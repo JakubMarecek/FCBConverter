@@ -1429,6 +1429,55 @@ namespace FCBConverter
 
         static void CombinedMoveFileConvertXml(string file)
         {
+            string onlyDir = Path.GetDirectoryName(file);
+
+            string newName = file.Replace("combinedmovefile.bin.converted.xml", "combinedmovefile_new.bin");
+
+            var output = File.Create(newName);
+
+            var doc = new XPathDocument(file);
+            var nav = doc.CreateNavigator();
+
+            var root = nav.SelectSingleNode("/CombinedMoveFile");
+
+            var CMove_BlendRoot_DTRoot = nav.Select("/CombinedMoveFile/PerMoveResourceInfos/CMove_BlendRoot_DTRoot");
+
+            List<byte[]> perMoveResourceInfos = new List<byte[]>();
+            uint currentOffset = 0;
+            while (CMove_BlendRoot_DTRoot.MoveNext() == true)
+            {
+                MoveBinDataChunk moveBinDataChunk = new MoveBinDataChunk(currentOffset, true);
+                byte[] chunk = moveBinDataChunk.Serialize(CMove_BlendRoot_DTRoot.Current, false);
+
+                perMoveResourceInfos.Add(chunk);
+
+                currentOffset += (uint)chunk.Length;
+            }
+
+            byte[] perMoveResourceInfosByte = perMoveResourceInfos.SelectMany(byteArr => byteArr).ToArray();
+
+            string tmp = onlyDir + "\\tmp";
+            var fcb = nav.SelectSingleNode("CombinedMoveFile/FCBData/object");
+            XmlWriter writer = XmlWriter.Create(tmp);
+            fcb.WriteSubtree(writer);
+            writer.Close();
+
+            ConvertXML(tmp, tmp + "c");
+
+            byte[] fcbByte = File.ReadAllBytes(tmp + "c");
+
+            output.WriteValueU32(uint.Parse(root.GetAttribute("Version", "")));
+            output.WriteValueU32((uint)perMoveResourceInfosByte.Length);
+            output.WriteValueU32((uint)fcbByte.Length);
+            output.WriteBytes(perMoveResourceInfosByte);
+            output.WriteBytes(fcbByte);
+
+            File.Delete(tmp);
+            File.Delete(tmp + "c");
+
+            output.Close();
+
+
             /*string onlyDir = Path.GetDirectoryName(file);
 
             string newName = file.Replace("combinedmovefile.bin.converted.xml", "combinedmovefile_new.bin");

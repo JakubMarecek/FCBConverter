@@ -12,7 +12,6 @@ namespace FCBConverter
     class MoveBinDataChunk
     {
         XmlWriter writer;
-        XPathNavigator nav;
         Stream dataStream;
         uint currentOffset;
         bool isCombined;
@@ -61,7 +60,7 @@ namespace FCBConverter
             if (isCombined)
             {
                 long pos = dataStream.Position;
-                OffsetsHashesArray.offsetsHashesArray.Add(new OffsetsHashesArrayItem((uint)(currentOffset + pos), ulong.Parse(value), type));
+                OffsetsHashesArray.offsetsHashesArray.Add(new OffsetsHashesArrayItem((uint)(currentOffset + pos), ulong.Parse(value, NumberStyles.HexNumber), type));
 
                 if (type == OffsetsHashesArray.ParamNames.PMSVALUEPARAM)
                     dataStream.WriteValueS16(-1);
@@ -187,6 +186,7 @@ namespace FCBConverter
                     CMoveTransition();
                     break;
                 case 42:
+                    endSpace = 1;
                     childrenCountF = unknownA;
                     unknownA = childrenCount;
                     CMoveTransitionContainer();
@@ -277,10 +277,9 @@ namespace FCBConverter
 
         public byte[] Serialize(XPathNavigator xPathNavigator, bool IncludeLength)
         {
-            nav = xPathNavigator;
             dataStream = new MemoryStream();
 
-            var root = nav.SelectSingleNode("CMove_BlendRoot_DTRoot");
+            var root = isCombined ? xPathNavigator : xPathNavigator.SelectSingleNode("CMove_BlendRoot_DTRoot");
 
             dataStream.WriteValueU64(ulong.Parse(root.GetAttribute("hash", ""), NumberStyles.HexNumber));
 
@@ -408,10 +407,11 @@ namespace FCBConverter
                     CMoveRandomSelector(root);
                     break;
                 case "CMoveTransition":
-                    WriteChildHeader(41, unknownHA, childCount, unknownHB);
+                    WriteChildHeader(41, childCount, unknownHA, unknownHB);
                     CMoveTransition(root);
                     break;
                 case "CMoveTransitionContainer":
+                    endSpace = 1;
                     WriteChildHeader(42, unknownHA, childCount, unknownHB);
                     CMoveTransitionContainer(root);
                     break;
@@ -770,7 +770,6 @@ namespace FCBConverter
                 dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownA", "")));
                 dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownB", "")));
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space3", "")));
-                dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("pmsvalueParamOffset", "")));
                 GetOffsetFromHash(xmlNav.GetAttribute("pmsvalueParamOffset", ""), OffsetsHashesArray.ParamNames.PMSVALUEPARAM, true);
                 dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownC", "")));
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space4", "")));

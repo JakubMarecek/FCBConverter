@@ -106,32 +106,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             if (FCBConverter.Program.isCombinedMoveFile)
             {
                 FCBConverter.OffsetsHashesArray.Serialize(node);
-
-
-
-                var PerMoveResourceInfos = nav.Select("PerMoveResourceInfo");
-                if (PerMoveResourceInfos.Count > 0)
-                {
-                    List<byte[]> sizes = new List<byte[]>();
-                    List<byte[]> rootNodeIds = new List<byte[]>();
-                    List<byte[]> resourcePathIds = new List<byte[]>();
-                    while (PerMoveResourceInfos.MoveNext() == true)
-                    {
-                        sizes.Add(BitConverter.GetBytes(uint.Parse(PerMoveResourceInfos.Current.GetAttribute("size", ""))));
-                        rootNodeIds.Add(FCBConverter.Helpers.StringToByteArray(PerMoveResourceInfos.Current.GetAttribute("rootNodeId", "")));
-                        resourcePathIds.Add(FCBConverter.Helpers.StringToByteArray(PerMoveResourceInfos.Current.GetAttribute("resourcePathId", "")));
-                    }
-                    if (sizes.Count > 0)
-                    {
-                        sizes.Insert(0, BitConverter.GetBytes(sizes.Count));
-                        rootNodeIds.Insert(0, BitConverter.GetBytes(rootNodeIds.Count));
-                        resourcePathIds.Insert(0, BitConverter.GetBytes(resourcePathIds.Count));
-
-                        node.Fields.Add(CRC32.Hash("sizes"), sizes.SelectMany(byteArr => byteArr).ToArray());
-                        node.Fields.Add(CRC32.Hash("rootNodeIds"), rootNodeIds.SelectMany(byteArr => byteArr).ToArray());
-                        node.Fields.Add(CRC32.Hash("resourcePathIds"), resourcePathIds.SelectMany(byteArr => byteArr).ToArray());
-                    }
-                }
+                FCBConverter.PerMoveResourceInfo.Serialize(node);
             }
 
 
