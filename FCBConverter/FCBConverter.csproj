@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>FCBConverter</RootNamespace>
+    <AssemblyName>FCBConverter</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DependencyLoaderItem.cs" />
+    <Compile Include="DependentFile.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\ConditionValueSource.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\ClassDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\EnumDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\EnumElementDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\FieldDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\FriendDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Loaders\ClassDefinitionLoader.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Loaders\LoaderHelper.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Loaders\ObjectFileDefinitionLoader.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\ObjectFileDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\ClassDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\EnumDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\EnumElementDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\FieldDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\FriendDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\Raw\ObjectFileDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\FieldType.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\FieldTypeDeserializers.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\FieldTypeHelper.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\FieldTypeSerializers.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\HashedDefinitionDictionary.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\IFileDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\IHashedDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\INamedDefinition.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\InfoManager.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\LoadException.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\NamedDefinitionDictionary.cs" />
+    <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\XmlLoadException.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ExportException.cs" />
+    <None Include="FCBConverterFileNames.list">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="FCBConverterStrings.list">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs.bak" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ImportException.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Importing.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Mode.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Program.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertXml\Mode.cs" />
+    <Compile Include="Gibbed.Dunia2.ConvertXml\Program.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\BigFile.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\CompressionScheme.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\Entry.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntryCompression.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntryDecompression.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntrySerializerV1.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntrySerializerV5.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntrySerializerV6V8.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntrySerializerV7.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\EntrySerializerV9.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\IEntrySerializer.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\Platform.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Big\SubFatEntry.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\BinaryObject.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\BinaryObjectFile.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\CRC32.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\CRC64.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\FileExtensions.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\LZO.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\ProjectHelpers.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\StreamHelpers.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\SubFatFile.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Vector2.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Vector3.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\Vector4.cs" />
+    <Compile Include="Gibbed.Dunia2.FileFormats\XmlResourceFile.cs" />
+    <Compile Include="Gibbed.IO\Endian.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\Align.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\BigEndian.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\LittleEndian.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\Padding.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\RotateLeft.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\RotateRight.cs" />
+    <Compile Include="Gibbed.IO\NumberHelpers\Swap.cs" />
+    <Compile Include="Gibbed.IO\OverlapDouble.cs" />
+    <Compile Include="Gibbed.IO\OverlapSingle.cs" />
+    <Compile Include="Gibbed.IO\PathHelper.cs" />
+    <Compile Include="Gibbed.IO\SmallWorkBuffer.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Aligned.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Boolean.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Enum.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Guid.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\NumberFloating.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\NumberSigned.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\NumberUnsigned.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Strings\Default.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Strings\Internal.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Strings\Supplied.cs" />
+    <Compile Include="Gibbed.IO\StreamHelpers\Structure.cs" />
+    <Compile Include="Gibbed.ProjectData\HashList.cs" />
+    <Compile Include="Gibbed.ProjectData\Manager.cs" />
+    <Compile Include="Gibbed.ProjectData\Project.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFile.cs" />
+    <Compile Include="LZ4Sharp\ILZ4Compressor.cs" />
+    <Compile Include="LZ4Sharp\ILZ4Decompressor.cs" />
+    <Compile Include="LZ4Sharp\LZ4.cs" />
+    <Compile Include="LZ4Sharp\LZ4Compressor32.cs" />
+    <Compile Include="LZ4Sharp\LZ4Compressor64.cs" />
+    <Compile Include="LZ4Sharp\LZ4CompressorFactory.cs" />
+    <Compile Include="LZ4Sharp\LZ4Decompressor32.cs" />
+    <Compile Include="LZ4Sharp\LZ4Decompressor64.cs" />
+    <Compile Include="LZ4Sharp\LZ4DecompressorFactory.cs" />
+    <Compile Include="LZ4Sharp\LZ4Util.cs" />
+    <Compile Include="MoveBinDataChunk.cs" />
+    <Compile Include="OffsetsHashesArray.cs" />
+    <Compile Include="PerMoveResourceInfo.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

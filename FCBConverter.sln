@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCBConverter", "FCBConverter\FCBConverter.csproj", "{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D682750-40AC-4FF1-AD9A-9C0964CE2970}
+	EndGlobalSection
+EndGlobal

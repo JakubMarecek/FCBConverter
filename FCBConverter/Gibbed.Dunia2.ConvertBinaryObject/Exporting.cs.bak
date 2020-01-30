@@ -1,0 +1,791 @@
+﻿/* Copyright (c) 2012 Rick (rick 'at' gibbed 'dot' us)
+ * 
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ * 
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ * 
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would
+ *    be appreciated but is not required.
+ * 
+ * 2. Altered source versions must be plainly marked as such, and must not
+ *    be misrepresented as being the original software.
+ * 
+ * 3. This notice may not be removed or altered from any source
+ *    distribution.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using Gibbed.Dunia2.BinaryObjectInfo;
+using Gibbed.Dunia2.BinaryObjectInfo.Definitions;
+using Gibbed.Dunia2.FileFormats;
+
+namespace Gibbed.Dunia2.ConvertBinaryObject
+{
+    public static class Exporting
+    {
+        public static void Export(ObjectFileDefinition objectFileDef,
+                                  string outputPath,
+                                  InfoManager infoManager,
+                                  BinaryObjectFile bof)
+        {
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = false,
+                OmitXmlDeclaration = false
+            };
+
+            var objectDef = objectFileDef != null &&
+                            objectFileDef.Object != null &&
+                            objectFileDef.Object.Hash == bof.Root.NameHash
+                                ? objectFileDef.Object
+                                : null;
+
+            using (var writer = XmlWriter.Create(outputPath, settings))
+            {
+                writer.WriteStartDocument();
+                writer.WriteComment("Converted by FCBConverter by ArmanIII. Original code by Gibbed.");
+                writer.WriteComment("Please remember that this is beta. As far I tested it, it successfully convert to xml and back to fcb.");
+                writer.WriteComment("If some fields have wrong type, please send me which file and which line it is, this is only way how to make it better. Thanks.");
+                if (bof.matHeaders.Length > 0)
+                    writer.WriteComment("MATHeaders=" + ByteArrayToString(bof.matHeaders));
+                WriteNode(infoManager, writer, new BinaryObject[0], bof.Root, objectDef, objectFileDef);
+                writer.WriteEndDocument();
+            }
+        }
+
+        internal const uint EntityLibrariesHash = 0xBCDD10B4u; // crc32(EntityLibraries)
+        internal const uint EntityLibraryHash = 0xE0BDB3DBu; // crc32(EntityLibrary)
+        internal const uint NameHash = 0xFE11D138u; // crc32(Name);
+        internal const uint EntityLibraryItemHash = 0x256A1FF9u; // unknown source name
+        internal const uint DisLibItemIdHash = 0x8EDB0295u; // crc32(disLibItemId)
+        internal const uint EntityHash = 0x0984415Eu; // crc32(Entity)
+        internal const uint LibHash = 0xA90F3BCC; // crc32(lib)
+        internal const uint LibItemHash = 0x72DE4948; // unknown source name
+        internal const uint TextHidNameHash = 0x9D8873F8; // crc32(text_hidName)
+        internal const uint NomadObjectTemplatesHash = 0x4C4C4CA4; // crc32(NomadObjectTemplates)
+        internal const uint NomadObjectTemplateHash = 0x142371CF; // unknown source name
+        internal const uint TemplateHash = 0x6E167DD5; // crc32(Template)
+
+        public static void MultiExportEntityLibrary(ObjectFileDefinition objectFileDef,
+                                                    string basePath,
+                                                    string outputPath,
+                                                    InfoManager infoManager,
+                                                    BinaryObjectFile bof)
+        {
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = false,
+                OmitXmlDeclaration = false
+            };
+
+            var objectDef = objectFileDef != null ? objectFileDef.Object : null;
+
+            using (var writer = XmlWriter.Create(outputPath, settings))
+            {
+                writer.WriteStartDocument();
+
+                var root = bof.Root;
+                {
+                    writer.WriteStartElement("object");
+                    writer.WriteAttributeString("name", "EntityLibraries");
+
+                    if (objectFileDef != null &&
+                        string.IsNullOrEmpty(objectFileDef.Name) == false)
+                    {
+                        writer.WriteAttributeString("def", objectFileDef.Name);
+                    }
+
+                    var libraryNames = new Dictionary<string, int>();
+
+                    Directory.CreateDirectory(basePath);
+
+                    foreach (var library in root.Children)
+                    {
+                        var chain = new[] { bof.Root, library };
+
+                        var libraryDef = objectDef != null
+                                             ? objectDef.GetObjectDefinition(library.NameHash, null)
+                                             : null;
+
+                        var libraryName = FieldTypeDeserializers.Deserialize<string>(FieldType.String,
+                                                                                     library.Fields[NameHash]);
+                        var unsanitizedLibraryName = libraryName;
+
+                        libraryName = libraryName.Replace('/', Path.DirectorySeparatorChar);
+                        libraryName = libraryName.Replace('\\', Path.DirectorySeparatorChar);
+
+                        if (libraryNames.ContainsKey(libraryName) == false)
+                        {
+                            libraryNames.Add(libraryName, 1);
+                        }
+                        else
+                        {
+                            libraryName = string.Format("{0} ({1})", libraryName, ++libraryNames[libraryName]);
+                        }
+
+                        var libraryPath = Path.Combine(libraryName, "@library.xml");
+
+                        writer.WriteStartElement("object");
+                        writer.WriteAttributeString("external", libraryPath);
+                        writer.WriteEndElement();
+
+                        libraryPath = Path.Combine(basePath, libraryPath);
+
+                        var itemNames = new Dictionary<string, int>();
+
+                        var libraryParentPath = Path.GetDirectoryName(libraryPath);
+                        if (string.IsNullOrEmpty(libraryParentPath) == false)
+                        {
+                            Directory.CreateDirectory(libraryParentPath);
+                        }
+
+                        using (var libraryWriter = XmlWriter.Create(libraryPath, settings))
+                        {
+                            libraryWriter.WriteStartDocument();
+                            libraryWriter.WriteStartElement("object");
+                            libraryWriter.WriteAttributeString("name", "EntityLibrary");
+
+                            libraryWriter.WriteStartElement("field");
+                            libraryWriter.WriteAttributeString("name", "Name");
+                            libraryWriter.WriteAttributeString("type", "String");
+                            libraryWriter.WriteString(unsanitizedLibraryName);
+                            libraryWriter.WriteEndElement();
+
+                            foreach (var item in library.Children)
+                            {
+                                var itemDef = libraryDef != null
+                                                  ? libraryDef.GetObjectDefinition(item.NameHash, null)
+                                                  : null;
+
+                                var itemName =
+                                    FieldTypeDeserializers.Deserialize<string>(FieldType.String,
+                                                                               item.Fields[NameHash]);
+                                itemName = itemName.Replace('/', Path.DirectorySeparatorChar);
+                                itemName = itemName.Replace('\\', Path.DirectorySeparatorChar);
+
+                                if (itemNames.ContainsKey(itemName) == false)
+                                {
+                                    itemNames.Add(itemName, 1);
+                                }
+                                else
+                                {
+                                    itemName = string.Format("{0} ({1})", itemName, ++itemNames[itemName]);
+                                }
+
+                                var itemPath = itemName + ".xml";
+
+                                libraryWriter.WriteStartElement("object");
+                                libraryWriter.WriteAttributeString("external", itemPath);
+                                libraryWriter.WriteEndElement();
+
+                                itemPath = Path.Combine(basePath, libraryName, itemPath);
+
+                                var itemParentPath = Path.GetDirectoryName(itemPath);
+                                if (string.IsNullOrEmpty(itemParentPath) == false)
+                                {
+                                    Directory.CreateDirectory(itemParentPath);
+                                }
+
+                                using (var itemWriter = XmlWriter.Create(itemPath, settings))
+                                {
+                                    itemWriter.WriteStartDocument();
+                                    WriteNode(infoManager,
+                                              itemWriter,
+                                              chain,
+                                              item,
+                                              itemDef,
+                                              null);
+                                    itemWriter.WriteEndDocument();
+                                }
+                            }
+
+                            libraryWriter.WriteEndDocument();
+                        }
+                    }
+
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public static bool IsSuitableForEntityLibraryMultiExport(BinaryObjectFile bof)
+        {
+            if (bof.Root.Fields.Count != 0 ||
+                bof.Root.NameHash != EntityLibrariesHash ||
+                bof.Root.Children.Any(c => c.NameHash != EntityLibraryHash) == true)
+            {
+                return false;
+            }
+
+            var nameSeq = new[] { NameHash };
+            var idAndNameSeq = new[] { DisLibItemIdHash, NameHash };
+
+            foreach (var library in bof.Root.Children)
+            {
+                if (library.Fields.Keys.SequenceEqual(nameSeq) == false)
+                {
+                    return false;
+                }
+
+                if (library.Children.Any(sc => sc.NameHash != EntityLibraryItemHash) == true)
+                {
+                    return false;
+                }
+
+                foreach (var item in library.Children)
+                {
+                    if (item.Fields.Keys.OrderBy(h => h).SequenceEqual(idAndNameSeq) == false)
+                    {
+                        return false;
+                    }
+
+                    if (item.Children.Any(sc => sc.NameHash != EntityHash) == true)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static void MultiExportLibrary(ObjectFileDefinition objectFileDef,
+                                              string basePath,
+                                              string outputPath,
+                                              InfoManager infoManager,
+                                              BinaryObjectFile bof)
+        {
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = false,
+                OmitXmlDeclaration = false
+            };
+
+            var objectDef = objectFileDef != null ? objectFileDef.Object : null;
+
+            using (var writer = XmlWriter.Create(outputPath, settings))
+            {
+                writer.WriteStartDocument();
+
+                var root = bof.Root;
+                var chain = new[] { root };
+                {
+                    writer.WriteStartElement("object");
+                    writer.WriteAttributeString("name", "lib");
+
+                    if (objectFileDef != null &&
+                        string.IsNullOrEmpty(objectFileDef.Name) == false)
+                    {
+                        writer.WriteAttributeString("def", objectFileDef.Name);
+                    }
+
+                    Directory.CreateDirectory(basePath);
+
+                    var itemNames = new Dictionary<string, int>();
+
+                    foreach (var item in root.Children)
+                    {
+                        var itemDef = objectDef != null
+                                          ? objectDef.GetObjectDefinition(item.NameHash, null)
+                                          : null;
+
+                        var itemName =
+                            FieldTypeDeserializers.Deserialize<string>(FieldType.String,
+                                                                       item.Fields[TextHidNameHash]);
+                        itemName = itemName.Replace('/', Path.DirectorySeparatorChar);
+                        itemName = itemName.Replace('\\', Path.DirectorySeparatorChar);
+
+                        if (itemNames.ContainsKey(itemName) == false)
+                        {
+                            itemNames.Add(itemName, 1);
+                        }
+                        else
+                        {
+                            itemName = string.Format("{0} ({1})", itemName, ++itemNames[itemName]);
+                        }
+
+                        var itemPath = itemName + ".xml";
+
+                        writer.WriteStartElement("object");
+                        writer.WriteAttributeString("external", itemPath);
+                        writer.WriteEndElement();
+
+                        itemPath = Path.Combine(basePath, itemPath);
+
+                        var itemParentPath = Path.GetDirectoryName(itemPath);
+                        if (string.IsNullOrEmpty(itemParentPath) == false)
+                        {
+                            Directory.CreateDirectory(itemParentPath);
+                        }
+
+                        using (var itemWriter = XmlWriter.Create(itemPath, settings))
+                        {
+                            itemWriter.WriteStartDocument();
+                            WriteNode(infoManager,
+                                      itemWriter,
+                                      chain,
+                                      item,
+                                      itemDef,
+                                      null);
+                            itemWriter.WriteEndDocument();
+                        }
+                    }
+                }
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public static bool IsSuitableForLibraryMultiExport(BinaryObjectFile bof)
+        {
+            return bof.Root.Fields.Count == 0 &&
+                   bof.Root.NameHash == LibHash &&
+                   bof.Root.Children.Any(c => c.NameHash != LibItemHash ||
+                                              c.Fields.ContainsKey(TextHidNameHash) == false) == false;
+        }
+
+        public static void MultiExportNomadObjectTemplates(ObjectFileDefinition objectFileDef,
+                                                           string basePath,
+                                                           string outputPath,
+                                                           InfoManager infoManager,
+                                                           BinaryObjectFile bof)
+        {
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = false,
+                OmitXmlDeclaration = false
+            };
+
+            var objectDef = objectFileDef != null ? objectFileDef.Object : null;
+
+            using (var writer = XmlWriter.Create(outputPath, settings))
+            {
+                writer.WriteStartDocument();
+
+                var root = bof.Root;
+                var chain = new[] { root };
+                {
+                    writer.WriteStartElement("object");
+                    writer.WriteAttributeString("name", "NomadObjectTemplates");
+
+                    if (objectFileDef != null &&
+                        string.IsNullOrEmpty(objectFileDef.Name) == false)
+                    {
+                        writer.WriteAttributeString("def", objectFileDef.Name);
+                    }
+
+                    Directory.CreateDirectory(basePath);
+
+                    var itemNames = new Dictionary<string, int>();
+
+                    foreach (var item in root.Children)
+                    {
+                        var itemDef = objectDef != null
+                                          ? objectDef.GetObjectDefinition(item.NameHash, null)
+                                          : null;
+
+                        var itemName =
+                            FieldTypeDeserializers.Deserialize<string>(FieldType.String,
+                                                                       item.Fields[NameHash]);
+                        itemName = itemName.Replace('/', Path.DirectorySeparatorChar);
+                        itemName = itemName.Replace('\\', Path.DirectorySeparatorChar);
+
+                        if (itemNames.ContainsKey(itemName) == false)
+                        {
+                            itemNames.Add(itemName, 1);
+                        }
+                        else
+                        {
+                            itemName = string.Format("{0} ({1})", itemName, ++itemNames[itemName]);
+                        }
+
+                        var itemPath = itemName + ".xml";
+
+                        writer.WriteStartElement("object");
+                        writer.WriteAttributeString("external", itemPath);
+                        writer.WriteEndElement();
+
+                        itemPath = Path.Combine(basePath, itemPath);
+
+                        var itemParentPath = Path.GetDirectoryName(itemPath);
+                        if (string.IsNullOrEmpty(itemParentPath) == false)
+                        {
+                            Directory.CreateDirectory(itemParentPath);
+                        }
+
+                        using (var itemWriter = XmlWriter.Create(itemPath, settings))
+                        {
+                            itemWriter.WriteStartDocument();
+                            WriteNode(infoManager,
+                                      itemWriter,
+                                      chain,
+                                      item,
+                                      itemDef,
+                                      null);
+                            itemWriter.WriteEndDocument();
+                        }
+                    }
+                }
+
+                writer.WriteEndDocument();
+            }
+        }
+
+        public static bool IsSuitableForNomadObjectTemplatesMultiExport(BinaryObjectFile bof)
+        {
+            if (bof.Root.Fields.Count != 0 ||
+                bof.Root.NameHash != NomadObjectTemplatesHash ||
+                bof.Root.Children.Any(c => c.NameHash != NomadObjectTemplateHash) == true)
+            {
+                return false;
+            }
+
+            var nameSeq = new[] { NameHash };
+
+            foreach (var library in bof.Root.Children)
+            {
+                if (library.Fields.Keys.SequenceEqual(nameSeq) == false)
+                {
+                    return false;
+                }
+
+                if (library.Children.Any(sc => sc.NameHash != TemplateHash) == true)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void WriteNode(InfoManager infoManager,
+                                      XmlWriter writer,
+                                      IEnumerable<BinaryObject> parentChain,
+                                      BinaryObject node,
+                                      ClassDefinition def,
+                                      ObjectFileDefinition objectFileDef)
+        {
+            var chain = parentChain.Concat(new[] { node });
+
+            if (def != null &&
+                def.ClassFieldHash.HasValue == true)
+            {
+                if (node.Fields.ContainsKey(def.ClassFieldHash.Value) == true)
+                {
+                    var hash = FieldTypeDeserializers.Deserialize<uint>(FieldType.UInt32,
+                                                                        node.Fields[def.ClassFieldHash.Value]);
+                    def = infoManager.GetClassDefinition(hash);
+                }
+            }
+
+            writer.WriteStartElement("object");
+
+            writer.WriteAttributeString("hash", node.NameHash.ToString("X8"));
+
+            if (FCBConverter.Program.strings.ContainsKey(node.NameHash))
+                writer.WriteAttributeString("name", FCBConverter.Program.strings[node.NameHash]);
+
+            if (node.Fields != null)
+            {
+                string prevNodeVal = "";
+
+                foreach (var kv in node.Fields)
+                {
+                    writer.WriteStartElement("field");
+                    writer.WriteAttributeString("hash", kv.Key.ToString("X8"));
+
+                    string name = "";
+                    if (FCBConverter.Program.strings.ContainsKey(kv.Key))
+                    {
+                        name = FCBConverter.Program.strings[kv.Key];
+                        writer.WriteAttributeString("name", name);
+                    }
+
+                    string str = Encoding.ASCII.GetString(kv.Value, 0, kv.Value.Length - 1);
+                    //str = Regex.Replace(str, @"\p{C}+", string.Empty);
+
+                    string binaryHex = ByteArrayToString(kv.Value);
+                    bool resetPrevNodeVal = true;
+                    bool stringRegex = Regex.IsMatch(str, @"^[a-zA-Z0-9_.:\/\-\x20\\\(\)]+$");
+
+                    byte[] reversed = new byte[kv.Value.Length];
+                    for (int i = 0; i < reversed.Length; i++)
+                    {
+                        reversed[i] = kv.Value[i];
+                    }
+
+                    Array.Reverse(reversed);
+                    string binaryHexRev = ByteArrayToString(reversed);
+
+                    bool isHash32 = (prevNodeVal != "" && CRC32.Hash(prevNodeVal).ToString("x8").ToLower() == binaryHexRev);
+                    bool isHash64 = (prevNodeVal != "" && CRC64.Hash(prevNodeVal).ToString("x16").ToLower() == binaryHexRev);
+
+                    // *****************************************************************************************************************
+                    // list values
+                    // *****************************************************************************************************************
+                    if ((name.Contains("List") && !stringRegex && !name.Contains("Id") && !name.StartsWithType("is")) || name == "disEntityId" || name == "GameElementId" || name == "TypeId")
+                    {
+                        writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                        writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
+                    }
+
+                    // *****************************************************************************************************************
+                    // hash32
+                    // *****************************************************************************************************************
+                    else if (isHash32)
+                    {
+                        writer.WriteAttributeString("type", "ComputeHash32");
+                        writer.WriteString(prevNodeVal);
+                    }
+                    // *****************************************************************************************************************
+                    // hash64
+                    // *****************************************************************************************************************
+                    else if (isHash64)
+                    {
+                        writer.WriteAttributeString("type", "ComputeHash64");
+                        writer.WriteString(prevNodeVal);
+                    }
+
+                    // *****************************************************************************************************************
+                    // enum
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 8 && name.StartsWithType("sel"))
+                    {
+                        int v = Int32.Parse(binaryHexRev, NumberStyles.HexNumber);
+                        writer.WriteAttributeString("type", "Enum");
+                        writer.WriteString(v.ToString());
+                    }
+                    // *****************************************************************************************************************
+                    // int32
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 8 && (binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId")
+                    {
+                        int v = Int32.Parse(binaryHexRev, NumberStyles.HexNumber);
+                        writer.WriteAttributeString("type", "Int32");
+                        writer.WriteString(v.ToString());
+                    }
+                    // *****************************************************************************************************************
+                    // int16
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 4 && !name.StartsWithType("f"))
+                    {
+                        int v = Int16.Parse(binaryHexRev, NumberStyles.HexNumber);
+                        writer.WriteAttributeString("type", "Int16");
+                        writer.WriteString(v.ToString());
+                    }
+                    // *****************************************************************************************************************
+                    // string
+                    // *****************************************************************************************************************
+                    else if ((stringRegex && binaryHex.Length > 4 && binaryHex.GetLast(2) == "00") || name == "hidDescriptor")
+                    {
+                        writer.WriteAttributeString("type", "String");
+                        writer.WriteString(str);
+                        prevNodeVal = str;
+                        resetPrevNodeVal = false;
+                    }
+                    // *****************************************************************************************************************
+                    // hash64 id64
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 16 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{16}$", RegexOptions.Compiled) && binaryHex != "0000000000000000" && binaryHex != "ffffffffffffffff" && !name.StartsWith("vec") && !name.ContainsCI("value") && !name.StartsWith("text_"))
+                    {
+                        if (binaryHex.GetLast(2) != "00" && !name.ContainsCI("layerid") && !name.StartsWithType("ent"))
+                        {
+                            writer.WriteAttributeString("type", "Hash64");
+                            writer.WriteString(binaryHexRev);
+                        }
+                        else
+                        {
+                            BigInteger a = BigInteger.Parse(binaryHexRev, NumberStyles.AllowHexSpecifier);
+                            writer.WriteAttributeString("type", "Id64");
+                            writer.WriteAttributeString("binHexID", binaryHex.ToUpper());
+                            writer.WriteString(a.ToString());
+                        }
+                    }
+                    // *****************************************************************************************************************
+                    // float32 hash32
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 8 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{8}$", RegexOptions.Compiled) && ((binaryHex != "00000000" && binaryHex != "ffffffff" && binaryHex.GetLast(2) != "00") || name.StartsWithType("f")) && !name.StartsWith("text_")) // && !name.Contains("Id")
+                    {
+                        float f = BitConverter.ToSingle(kv.Value, 0);
+                        if ((!name.ContainsCI("hid_DTCTH_ClassName") && !name.ContainsCI("Name") && !name.ContainsCI("BoneID") && !name.Contains("Type") && !name.ContainsCI("Id") && !name.Contains("sDetail") && !name.Contains("class") && !name.Contains("type")) || f == -1 || name.StartsWithType("f") || name.Contains("Duration") || name.Contains("Multiplier"))
+                        {
+                            writer.WriteAttributeString("type", "Float32");
+                            writer.WriteString(f.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        }
+                        else
+                        {
+                            writer.WriteAttributeString("type", "Hash32");
+                            writer.WriteString(binaryHexRev);
+                        }
+                    }
+                    // *****************************************************************************************************************
+                    // bool
+                    // *****************************************************************************************************************
+                    else if (binaryHex == "00" && (name.StartsWithType("b") || name.StartsWithType("is") || name == "loaddep"))
+                    {
+                        writer.WriteAttributeString("type", "Boolean");
+                        writer.WriteString("False");
+                    }
+                    else if (binaryHex == "01" && (name.StartsWithType("b") || name.StartsWithType("is") || name == "loaddep"))
+                    {
+                        writer.WriteAttributeString("type", "Boolean");
+                        writer.WriteString("True");
+                    }
+                    // *****************************************************************************************************************
+                    // vec4
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 32 && (name == "Value" || name == "Info" || name.ContainsCI("offset") || name.ContainsCI("position") || name.ContainsCI("rotation") || name.ContainsCI("vector") || name.StartsWith("vec") || name.Contains("value") || name.ContainsCI("color")))
+                    {
+                        byte[] vecX = kv.Value.Skip(0).Take(4).ToArray();
+                        byte[] vecY = kv.Value.Skip(4).Take(4).ToArray();
+                        byte[] vecZ = kv.Value.Skip(8).Take(4).ToArray();
+                        byte[] vecT = kv.Value.Skip(12).Take(4).ToArray();
+
+                        float vecfX = BitConverter.ToSingle(vecX, 0);
+                        float vecfY = BitConverter.ToSingle(vecY, 0);
+                        float vecfZ = BitConverter.ToSingle(vecZ, 0);
+                        float vecfT = BitConverter.ToSingle(vecT, 0);
+
+                        writer.WriteAttributeString("type", "Vector4");
+                        writer.WriteString(
+                            vecfX.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfY.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfZ.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfT.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    // *****************************************************************************************************************
+                    // vec3
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 24 && (name.ContainsCI("Angle") || name.Contains("Dimensions") || name.ContainsCI("offset") || name.ContainsCI("position") || name.Contains("Pos") || name.ContainsCI("rotation") || name.Contains("Orientation") || name.Contains("Direction") || name.Contains("Multiplier") || name.ContainsCI("vector") || name.ContainsCI("color") || name.ContainsCI("clr") || name.ContainsCI("BBoxMin") || name.ContainsCI("BBoxMax") || name.ContainsCI("BBMin") || name.ContainsCI("BBMax") || name.StartsWith("vec") || name.Contains("value")))
+                    {
+                        byte[] vecX = kv.Value.Skip(0).Take(4).ToArray();
+                        byte[] vecY = kv.Value.Skip(4).Take(4).ToArray();
+                        byte[] vecZ = kv.Value.Skip(8).Take(4).ToArray();
+
+                        float vecfX = BitConverter.ToSingle(vecX, 0);
+                        float vecfY = BitConverter.ToSingle(vecY, 0);
+                        float vecfZ = BitConverter.ToSingle(vecZ, 0);
+
+                        writer.WriteAttributeString("type", "Vector3");
+                        writer.WriteString(
+                            vecfX.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfY.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfZ.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    // *****************************************************************************************************************
+                    // vec2
+                    // *****************************************************************************************************************
+                    else if (binaryHex.Length == 16 && (name.Contains("offset") || name.Contains("position") || name.Contains("rotation") || name.Contains("vector") || name.StartsWith("vec") || name.Contains("value")))
+                    {
+                        byte[] vecX = kv.Value.Skip(0).Take(4).ToArray();
+                        byte[] vecY = kv.Value.Skip(4).Take(4).ToArray();
+
+                        float vecfX = BitConverter.ToSingle(vecX, 0);
+                        float vecfY = BitConverter.ToSingle(vecY, 0);
+
+                        writer.WriteAttributeString("type", "Vector2");
+                        writer.WriteString(
+                            vecfX.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                            vecfY.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    // *****************************************************************************************************************
+                    // other binhex
+                    // *****************************************************************************************************************
+                    else
+                    {
+                        str = Regex.Replace(str, @"\p{C}+", string.Empty).Replace("?", "");
+                        if (str != "")
+                            writer.WriteAttributeString("strVal", str);
+
+                        writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                        writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
+                    }
+
+                    if (resetPrevNodeVal) prevNodeVal = "";
+
+                    writer.WriteEndElement();
+                }
+            }
+
+            if (def == null || def.DynamicNestedClasses == false)
+            {
+                foreach (var childNode in node.Children)
+                {
+                    var childDef = def != null ? def.GetObjectDefinition(childNode.NameHash, chain) : null;
+                    WriteNode(infoManager, writer, chain, childNode, childDef, null);
+                }
+            }
+            else if (def.DynamicNestedClasses == true)
+            {
+                foreach (var childNode in node.Children)
+                {
+                    var childDef = infoManager.GetClassDefinition(childNode.NameHash);
+                    WriteNode(infoManager, writer, chain, childNode, childDef, null);
+                }
+            }
+
+            writer.WriteEndElement();
+        }
+
+        public static string ByteArrayToString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
+        }
+    }
+
+    public static class StringExtension
+    {
+        public static string GetLast(this string source, int tail_length)
+        {
+            if (tail_length >= source.Length)
+                return source;
+            return source.Substring(source.Length - tail_length);
+        }
+
+        public static bool ContainsCI(this string source, string toCheck)
+        {
+            return source?.IndexOf(toCheck, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public static bool StartsWithType(this string source, string toCheck)
+        {
+            bool starts = source.StartsWith(toCheck);
+            if (starts)
+            {
+                if (source.Length > toCheck.Length)
+                {
+                    bool secondChar = char.IsUpper(source[toCheck.Length]);
+                    return starts && secondChar;
+                }
+            }
+            return false;
+        }
+    }
+}
