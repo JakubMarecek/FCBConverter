@@ -9,6 +9,7 @@ namespace FCBConverter
     {
         public static List<OffsetsHashesArrayItem> offsetsHashesArray = new List<OffsetsHashesArrayItem>();
         public static Dictionary<uint, ulong> offsetsHashesDict = new Dictionary<uint, ulong>();
+        //public static Dictionary<uint, ulong> offsetsHashesDict2 = new Dictionary<uint, ulong>();
 
         public enum ParamNames : uint
         {

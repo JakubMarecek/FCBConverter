@@ -54,13 +54,16 @@ namespace FCBConverter
             List<byte[]> sizes = new List<byte[]>();
             List<byte[]> rootNodeIds = new List<byte[]>();
             List<byte[]> resourcePathIds = new List<byte[]>();
-
-            for (int i = 0; i < perMoveResourceInfos.Count(); i++)
+            
+            for (int i = 0; i < perMoveResourceInfos.Count(); i++) //perMoveResourceInfos.Count() 10520 2C8A381201B8298B   25315 EE986B52BAA56318
             {
                 sizes.Add(BitConverter.GetBytes(perMoveResourceInfos[i].size));
                 rootNodeIds.Add(BitConverter.GetBytes(perMoveResourceInfos[i].rootNodeId));
                 resourcePathIds.Add(BitConverter.GetBytes(perMoveResourceInfos[i].resourcePathId));
             }
+
+            //string a = Helpers.ByteArrayToString(resourcePathIds[10519]);
+            //PerMoveResourceInfoItem perMoveResourceInfoItem = perMoveResourceInfos[25315];
 
             if (sizes.Count > 0)
             {

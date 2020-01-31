@@ -39,8 +39,8 @@ namespace FCBConverter
 
                 string a = OffsetsHashesArray.offsetsHashesDict[(uint)(currentOffset + pos)].ToString("X16");
                 /*
-                if (!Program.offsetsHashesDict2.ContainsKey((uint)(currentOffset + pos)))
-                    Program.offsetsHashesDict2.Add((uint)(currentOffset + pos), ulong.Parse(a, NumberStyles.HexNumber));
+                if (!OffsetsHashesArray.offsetsHashesDict2.ContainsKey((uint)(currentOffset + pos)))
+                    OffsetsHashesArray.offsetsHashesDict2.Add((uint)(currentOffset + pos), ulong.Parse(a, NumberStyles.HexNumber));
                     */
                 return a;
 
@@ -49,7 +49,7 @@ namespace FCBConverter
             else
             {
                 if (isShort)
-                    return dataStream.ReadValueU16().ToString(); // read
+                    return dataStream.ReadValueS16().ToString(); // read
                 else
                     return dataStream.ReadValueU32().ToString(); // read
             }
@@ -67,7 +67,7 @@ namespace FCBConverter
                 else
                 {
                     if (isShort)
-                        dataStream.WriteValueU16((ushort)pos);
+                        dataStream.WriteValueS16((short)pos);
                     else
                         dataStream.WriteValueU32((uint)pos);
                 }
@@ -75,7 +75,7 @@ namespace FCBConverter
             else
             {
                 if (isShort)
-                    dataStream.WriteValueU16(ushort.Parse(value));
+                    dataStream.WriteValueS16(short.Parse(value));
                 else
                     dataStream.WriteValueU32(uint.Parse(value));
             }
@@ -93,10 +93,10 @@ namespace FCBConverter
             writer.WriteStartElement("CMove_BlendRoot_DTRoot");
             writer.WriteAttributeString("hash", filename.ToString("X16"));
 
-            if (rootNodeId > 0)
+            if (isCombined)
                 writer.WriteAttributeString("rootNodeId", rootNodeId.ToString("X16"));
 
-            writer.WriteAttributeString("debugPurpose", Helpers.ByteArrayToString(data));
+            //writer.WriteAttributeString("debugPurpose", Helpers.ByteArrayToString(data));
             ChildDeserialize();
             writer.WriteEndElement();
         }
@@ -1256,7 +1256,7 @@ namespace FCBConverter
             if (xmlNav == null)
             {
                 writer.WriteStartElement("CMoveSuspendLayer");
-                writer.WriteAttributeString("space0", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("unknownA", dataStream.ReadValueF32().ToString(CultureInfo.InvariantCulture));
                 writer.WriteAttributeString("blendParamOffset", GetHashFromOffset());
                 writer.WriteAttributeString("space1", dataStream.ReadValueS32().ToString());
                 writer.WriteAttributeString("layerParamOffset", GetHashFromOffset());
@@ -1264,8 +1264,8 @@ namespace FCBConverter
             }
             else
             {
-                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space0", "")));
-                GetOffsetFromHash(xmlNav.GetAttribute("blendParamOffset", ""), OffsetsHashesArray.ParamNames.LAYERPARAM);
+                dataStream.WriteValueF32(float.Parse(xmlNav.GetAttribute("unknownA", ""), CultureInfo.InvariantCulture));
+                GetOffsetFromHash(xmlNav.GetAttribute("blendParamOffset", ""), OffsetsHashesArray.ParamNames.BLENDPARAM); // bad ParamNames took me two days finding out where is a problem...
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space1", "")));
                 GetOffsetFromHash(xmlNav.GetAttribute("layerParamOffset", ""), OffsetsHashesArray.ParamNames.LAYERPARAM);
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space2", "")));

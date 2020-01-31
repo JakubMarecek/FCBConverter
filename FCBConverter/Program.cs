@@ -25,7 +25,7 @@ namespace FCBConverter
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
 
-        public static string version = "20200111-1500";
+        public static string version = "20200131-2100";
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
         public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), xBaebsae";
@@ -34,7 +34,6 @@ namespace FCBConverter
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheadercombined2 = "!!! WARNING: Part of the file is still unknown. Please do not change <param> nodes, because they are not converted.";
 
         static void Main(string[] args)
         {
@@ -1349,7 +1348,6 @@ namespace FCBConverter
             writer.WriteStartDocument();
             writer.WriteComment(xmlheader);
             writer.WriteComment(xmlheadercombined1);
-            writer.WriteComment(xmlheadercombined2);
             writer.WriteStartElement("CombinedMoveFile");
 
 
@@ -1396,10 +1394,10 @@ namespace FCBConverter
             }
             /*
             Dictionary<uint, ulong> a = new Dictionary<uint, ulong>();
-            foreach (KeyValuePair<uint, ulong> aa in offsetsHashesDict)
-                if (!offsetsHashesDict2.ContainsKey(aa.Key))
-                    a.Add(aa.Key, aa.Value);
-                    */
+            foreach (KeyValuePair<uint, ulong> aa in OffsetsHashesArray.offsetsHashesDict)
+                if (!OffsetsHashesArray.offsetsHashesDict2.ContainsKey(aa.Key))
+                    a.Add(aa.Key, aa.Value);*/
+                    
             writer.WriteEndElement();
 
             //****
@@ -1476,76 +1474,6 @@ namespace FCBConverter
             File.Delete(tmp + "c");
 
             output.Close();
-
-
-            /*string onlyDir = Path.GetDirectoryName(file);
-
-            string newName = file.Replace("combinedmovefile.bin.converted.xml", "combinedmovefile_new.bin");
-
-            var output = File.Create(newName);
-
-            XDocument doc = XDocument.Load(file);
-            XElement root = doc.Element("CombinedMoveFile");
-
-
-
-
-
-            List<byte[]> moveDataBytes = new List<byte[]>();
-            IEnumerable<XElement> MoveData = root.Element("MoveData").Elements("MoveResourceInfo");
-            foreach (XElement MoveResourceInfo in MoveData)
-            {
-                MemoryStream moveDataStream = new MemoryStream();
-
-                string resourcePathId = MoveResourceInfo.Attribute("resourcePathId").Value;
-                string unk1 = MoveResourceInfo.Attribute("Unknown1").Value;
-                string unk2 = MoveResourceInfo.Attribute("Unknown2").Value;
-                string unk3 = MoveResourceInfo.Attribute("Unknown3").Value;
-                string unk4 = MoveResourceInfo.Attribute("Unknown4").Value;
-                string unk = MoveResourceInfo.Attribute("Unknown5").Value;
-                string rootNodeId = MoveResourceInfo.Attribute("rootNodeId").Value;
-                string chunk = MoveResourceInfo.Attribute("UnknownBinaryData").Value;
-
-                moveDataStream.WriteBytes(Helpers.StringToByteArray(resourcePathId));
-                moveDataStream.WriteByte((byte)int.Parse(unk1));
-                moveDataStream.WriteByte((byte)int.Parse(unk2));
-                moveDataStream.WriteByte((byte)int.Parse(unk3));
-                moveDataStream.WriteByte((byte)int.Parse(unk4));
-                moveDataStream.WriteValueU32(uint.Parse(unk));
-                moveDataStream.WriteBytes(Helpers.StringToByteArray(rootNodeId));
-                moveDataStream.WriteBytes(Helpers.StringToByteArray(chunk));
-
-                moveDataStream.Seek(0, SeekOrigin.Begin);
-                byte[] bytes = moveDataStream.ToArray();
-                moveDataBytes.Add(bytes);
-                // zde by melo byt pridani velikosti do PerMoveResourceInfo ve FCB data
-                // nyni je to zbytecne protoze je cast unknown
-            }
-            byte[] moveDataByte = moveDataBytes.SelectMany(byteArr => byteArr).ToArray();
-
-
-
-            string tmp = onlyDir + "\\tmp";
-            XElement fcb = root.Element("FCBData").Element("object");
-            fcb.Save(tmp);
-
-            ConvertXML(tmp, tmp + "c");
-
-            byte[] fcbByte = File.ReadAllBytes(tmp + "c");
-
-
-
-
-            output.WriteValueU32(uint.Parse(root.Attribute("Version").Value));
-            output.WriteValueU32((uint)moveDataByte.Length);
-            output.WriteValueU32((uint)fcbByte.Length);
-            output.WriteBytes(moveDataByte);
-            output.WriteBytes(fcbByte);
-
-            File.Delete(tmp);
-            File.Delete(tmp + "c");
-
-            output.Close();*/
         }
     }
 }
