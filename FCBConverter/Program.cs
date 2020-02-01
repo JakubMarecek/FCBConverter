@@ -25,7 +25,7 @@ namespace FCBConverter
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
 
-        public static string version = "20200131-2100";
+        public static string version = "20200201-0200";
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
         public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), xBaebsae";
@@ -449,6 +449,10 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
+            LoadFile();
+
+            // ********************************************************************************************************************************************
+
             if (file.EndsWith(".converted.xml") && !file.EndsWith("_depload.dat.converted.xml"))
             {
                 if (file.Replace(".converted.xml", "").EndsWith(".material.bin"))
@@ -517,10 +521,6 @@ namespace FCBConverter
 
                 FIN();
             }
-
-            // ********************************************************************************************************************************************
-
-            LoadFile();
 
             // ********************************************************************************************************************************************
 
@@ -728,9 +728,9 @@ namespace FCBConverter
             return node;
         }
 
-        static ulong GetFileHash(string fileName)
+        public static ulong GetFileHash(string fileName)
         {
-            if (fileName.Contains("__unknown"))
+            if (fileName.ToLowerInvariant().Contains("__unknown"))
             {
                 var partName = Path.GetFileNameWithoutExtension(fileName);
 

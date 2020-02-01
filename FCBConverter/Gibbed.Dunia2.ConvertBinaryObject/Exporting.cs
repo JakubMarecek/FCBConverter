@@ -148,6 +148,19 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                             MoveBinDataChunk moveBinDataChunk = new MoveBinDataChunk();
                             moveBinDataChunk.Deserialize(writer, kv.Value, true);
                         }
+                        else if (name == "ResIds")
+                        {
+                            var resIds = Helpers.UnpackArray(kv.Value, 8);
+
+                            foreach (byte[] fileNameBytes in resIds)
+                            {
+                                ulong fileName = BitConverter.ToUInt64(fileNameBytes, 0);
+
+                                writer.WriteStartElement("ResId");
+                                writer.WriteAttributeString("ID", Program.m_HashList.ContainsKey(fileName) ? Program.m_HashList[fileName] : "__Unknown\\" + fileName.ToString("X16"));
+                                writer.WriteEndElement();
+                            }
+                        }
                         // *****************************************************************************************************************
                         // list values
                         // *****************************************************************************************************************
@@ -334,7 +347,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         }
 
-                        if (name != "data")
+                        if (name != "data" && name != "ResIds")
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);

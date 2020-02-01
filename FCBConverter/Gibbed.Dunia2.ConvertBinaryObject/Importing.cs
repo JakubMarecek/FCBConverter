@@ -78,6 +78,20 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     byte[] data = moveBinDataChunk.Serialize(fields.Current, true);
                     node.Fields.Add(fieldNameHash, data);
                 }
+                else if (fieldName == "ResIds")
+                {
+                    List<byte[]> resIdsBytes = new List<byte[]>();
+
+                    var resIds = fields.Current.Select("ResId");
+                    while (resIds.MoveNext() == true)
+                    {
+                        resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""))));
+                    }
+
+                    resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
+
+                    node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
+                }
                 else
                 {
                     FieldType fieldType;
