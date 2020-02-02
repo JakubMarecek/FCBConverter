@@ -74,8 +74,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                 if (fieldName == "data")
                 {
-                    var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk();
-                    byte[] data = moveBinDataChunk.Serialize(fields.Current, true);
+                    var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(FCBConverter.Program.isNewDawn);
+                    byte[] data = moveBinDataChunk.Serialize(fields.Current);
                     node.Fields.Add(fieldNameHash, data);
                 }
                 else if (fieldName == "ResIds")

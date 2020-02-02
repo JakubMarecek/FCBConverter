@@ -142,8 +142,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         if (name == "data")
                         {
-                            var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk();
-                            moveBinDataChunk.Deserialize(writer, kv.Value, true);
+                            var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(Program.isNewDawn);
+                            moveBinDataChunk.Deserialize(writer, kv.Value);
                         }
                         else if (name == "ResIds")
                         {

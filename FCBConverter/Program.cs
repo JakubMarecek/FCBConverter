@@ -24,6 +24,7 @@ namespace FCBConverter
 
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
+        public static bool isNewDawn = false;
 
         public static string version = "20200201-0200";
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
@@ -1276,11 +1277,18 @@ namespace FCBConverter
             FileStream MoveStream = new FileStream(file, FileMode.Open);
             BinaryReader MoveReader = new BinaryReader(MoveStream);
 
-            uint ver = MoveReader.ReadUInt32();
+            ushort ver = MoveReader.ReadUInt16();
+            ushort unk = MoveReader.ReadUInt16();
+
+            isNewDawn = ver == 65;
 
             XmlAttribute rootNodeAttributeVersion = xmlDoc.CreateAttribute("Version");
             rootNodeAttributeVersion.Value = ver.ToString();
             rootNode.Attributes.Append(rootNodeAttributeVersion);
+
+            XmlAttribute rootNodeAttributeUnknown = xmlDoc.CreateAttribute("Unknown");
+            rootNodeAttributeUnknown.Value = unk.ToString();
+            rootNode.Attributes.Append(rootNodeAttributeUnknown);
 
 
             byte[] fcbData = MoveReader.ReadBytes(100000000);
@@ -1313,7 +1321,11 @@ namespace FCBConverter
             XDocument doc = XDocument.Load(file);
             XElement root = doc.Element("CMoveResource");
 
-            output.WriteValueU32(uint.Parse(root.Attribute("Version").Value));
+            ushort ver = ushort.Parse(root.Attribute("Version").Value);
+            isNewDawn = ver == 65;
+
+            output.WriteValueU16(ver);
+            output.WriteValueU16(ushort.Parse(root.Attribute("Unknown").Value));
 
 
             string tmp = onlyDir + "\\tmp";
@@ -1358,6 +1370,14 @@ namespace FCBConverter
             uint moveDataSize = CombinedMoveFileReader.ReadUInt32();
             uint fcbDataSize = CombinedMoveFileReader.ReadUInt32();
 
+            if (moveCount != 64 && moveCount != 65)
+            {
+                Console.WriteLine("Unsupported version of CombinedMoveFile.bin!");
+                return;
+            }
+
+            bool isNewDawn = moveCount == 65;
+
             writer.WriteAttributeString("Version", moveCount.ToString());
 
             byte[] moveData = CombinedMoveFileReader.ReadBytes((int)moveDataSize);
@@ -1386,9 +1406,9 @@ namespace FCBConverter
 
                 byte[] chunk = moveDataStream.ReadBytes((int)chunkLen);
 
-                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true);
-                moveBinDataChunk.Deserialize(writer, chunk, false, pmri.rootNodeId);
-                writer.Flush();
+                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true, isNewDawn, false);
+                moveBinDataChunk.Deserialize(writer, chunk, pmri.rootNodeId);
+                //writer.Flush();
 
                 currentOffset += chunkLen;
             }
@@ -1440,12 +1460,14 @@ namespace FCBConverter
 
             var CMove_BlendRoot_DTRoot = nav.Select("/CombinedMoveFile/PerMoveResourceInfos/CMove_BlendRoot_DTRoot");
 
+            uint ver = uint.Parse(root.GetAttribute("Version", ""));
+
             List<byte[]> perMoveResourceInfos = new List<byte[]>();
             uint currentOffset = 0;
             while (CMove_BlendRoot_DTRoot.MoveNext() == true)
             {
-                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true);
-                byte[] chunk = moveBinDataChunk.Serialize(CMove_BlendRoot_DTRoot.Current, false);
+                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true, ver == 65, false);
+                byte[] chunk = moveBinDataChunk.Serialize(CMove_BlendRoot_DTRoot.Current);
 
                 perMoveResourceInfos.Add(chunk);
 
@@ -1464,7 +1486,7 @@ namespace FCBConverter
 
             byte[] fcbByte = File.ReadAllBytes(tmp + "c");
 
-            output.WriteValueU32(uint.Parse(root.GetAttribute("Version", "")));
+            output.WriteValueU32(ver);
             output.WriteValueU32((uint)perMoveResourceInfosByte.Length);
             output.WriteValueU32((uint)fcbByte.Length);
             output.WriteBytes(perMoveResourceInfosByte);
