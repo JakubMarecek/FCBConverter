@@ -74,7 +74,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                 if (fieldName == "data")
                 {
-                    FCBConverter.MoveBinDataChunk moveBinDataChunk = new FCBConverter.MoveBinDataChunk();
+                    var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk();
                     byte[] data = moveBinDataChunk.Serialize(fields.Current, true);
                     node.Fields.Add(fieldNameHash, data);
                 }
@@ -119,8 +119,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             if (FCBConverter.Program.isCombinedMoveFile)
             {
-                FCBConverter.OffsetsHashesArray.Serialize(node);
-                FCBConverter.PerMoveResourceInfo.Serialize(node);
+                FCBConverter.CombinedMoveFile.OffsetsHashesArray.Serialize(node);
+                FCBConverter.CombinedMoveFile.PerMoveResourceInfo.Serialize(node);
             }
 
 

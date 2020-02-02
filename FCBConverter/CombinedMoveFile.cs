@@ -1,4 +1,5 @@
-﻿using Gibbed.IO;
+﻿using Gibbed.Dunia2.FileFormats;
+using Gibbed.IO;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,8 +8,208 @@ using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
 
-namespace FCBConverter
+namespace FCBConverter.CombinedMoveFile
 {
+    class OffsetsHashesArray
+    {
+        public static List<OffsetsHashesArrayItem> offsetsHashesArray = new List<OffsetsHashesArrayItem>();
+        public static Dictionary<uint, ulong> offsetsHashesDict = new Dictionary<uint, ulong>();
+        //public static Dictionary<uint, ulong> offsetsHashesDict2 = new Dictionary<uint, ulong>();
+
+        public enum ParamNames : uint
+        {
+            ANIMPARAM = 3324928103,
+            POSEANIMPARAM = 698988808,
+            MOTIONMATCHINGPARAM = 2395932676,
+            BLENDPARAM = 1608936243,
+            CURVEPARAM = 3020094394,
+            CLIPPARAM = 438514225,
+            LAYERPARAM = 1304798653,
+            LOOAKATPARAM = 3106312372,
+            MOVEBLENDPARAM = 1606123814,
+            MOVESTATEPARAM = 3105302744,
+            PMSVALUEPARAM = 2803151549,
+            RAGDOLLPARAM = 1761566118,
+            SECONDARYMOTIONPARAM = 670538874,
+            BLENDADJUSTPARAM = 1387024244
+        }
+
+        public static void Deserialize(Dictionary<uint, byte[]> node)
+        {
+            var offsetsArray = Helpers.UnpackArray(node[CRC32.Hash("offsetsArray")], 4);
+            var hashesArray = Helpers.UnpackArray(node[CRC32.Hash("hashesArray")], 8);
+
+            for (int i = 0; i < offsetsArray.Count(); i++)
+            {
+                offsetsHashesDict.Add(BitConverter.ToUInt32(offsetsArray[i], 0), BitConverter.ToUInt64(hashesArray[i], 0));
+
+                //Program.offsetsHashesArray.Add(new OffsetsHashesArray(BitConverter.ToUInt32(offsetsArray[i], 0), BitConverter.ToUInt64(hashesArray[i], 0), node.NameHash));
+
+                /*writer.WriteStartElement("fixup");
+                writer.WriteAttributeString("offset", BitConverter.ToUInt32(offsetsArray[i], 0).ToString());
+                writer.WriteAttributeString("hash", Helpers.ByteArrayToString(hashesArray[i]));*/
+                /*
+                byte[] hashesArrayRev = new byte[hashesArray[i].Length];
+                for (int j = 0; j < hashesArray[i].Length; j++)
+                {
+                    hashesArrayRev[j] = hashesArray[i][j];
+                }
+                Array.Reverse(hashesArrayRev);
+                ulong aaa = ulong.Parse(ByteArrayToString(hashesArrayRev), NumberStyles.HexNumber);
+                if (FCBConverter.Program.m_HashList.ContainsKey(aaa))
+                {
+                    string name = FCBConverter.Program.m_HashList[aaa];
+                    writer.WriteAttributeString("hash", name);
+                }
+                else
+                    writer.WriteAttributeString("hash", ByteArrayToString(hashesArray[i]));
+                */
+                //writer.WriteEndElement();
+
+                //Program.combinedMoveFileHelper.Add(node.NameHash.ToString("X8"), offsetsArray[i], hashesArray[i]);
+            }
+        }
+
+        public static void Serialize(BinaryObject node)
+        {
+            if (!Enum.IsDefined(typeof(ParamNames), node.NameHash))
+                return;
+
+            List<byte[]> fixupsOffsets = new List<byte[]>();
+            List<byte[]> fixupsHashes = new List<byte[]>();
+
+            for (int i = 0; i < offsetsHashesArray.Count(); i++)
+            {
+                if ((uint)offsetsHashesArray[i].param == node.NameHash)
+                {
+                    fixupsOffsets.Add(BitConverter.GetBytes(offsetsHashesArray[i].offset));
+                    fixupsHashes.Add(BitConverter.GetBytes(offsetsHashesArray[i].hash));
+                }
+            }
+
+            if (fixupsOffsets.Count > 0)
+            {
+                fixupsOffsets.Insert(0, BitConverter.GetBytes(fixupsOffsets.Count));
+                fixupsHashes.Insert(0, BitConverter.GetBytes(fixupsHashes.Count));
+
+                node.Fields.Add(CRC32.Hash("offsetsArray"), fixupsOffsets.SelectMany(byteArr => byteArr).ToArray());
+                node.Fields.Add(CRC32.Hash("hashesArray"), fixupsHashes.SelectMany(byteArr => byteArr).ToArray());
+            }
+        }
+    }
+
+    class OffsetsHashesArrayItem
+    {
+        public uint offset { get; set; }
+
+        public ulong hash { get; set; }
+
+        public OffsetsHashesArray.ParamNames param { get; set; }
+
+        public OffsetsHashesArrayItem(uint offset, ulong hash, uint fixupsParam)
+        {
+            this.offset = offset;
+            this.hash = hash;
+            this.param = (OffsetsHashesArray.ParamNames)fixupsParam;
+        }
+
+        public OffsetsHashesArrayItem(uint offset, ulong hash, OffsetsHashesArray.ParamNames fixupsParam)
+        {
+            this.offset = offset;
+            this.hash = hash;
+            this.param = fixupsParam;
+        }
+    }
+
+    class PerMoveResourceInfo
+    {
+        public static List<PerMoveResourceInfoItem> perMoveResourceInfos = new List<PerMoveResourceInfoItem>();
+
+        public static void Deserialize(Dictionary<uint, byte[]> node)
+        {
+            var sizes = Helpers.UnpackArray(node[CRC32.Hash("sizes")], 4);
+            var rootNodeIds = Helpers.UnpackArray(node[CRC32.Hash("rootNodeIds")], 8);
+            var resourcePathIds = Helpers.UnpackArray(node[CRC32.Hash("resourcePathIds")], 8);
+
+            for (int i = 0; i < sizes.Count(); i++)
+            {
+                perMoveResourceInfos.Add(new PerMoveResourceInfoItem(BitConverter.ToUInt32(sizes[i], 0), BitConverter.ToUInt64(rootNodeIds[i], 0), BitConverter.ToUInt64(resourcePathIds[i], 0)));
+
+                /*writer.WriteStartElement("PerMoveResourceInfo");
+                writer.WriteAttributeString("size", BitConverter.ToUInt32(sizes[i], 0).ToString());
+                writer.WriteAttributeString("rootNodeId", Helpers.ByteArrayToString(rootNodeIds[i]));
+                writer.WriteAttributeString("resourcePathId", Helpers.ByteArrayToString(resourcePathIds[i]));*/
+
+                /*
+                byte[] resourcePathIdsRev = new byte[resourcePathIds[i].Length];
+                for (int j = 0; j < resourcePathIds[i].Length; j++)
+                {
+                    resourcePathIdsRev[j] = resourcePathIds[i][j];
+                }
+                Array.Reverse(resourcePathIdsRev);
+                ulong aaa = ulong.Parse(ByteArrayToString(resourcePathIdsRev), NumberStyles.HexNumber);
+                if (FCBConverter.Program.m_HashList.ContainsKey(aaa))
+                {
+                    string name = FCBConverter.Program.m_HashList[aaa];
+                    writer.WriteAttributeString("resourcePathId", name);
+                }
+                else
+                    writer.WriteAttributeString("resourcePathId", ByteArrayToString(resourcePathIds[i]));
+                */
+                //writer.WriteEndElement();
+
+                //Program.combinedMoveFileHelper.AddSizes(sizes[i], resourcePathIds[i]);
+            }
+        }
+
+        public static void Serialize(BinaryObject node)
+        {
+            if (node.NameHash != 1650810464)
+                return;
+
+            List<byte[]> sizes = new List<byte[]>();
+            List<byte[]> rootNodeIds = new List<byte[]>();
+            List<byte[]> resourcePathIds = new List<byte[]>();
+
+            for (int i = 0; i < perMoveResourceInfos.Count(); i++) //perMoveResourceInfos.Count() 10520 2C8A381201B8298B   25315 EE986B52BAA56318
+            {
+                sizes.Add(BitConverter.GetBytes(perMoveResourceInfos[i].size));
+                rootNodeIds.Add(BitConverter.GetBytes(perMoveResourceInfos[i].rootNodeId));
+                resourcePathIds.Add(BitConverter.GetBytes(perMoveResourceInfos[i].resourcePathId));
+            }
+
+            //string a = Helpers.ByteArrayToString(resourcePathIds[10519]);
+            //PerMoveResourceInfoItem perMoveResourceInfoItem = perMoveResourceInfos[25315];
+
+            if (sizes.Count > 0)
+            {
+                sizes.Insert(0, BitConverter.GetBytes(sizes.Count));
+                rootNodeIds.Insert(0, BitConverter.GetBytes(rootNodeIds.Count));
+                resourcePathIds.Insert(0, BitConverter.GetBytes(resourcePathIds.Count));
+
+                node.Fields.Add(CRC32.Hash("sizes"), sizes.SelectMany(byteArr => byteArr).ToArray());
+                node.Fields.Add(CRC32.Hash("rootNodeIds"), rootNodeIds.SelectMany(byteArr => byteArr).ToArray());
+                node.Fields.Add(CRC32.Hash("resourcePathIds"), resourcePathIds.SelectMany(byteArr => byteArr).ToArray());
+            }
+        }
+    }
+
+    class PerMoveResourceInfoItem
+    {
+        public uint size { get; set; }
+
+        public ulong rootNodeId { get; set; }
+
+        public ulong resourcePathId { get; set; }
+
+        public PerMoveResourceInfoItem(uint size, ulong rootNodeId, ulong resourcePathId)
+        {
+            this.size = size;
+            this.rootNodeId = rootNodeId;
+            this.resourcePathId = resourcePathId;
+        }
+    }
+
     class MoveBinDataChunk
     {
         XmlWriter writer;

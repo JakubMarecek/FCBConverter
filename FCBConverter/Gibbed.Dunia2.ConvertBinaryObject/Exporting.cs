@@ -20,19 +20,16 @@
  *    distribution.
  */
 
+using FCBConverter;
+using Gibbed.Dunia2.BinaryObjectInfo;
+using Gibbed.Dunia2.FileFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using FCBConverter;
-using Gibbed.Dunia2.BinaryObjectInfo;
-using Gibbed.Dunia2.BinaryObjectInfo.Definitions;
-using Gibbed.Dunia2.FileFormats;
 
 namespace Gibbed.Dunia2.ConvertBinaryObject
 {
@@ -100,11 +97,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             {
                 if (Program.isCombinedMoveFile && node.Fields.Count == 2 && node.Fields.ContainsKey(CRC32.Hash("offsetsArray")) && node.Fields.ContainsKey(CRC32.Hash("hashesArray")))
                 {
-                    OffsetsHashesArray.Deserialize(node.Fields);
+                    FCBConverter.CombinedMoveFile.OffsetsHashesArray.Deserialize(node.Fields);
                 }
                 else if (Program.isCombinedMoveFile && node.Fields.Count == 3 && node.Fields.ContainsKey(CRC32.Hash("rootNodeIds")) && node.Fields.ContainsKey(CRC32.Hash("resourcePathIds")))
                 {
-                    PerMoveResourceInfo.Deserialize(node.Fields);
+                    FCBConverter.CombinedMoveFile.PerMoveResourceInfo.Deserialize(node.Fields);
                 }
                 else
                 {
@@ -145,7 +142,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         if (name == "data")
                         {
-                            MoveBinDataChunk moveBinDataChunk = new MoveBinDataChunk();
+                            var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk();
                             moveBinDataChunk.Deserialize(writer, kv.Value, true);
                         }
                         else if (name == "ResIds")

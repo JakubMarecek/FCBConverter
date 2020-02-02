@@ -752,7 +752,7 @@ namespace FCBConverter
             FileStream DeploadStream = new FileStream(file, FileMode.Open);
             BinaryReader DeploadReader = new BinaryReader(DeploadStream);
 
-            List<DependentFile> DependentFiles = new List<DependentFile>();
+            List<Depload.DependentFile> DependentFiles = new List<Depload.DependentFile>();
             List<ulong> DependencyFiles = new List<ulong>();
             List<byte> DependencyFilesTypes = new List<byte>();
             List<string> Types = new List<string>();
@@ -763,7 +763,7 @@ namespace FCBConverter
                 int dependencyFilesStartIndex = DeploadReader.ReadInt32();
                 int countOfDependencyFiles = DeploadReader.ReadInt32();
                 ulong fileHash = DeploadReader.ReadUInt64();
-                DependentFiles.Add(new DependentFile { DependencyFilesStartIndex = dependencyFilesStartIndex, CountOfDependencyFiles = countOfDependencyFiles, FileHash = fileHash });
+                DependentFiles.Add(new Depload.DependentFile { DependencyFilesStartIndex = dependencyFilesStartIndex, CountOfDependencyFiles = countOfDependencyFiles, FileHash = fileHash });
             }
 
             int DependencyFilesCount = DeploadReader.ReadInt32();
@@ -794,11 +794,11 @@ namespace FCBConverter
             // ********** Proccess
             // ****************************************************************************************************
 
-            List<DependencyLoaderItem> dependencyLoaderItems = new List<DependencyLoaderItem>();
+            List<Depload.DependencyLoaderItem> dependencyLoaderItems = new List<Depload.DependencyLoaderItem>();
 
             for (int i = 0; i < DependentFiles.Count; i++)
             {
-                DependencyLoaderItem dependencyLoaderItem = new DependencyLoaderItem();
+                Depload.DependencyLoaderItem dependencyLoaderItem = new Depload.DependencyLoaderItem();
                 dependencyLoaderItem.fileName = m_HashList.ContainsKey(DependentFiles[i].FileHash) ? m_HashList[DependentFiles[i].FileHash] : "__Unknown\\" + DependentFiles[i].FileHash.ToString("X16");
 
                 dependencyLoaderItem.depFiles = new List<string>();
@@ -864,7 +864,7 @@ namespace FCBConverter
 
         static void DeploadConvertXml(string file)
         {
-            SortedDictionary<ulong, DependentFile> DependentFiles = new SortedDictionary<ulong, DependentFile>();
+            SortedDictionary<ulong, Depload.DependentFile> DependentFiles = new SortedDictionary<ulong, Depload.DependentFile>();
             List<ulong> DependencyFiles = new List<ulong>();
             List<byte> DependencyFilesTypes = new List<byte>();
             List<string> Types = new List<string>();
@@ -879,7 +879,7 @@ namespace FCBConverter
                 string fileName = DependentFileXML.Attribute("ID").Value.ToLowerInvariant();
                 ulong fileHash = GetFileHash(fileName);
 
-                DependentFile dependentFile = new DependentFile();
+                Depload.DependentFile dependentFile = new Depload.DependentFile();
                 dependentFile.DependencyFilesStartIndex = DependencyFiles.Count;
                 dependentFile.FileHash = fileHash;
 
@@ -1375,18 +1375,18 @@ namespace FCBConverter
 
             uint currentOffset = 0;
             Stream moveDataStream = new MemoryStream(moveData);
-            for (int i = 0; i < PerMoveResourceInfo.perMoveResourceInfos.Count(); i++)
+            for (int i = 0; i < CombinedMoveFile.PerMoveResourceInfo.perMoveResourceInfos.Count(); i++)
             {
                 long currentPos = moveDataStream.Position;
                 byte[] resourcePathId = moveDataStream.ReadBytes(sizeof(ulong));
                 moveDataStream.Seek(currentPos, SeekOrigin.Begin);
 
-                PerMoveResourceInfoItem pmri = PerMoveResourceInfo.perMoveResourceInfos.Where(e => e.resourcePathId == BitConverter.ToUInt64(resourcePathId, 0)).SingleOrDefault();
+                var pmri = CombinedMoveFile.PerMoveResourceInfo.perMoveResourceInfos.Where(e => e.resourcePathId == BitConverter.ToUInt64(resourcePathId, 0)).SingleOrDefault();
                 uint chunkLen = pmri.size;
 
                 byte[] chunk = moveDataStream.ReadBytes((int)chunkLen);
 
-                MoveBinDataChunk moveBinDataChunk = new MoveBinDataChunk(currentOffset, true);
+                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true);
                 moveBinDataChunk.Deserialize(writer, chunk, false, pmri.rootNodeId);
                 writer.Flush();
 
@@ -1444,7 +1444,7 @@ namespace FCBConverter
             uint currentOffset = 0;
             while (CMove_BlendRoot_DTRoot.MoveNext() == true)
             {
-                MoveBinDataChunk moveBinDataChunk = new MoveBinDataChunk(currentOffset, true);
+                var moveBinDataChunk = new CombinedMoveFile.MoveBinDataChunk(currentOffset, true);
                 byte[] chunk = moveBinDataChunk.Serialize(CMove_BlendRoot_DTRoot.Current, false);
 
                 perMoveResourceInfos.Add(chunk);

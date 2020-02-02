@@ -48,8 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DependencyLoaderItem.cs" />
-    <Compile Include="DependentFile.cs" />
+    <Compile Include="Depload.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\ConditionValueSource.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\ClassDefinition.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\EnumDefinition.cs" />
@@ -158,9 +157,7 @@
     <Compile Include="LZ4Sharp\LZ4Decompressor64.cs" />
     <Compile Include="LZ4Sharp\LZ4DecompressorFactory.cs" />
     <Compile Include="LZ4Sharp\LZ4Util.cs" />
-    <Compile Include="MoveBinDataChunk.cs" />
-    <Compile Include="OffsetsHashesArray.cs" />
-    <Compile Include="PerMoveResourceInfo.cs" />
+    <Compile Include="CombinedMoveFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
