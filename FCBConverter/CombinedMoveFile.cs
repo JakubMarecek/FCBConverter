@@ -423,8 +423,12 @@ namespace FCBConverter.CombinedMoveFile
             }
             else if (classNameType == 22 && isNewDawn)
                 CMoveMotionMatchingList();
+            else if (classNameType == 23 && isNewDawn)
+                CMoveMotionMatchingAnim();
             else if (classNameType == 24 && isNewDawn)
                 CMoveMotionMatchingPartialAnim();
+            else if (classNameType == 25 && isNewDawn)
+                CMoveMotionMatchingAnimGroup();
             else
             {
                 writer.Flush();
@@ -512,10 +516,14 @@ namespace FCBConverter.CombinedMoveFile
             byte.TryParse(root.GetAttribute("headerValueA", ""), out byte unknownHA);
             byte.TryParse(root.GetAttribute("headerValueB", ""), out byte unknownHB);
 
+            sbyte offset = 0;
+            if (isNewDawn)
+                offset = 4;
+
             switch (root.Name)
             {
                 case "CMoveAxialBlend":
-                    WriteChildHeader(30, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(30 + offset, childCount, unknownHA, unknownHB);
                     CMoveAxialBlend(root);
                     break;
                 case "CMoveSingleAnim":
@@ -523,23 +531,23 @@ namespace FCBConverter.CombinedMoveFile
                     CMoveSingleAnim(root);
                     break;
                 case "CMoveAnimTechAnchor":
-                    WriteChildHeader(38, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(38 + offset, childCount, unknownHA, unknownHB);
                     CMoveAnimTechAnchor(root);
                     break;
                 case "CMoveSetGameParams":
-                    WriteChildHeader(35, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(35 + offset, childCount, unknownHA, unknownHB);
                     CMoveSetGameParams(root);
                     break;
                 case "CMoveAnimTechSetPMS":
-                    WriteChildHeader(36, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(36 + offset, childCount, unknownHA, unknownHB);
                     CMoveAnimTechSetPMS(root);
                     break;
                 case "CMoveAnimTechIKPath":
-                    WriteChildHeader(39, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(39 + offset, childCount, unknownHA, unknownHB);
                     CMoveAnimTechIKPath(root);
                     break;
                 case "CMovePMSSelector":
-                    WriteChildHeader(27, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(27 + offset, childCount, unknownHA, unknownHB);
                     CMovePMSSelector(root);
                     break;
                 case "CMoveTimeControlledAnim":
@@ -551,7 +559,7 @@ namespace FCBConverter.CombinedMoveFile
                     CMoveDoNothing(root);
                     break;
                 case "CMoveRangeBlend":
-                    WriteChildHeader(29, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(29 + offset, childCount, unknownHA, unknownHB);
                     CMoveRangeBlend(root);
                     break;
                 case "CMoveSpeedScaledAnim":
@@ -590,20 +598,20 @@ namespace FCBConverter.CombinedMoveFile
                     CMoveIntervalOpe(root);
                     break;
                 case "CMoveMultiBlend":
-                    WriteChildHeader(32, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(32 + offset, childCount, unknownHA, unknownHB);
                     CMoveMultiBlend(root);
                     break;
                 case "CMoveRandomSelector":
-                    WriteChildHeader(26, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(26 + offset, childCount, unknownHA, unknownHB);
                     CMoveRandomSelector(root);
                     break;
                 case "CMoveTransition":
-                    WriteChildHeader(41, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(41 + offset, childCount, unknownHA, unknownHB);
                     CMoveTransition(root);
                     break;
                 case "CMoveTransitionContainer":
                     endSpace = 1;
-                    WriteChildHeader(42, unknownHA, childCount, unknownHB);
+                    WriteChildHeader(42 + offset, unknownHA, childCount, unknownHB);
                     CMoveTransitionContainer(root);
                     break;
                 case "CMoveStateRef":
@@ -619,7 +627,7 @@ namespace FCBConverter.CombinedMoveFile
                     CMoveRandomOffsetAnim(root);
                     break;
                 case "CMoveProcedural":
-                    WriteChildHeader(24, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(24 + offset, childCount, unknownHA, unknownHB);
                     CMoveProcedural(root);
                     break;
                 case "CMoveMotionMatching":
@@ -627,15 +635,15 @@ namespace FCBConverter.CombinedMoveFile
                     CMoveMotionMatching(root);
                     break;
                 case "CMoveFacialAnim":
-                    WriteChildHeader(22, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(22 + offset, childCount, unknownHA, unknownHB);
                     CMoveFacialAnim(root);
                     break;
                 case "CMoveSequence":
-                    WriteChildHeader(28, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(28 + offset, childCount, unknownHA, unknownHB);
                     CMoveSequence(root);
                     break;
                 case "CMoveAnimTechProgressToPMS":
-                    WriteChildHeader(37, childCount, unknownHA, unknownHB);
+                    WriteChildHeader(37 + offset, childCount, unknownHA, unknownHB);
                     CMoveAnimTechProgressToPMS(root);
                     break;
                 case "CMoveMotionMatchingList":
@@ -645,6 +653,14 @@ namespace FCBConverter.CombinedMoveFile
                 case "CMoveMotionMatchingPartialAnim":
                     WriteChildHeader(24, childCount, unknownHA, unknownHB);
                     CMoveMotionMatchingPartialAnim(root);
+                    break;
+                case "CMoveMotionMatchingAnim":
+                    WriteChildHeader(23, childCount, unknownHA, unknownHB);
+                    CMoveMotionMatchingAnim(root);
+                    break;
+                case "CMoveMotionMatchingAnimGroup":
+                    WriteChildHeader(25, childCount, unknownHA, unknownHB);
+                    CMoveMotionMatchingAnimGroup(root);
                     break;
                 default:
                     Console.WriteLine("Missing class name type " + root.Name + " in template! Exiting.");
@@ -677,17 +693,17 @@ namespace FCBConverter.CombinedMoveFile
             dataStream.Seek(currentPos, SeekOrigin.Begin);
         }
 
-        private void WriteChildHeader(sbyte classType, byte childCount, byte unknownHA, byte unknownHB)
+        private void WriteChildHeader(int classType, byte childCount, byte unknownHA, byte unknownHB)
         {
-            dataStream.WriteValueS8(classType);
+            dataStream.WriteValueS8((sbyte)classType);
             dataStream.WriteValueU8(childCount);
             dataStream.WriteValueU8(unknownHA);
             dataStream.WriteValueU8(unknownHB);
         }
 
-        private void WriteChildHeader(sbyte classType, byte unknown)
+        private void WriteChildHeader(int classType, byte unknown)
         {
-            dataStream.WriteValueS8(classType);
+            dataStream.WriteValueS8((sbyte)classType);
             dataStream.WriteValueU8(unknown);
         }
 
@@ -1824,6 +1840,76 @@ namespace FCBConverter.CombinedMoveFile
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space5", "")));
                 GetOffsetFromHash(xmlNav.GetAttribute("motionmatchinganimspeedParamOffset", ""), OffsetsHashesArray.ParamNames.MOTIONMATCHINGANIMSPEEDPARAM);
                 dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space6", "")));
+            }
+        }
+
+        private void CMoveMotionMatchingAnim(XPathNavigator xmlNav = null)
+        {
+            if (xmlNav == null)
+            {
+                writer.WriteStartElement("CMoveMotionMatchingAnim");
+                writer.WriteAttributeString("space0", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("uniqueID", dataStream.ReadValueU64().ToString());
+                writer.WriteAttributeString("CriteriaValue", dataStream.ReadValueF32().ToString(CultureInfo.InvariantCulture));
+                writer.WriteAttributeString("space1", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("layerParamOffset", GetHashFromOffset());
+                writer.WriteAttributeString("space2", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("unknownA", dataStream.ReadValueS16().ToString());
+                writer.WriteAttributeString("unknownB", dataStream.ReadValueS16().ToString());
+                writer.WriteAttributeString("space3", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("animParamOffset", GetHashFromOffset());
+                writer.WriteAttributeString("space4", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("motionmatchinganimspeedParamOffset", GetHashFromOffset());
+                writer.WriteAttributeString("space5", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("motionmatchinganimmotionParamOffset", GetHashFromOffset());
+                writer.WriteAttributeString("space6", dataStream.ReadValueS32().ToString());
+            }
+            else
+            {
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space0", "")));
+                dataStream.WriteValueU64(ulong.Parse(xmlNav.GetAttribute("uniqueID", "")));
+                dataStream.WriteValueF32(float.Parse(xmlNav.GetAttribute("CriteriaValue", ""), CultureInfo.InvariantCulture));
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space1", "")));
+                GetOffsetFromHash(xmlNav.GetAttribute("layerParamOffset", ""), OffsetsHashesArray.ParamNames.LAYERPARAM);
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space2", "")));
+                dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownA", "")));
+                dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownB", "")));
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space3", "")));
+                GetOffsetFromHash(xmlNav.GetAttribute("animParamOffset", ""), OffsetsHashesArray.ParamNames.ANIMPARAM);
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space4", "")));
+                GetOffsetFromHash(xmlNav.GetAttribute("motionmatchinganimspeedParamOffset", ""), OffsetsHashesArray.ParamNames.MOTIONMATCHINGANIMSPEEDPARAM);
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space5", "")));
+                GetOffsetFromHash(xmlNav.GetAttribute("motionmatchinganimmotionParamOffset", ""), OffsetsHashesArray.ParamNames.MOTIONMATCHINGANIMMOTIONPARAM);
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space6", "")));
+            }
+        }
+
+        private void CMoveMotionMatchingAnimGroup(XPathNavigator xmlNav = null)
+        {
+            if (xmlNav == null)
+            {
+                writer.WriteStartElement("CMoveMotionMatchingAnimGroup");
+                writer.WriteAttributeString("space0", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("uniqueID", dataStream.ReadValueU64().ToString());
+                writer.WriteAttributeString("CriteriaValue", dataStream.ReadValueF32().ToString(CultureInfo.InvariantCulture));
+                writer.WriteAttributeString("space1", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("layerParamOffset", GetHashFromOffset());
+                writer.WriteAttributeString("space2", dataStream.ReadValueS32().ToString());
+                writer.WriteAttributeString("unknownA", dataStream.ReadValueS16().ToString());
+                writer.WriteAttributeString("unknownB", dataStream.ReadValueS16().ToString());
+                writer.WriteAttributeString("space3", dataStream.ReadValueS32().ToString());
+            }
+            else
+            {
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space0", "")));
+                dataStream.WriteValueU64(ulong.Parse(xmlNav.GetAttribute("uniqueID", "")));
+                dataStream.WriteValueF32(float.Parse(xmlNav.GetAttribute("CriteriaValue", ""), CultureInfo.InvariantCulture));
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space1", "")));
+                GetOffsetFromHash(xmlNav.GetAttribute("layerParamOffset", ""), OffsetsHashesArray.ParamNames.LAYERPARAM);
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space2", "")));
+                dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownA", "")));
+                dataStream.WriteValueS16(short.Parse(xmlNav.GetAttribute("unknownB", "")));
+                dataStream.WriteValueS32(int.Parse(xmlNav.GetAttribute("space3", "")));
             }
         }
     }
