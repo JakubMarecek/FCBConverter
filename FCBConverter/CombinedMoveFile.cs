@@ -307,7 +307,7 @@ namespace FCBConverter.CombinedMoveFile
             if (isCombined)
                 writer.WriteAttributeString("rootNodeId", rootNodeId.ToString("X16"));
 
-            writer.WriteAttributeString("debugPurpose", Helpers.ByteArrayToString(data));
+            //writer.WriteAttributeString("debugPurpose", Helpers.ByteArrayToString(data));
             ChildDeserialize();
             writer.WriteEndElement();
         }
