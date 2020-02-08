@@ -26,12 +26,19 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200203-1800";
+        public static string version = "20200208-1420";
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
-        public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), xBaebsae";
+        public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Gibbed, xBaebsae";
+        public static string xmlheaderfcb2 = Environment.NewLine +
+            "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this." + Environment.NewLine +
+            "To change a value, set \"type\" attribute to a string which is after value-**here**. Example:" + Environment.NewLine +
+            "Changing" + Environment.NewLine +
+            "  <field hash=\"ABDC41FE\" name=\"fMaxHealth\" value-Float32=\"1000\" type=\"BinHex\">00007A44</field>" + Environment.NewLine +
+            "to" + Environment.NewLine +
+            "  <field hash=\"ABDC41FE\" name=\"fMaxHealth\" type=\"Float32\">1000</field>" + Environment.NewLine +
+            "";
         public static string xmlheaderdepload = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheadersoundinfo = "Converted by FCBConverter v" + version + ", author ArmanIII.";
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
@@ -1020,10 +1027,8 @@ namespace FCBConverter
             xmlDoc.InsertBefore(xmldecl, rootNode);
 
             XmlComment comment1 = xmlDoc.CreateComment(xmlheader);
-            XmlComment comment2 = xmlDoc.CreateComment(xmlheadersoundinfo);
 
             xmlDoc.InsertBefore(comment1, rootNode);
-            xmlDoc.InsertBefore(comment2, rootNode);
 
             uint Version = SoundInfoReader.ReadUInt32();
             uint EventsCount = SoundInfoReader.ReadUInt32();

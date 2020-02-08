@@ -50,7 +50,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 writer.WriteStartDocument();
                 writer.WriteComment(Program.xmlheader);
                 writer.WriteComment(Program.xmlheaderfcb);
-                writer.WriteComment("Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.");
+                writer.WriteComment(Program.xmlheaderfcb2);
                 WriteNode(writer, new BinaryObject[0], bof.Root);
                 writer.WriteEndDocument();
             }
@@ -158,6 +158,18 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 writer.WriteEndElement();
                             }
                         }
+                        else if (name == "hidDescriptor")
+                        {
+                            XmlReaderSettings settings = new XmlReaderSettings
+                            {
+                                IgnoreComments = true,
+                                //IgnoreWhitespace = false,
+                                IgnoreWhitespace = true,
+                                IgnoreProcessingInstructions = true
+                            };
+                            XmlReader xmlReader = XmlReader.Create(new System.IO.StringReader(str), settings);
+                            writer.WriteNode(xmlReader, false);
+                        }
                         // *****************************************************************************************************************
                         // list values
                         // *****************************************************************************************************************
@@ -227,7 +239,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // string
                         // *****************************************************************************************************************
-                        else if ((stringRegex && binaryHex.Length > 4 && binaryHex.GetLast(2) == "00") || name == "hidDescriptor" || name.StartsWith("text_"))
+                        else if ((stringRegex && binaryHex.Length > 4 && binaryHex.GetLast(2) == "00") || name.StartsWith("text_"))
                         {
                             writer.WriteAttributeString(prefix + "String", str);
                             prevNodeVal = str;
@@ -344,7 +356,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         }
 
-                        if (name != "data" && name != "ResIds")
+                        if (name != "data" && name != "ResIds" && name != "hidDescriptor")
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);

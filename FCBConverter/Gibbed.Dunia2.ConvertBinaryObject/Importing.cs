@@ -92,6 +92,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                     node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
                 }
+                else if (fieldName == "hidDescriptor")
+                {
+                    string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
+                    byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
+                    node.Fields.Add(fieldNameHash, bytes);
+                }
                 else
                 {
                     FieldType fieldType;
