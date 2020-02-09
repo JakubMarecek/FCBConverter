@@ -94,9 +94,18 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
                 else if (fieldName == "hidDescriptor")
                 {
-                    string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
-                    byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
-                    node.Fields.Add(fieldNameHash, bytes);
+                    string legacy = fields.Current.GetAttribute("legacy", "");
+                    if (legacy == "1")
+                    {
+                        byte[] bytes = FCBConverter.Helpers.StringToByteArray(fields.Current.Value);
+                        node.Fields.Add(fieldNameHash, bytes);
+                    }
+                    else
+                    {
+                        string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
+                        byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
+                        node.Fields.Add(fieldNameHash, bytes);
+                    }
                 }
                 else
                 {

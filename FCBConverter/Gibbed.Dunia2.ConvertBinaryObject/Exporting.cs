@@ -160,15 +160,24 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else if (name == "hidDescriptor")
                         {
-                            XmlReaderSettings settings = new XmlReaderSettings
+                            try
                             {
-                                IgnoreComments = true,
-                                //IgnoreWhitespace = false,
-                                IgnoreWhitespace = true,
-                                IgnoreProcessingInstructions = true
-                            };
-                            XmlReader xmlReader = XmlReader.Create(new System.IO.StringReader(str), settings);
-                            writer.WriteNode(xmlReader, false);
+                                XmlReaderSettings settings = new XmlReaderSettings
+                                {
+                                    IgnoreComments = true,
+                                    //IgnoreWhitespace = false,
+                                    IgnoreWhitespace = true,
+                                    IgnoreProcessingInstructions = true
+                                };
+                                XmlReader xmlReader = XmlReader.Create(new System.IO.StringReader(str), settings);
+                                writer.WriteNode(xmlReader, false);
+                            }
+                            catch (Exception)
+                            {
+                                writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                                writer.WriteAttributeString("legacy", "1");
+                                writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
+                            }
                         }
                         // *****************************************************************************************************************
                         // list values
