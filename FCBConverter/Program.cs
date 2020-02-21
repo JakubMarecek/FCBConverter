@@ -219,6 +219,13 @@ namespace FCBConverter
 
             Console.Title = "FCBConverter - " + file;
 
+            if (File.Exists(m_Path + "\\nocompress"))
+            {
+                Console.WriteLine("Compression disabled.");
+                Console.WriteLine("");
+                isCompressEnabled = false;
+            }
+
             // ********************************************************************************************************************************************
 
             if (file.EndsWith(".xbt") || file.EndsWith(".xbts"))
