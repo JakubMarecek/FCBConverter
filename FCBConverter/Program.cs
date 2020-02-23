@@ -212,6 +212,21 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin");
                 Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin.converted.xml");
                 Console.WriteLine("");
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<For *.cseq files>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <m_File>");
+                Console.WriteLine("    m_File - *.cseq file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\sequence.cseq");
+                Console.WriteLine("    FCBConverter D:\\sequence.cseq.converted.xml");
+                Console.WriteLine("");
                 Console.ResetColor();
                 return;
             }
@@ -226,6 +241,75 @@ namespace FCBConverter
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");
                 isCompressEnabled = false;
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".cseq"))
+            {
+                string workingOriginalFile;
+
+                if (outputFile != "")
+                    workingOriginalFile = outputFile;
+                else
+                    workingOriginalFile = Path.GetFileName(file) + ".converted.xml";
+
+                var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
+                using (var input = File.OpenRead(file))
+                {
+                    rez.Deserialize(input);
+                }
+
+                var settings = new XmlWriterSettings
+                {
+                    Encoding = Encoding.UTF8,
+                    Indent = true,
+                    OmitXmlDeclaration = true
+                };
+
+                using (var writer = XmlWriter.Create(workingOriginalFile, settings))
+                {
+                    writer.WriteStartDocument();
+                    Gibbed.Dunia2.ConvertXml.Program.WriteNode(writer, rez.Root);
+                    writer.WriteEndDocument();
+                }
+
+                FIN();
+            }
+
+            if (file.EndsWith(".cseq.converted.xml"))
+            {
+                string workingOriginalFile;
+
+                if (outputFile != "")
+                    workingOriginalFile = outputFile;
+                else
+                {
+                    workingOriginalFile = file.Replace(".converted.xml", "");
+                    string extension = Path.GetExtension(workingOriginalFile);
+                    workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
+                }
+
+                var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
+                using (var input = File.OpenRead(file))
+                {
+                    var doc = new XPathDocument(input);
+                    var nav = doc.CreateNavigator();
+
+                    if (nav.MoveToFirstChild() == false)
+                    {
+                        throw new FormatException();
+                    }
+
+                    rez.Root = Gibbed.Dunia2.ConvertXml.Program.ReadNode(nav);
+                }
+
+                using (var output = File.Create(workingOriginalFile))
+                {
+                    rez.Serialize(output);
+                }
+
+                FIN();
             }
 
             // ********************************************************************************************************************************************
@@ -470,7 +554,20 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
-            if (file.EndsWith(".converted.xml") && !file.EndsWith("_depload.dat.converted.xml"))
+            if (file.EndsWith("_depload.dat.converted.xml"))
+            {
+                DeploadConvertXml(file);
+                FIN();
+            }
+            else if (file.EndsWith("_depload.dat"))
+            {
+                DeploadConvertDat(file);
+                FIN();
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".converted.xml"))
             {
                 if (file.Replace(".converted.xml", "").EndsWith(".material.bin"))
                 {
@@ -536,19 +633,6 @@ namespace FCBConverter
                 else
                     ConvertFCB(file, workingOriginalFile);
 
-                FIN();
-            }
-
-            // ********************************************************************************************************************************************
-
-            if (file.EndsWith("_depload.dat.converted.xml"))
-            {
-                DeploadConvertXml(file);
-                FIN();
-            }
-            else if (file.EndsWith("_depload.dat"))
-            {
-                DeploadConvertDat(file);
                 FIN();
             }
 

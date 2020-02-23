@@ -90,7 +90,6 @@
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Importing.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Mode.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Program.cs" />
-    <Compile Include="Gibbed.Dunia2.ConvertXml\Mode.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertXml\Program.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\BigFile.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\Big\CompressionScheme.cs" />

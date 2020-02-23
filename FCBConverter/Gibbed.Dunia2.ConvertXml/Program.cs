@@ -20,23 +20,17 @@
  *    distribution.
  */
 
+using Gibbed.Dunia2.FileFormats;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Xml;
 using System.Xml.XPath;
-using Gibbed.Dunia2.FileFormats;
 //using NDesk.Options;
 
 namespace Gibbed.Dunia2.ConvertXml
 {
     public class Program
     {
-        private static string GetExecutableName()
-        {
-            return Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        }
         /*
         public static void Main(string[] args)
         {
