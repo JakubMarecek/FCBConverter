@@ -22,6 +22,8 @@ namespace FCBConverter
         static string stringsFile = @"\FCBConverterStrings.list";
         public static Dictionary<uint, string> strings = new Dictionary<uint, string>();
 
+        static string nocompressFile = @"\FCBNoCompress.txt";
+
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
@@ -219,7 +221,7 @@ namespace FCBConverter
 
             Console.Title = "FCBConverter - " + file;
 
-            if (File.Exists(m_Path + "\\nocompress"))
+            if (File.Exists(m_Path + nocompressFile))
             {
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");

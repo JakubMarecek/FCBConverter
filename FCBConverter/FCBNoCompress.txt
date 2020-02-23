@@ -1,0 +1,2 @@
+﻿By deleting this file you'll enable compression of FCB.
+Compression of big files (XML 20MB or more) will take more time to convert.
