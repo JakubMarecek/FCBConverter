@@ -1,4 +1,22 @@
-﻿using Gibbed.IO;
+﻿/* 
+ * FCBConverter
+ * Copyright (C) 2020  Jakub Mareček (info@jakubmarecek.cz)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FCBConverter.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Gibbed.IO;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,7 +46,8 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200209-2000";
+        public static string version = "20200223-2330";
+
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
         public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Gibbed, xBaebsae";
