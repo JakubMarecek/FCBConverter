@@ -46,7 +46,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200223-2330";
+        public static string version = "20200305-2015";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1266,33 +1266,35 @@ namespace FCBConverter
             FileStream MarkupStream = new FileStream(file, FileMode.Open);
             BinaryReader MarkupReader = new BinaryReader(MarkupStream);
 
-            int ver = MarkupReader.ReadInt32();
-            ushort unknown0 = MarkupReader.ReadUInt16();
-            ushort unknown1 = MarkupReader.ReadUInt16();
-            ushort unknown2 = MarkupReader.ReadUInt16();
-            ushort unknown3 = MarkupReader.ReadUInt16();
+            int ver = MarkupReader.ReadInt16();
+            ushort groupCount0 = MarkupReader.ReadUInt16();
+            ushort groupCount1 = MarkupReader.ReadUInt16();
+            ushort groupCount2 = MarkupReader.ReadUInt16();
+            ushort groupCount3 = MarkupReader.ReadUInt16();
+            ushort groupCount4 = MarkupReader.ReadUInt16();
 
             XmlAttribute rootNodeAttributeVersion = xmlDoc.CreateAttribute("Version");
             rootNodeAttributeVersion.Value = ver.ToString();
             rootNode.Attributes.Append(rootNodeAttributeVersion);
 
-            XmlAttribute rootNodeAttributeUnknown0 = xmlDoc.CreateAttribute("Unknown0");
-            rootNodeAttributeUnknown0.Value = unknown0.ToString(CultureInfo.InvariantCulture);
-            rootNode.Attributes.Append(rootNodeAttributeUnknown0);
+            MarkupWriteGroup(MarkupReader, onlyDir, xmlDoc, rootNode, groupCount0, 0);
+            MarkupWriteGroup(MarkupReader, onlyDir, xmlDoc, rootNode, groupCount1, 1);
+            MarkupWriteGroup(MarkupReader, onlyDir, xmlDoc, rootNode, groupCount2, 2);
+            MarkupWriteGroup(MarkupReader, onlyDir, xmlDoc, rootNode, groupCount3, 3);
+            MarkupWriteGroup(MarkupReader, onlyDir, xmlDoc, rootNode, groupCount4, 4);
 
-            XmlAttribute rootNodeAttributeUnknown1 = xmlDoc.CreateAttribute("Unknown1");
-            rootNodeAttributeUnknown1.Value = unknown1.ToString(CultureInfo.InvariantCulture);
-            rootNode.Attributes.Append(rootNodeAttributeUnknown1);
+            MarkupReader.Dispose();
+            MarkupStream.Dispose();
 
-            XmlAttribute rootNodeAttributeUnknown2 = xmlDoc.CreateAttribute("Unknown2");
-            rootNodeAttributeUnknown2.Value = unknown2.ToString(CultureInfo.InvariantCulture);
-            rootNode.Attributes.Append(rootNodeAttributeUnknown2);
+            xmlDoc.Save(file + ".converted.xml");
+        }
 
-            XmlAttribute rootNodeAttributeUnknown3 = xmlDoc.CreateAttribute("Unknown3");
-            rootNodeAttributeUnknown3.Value = unknown3.ToString(CultureInfo.InvariantCulture);
-            rootNode.Attributes.Append(rootNodeAttributeUnknown3);
+        static void MarkupWriteGroup(BinaryReader MarkupReader, string onlyDir, XmlDocument xmlDoc, XmlNode rootNode, int count, int group)
+        {
+            XmlNode groupNode = xmlDoc.CreateElement("FrameGroup" + group.ToString());
+            rootNode.AppendChild(groupNode);
 
-            for (int i = 0; i < unknown0 + unknown3; i++)
+            for (int i = 0; i < count; i++)
             {
                 float unknown = MarkupReader.ReadSingle();
                 uint fcbByteLength = MarkupReader.ReadUInt32();
@@ -1307,24 +1309,19 @@ namespace FCBConverter
 
                 XmlNode FrameNode = xmlDoc.CreateElement("Frame");
                 FrameNode.AppendChild(xmlDoc.ImportNode(doc.SelectSingleNode("object"), true));
-                rootNode.AppendChild(FrameNode);
+                groupNode.AppendChild(FrameNode);
 
-                XmlAttribute FrameNodeAttributeUnknown = xmlDoc.CreateAttribute("Unknown");
+                XmlAttribute FrameNodeAttributeUnknown = xmlDoc.CreateAttribute("length");
                 FrameNodeAttributeUnknown.Value = unknown.ToString(CultureInfo.InvariantCulture);
                 FrameNode.Attributes.Append(FrameNodeAttributeUnknown);
 
-                XmlAttribute FrameNodeAttributeFileNameHash = xmlDoc.CreateAttribute("FileNameHash");
+                XmlAttribute FrameNodeAttributeFileNameHash = xmlDoc.CreateAttribute("AnimID");
                 FrameNodeAttributeFileNameHash.Value = probablyFileNameHash.ToString();
                 FrameNode.Attributes.Append(FrameNodeAttributeFileNameHash);
 
                 File.Delete(tmp);
                 File.Delete(tmp + "c");
             }
-
-            MarkupReader.Dispose();
-            MarkupStream.Dispose();
-
-            xmlDoc.Save(file + ".converted.xml");
         }
 
         static void MarkupConvertXml(string file)
@@ -1338,17 +1335,18 @@ namespace FCBConverter
             XDocument doc = XDocument.Load(file);
             XElement root = doc.Element("CMarkupResource");
 
-            output.WriteValueS32(int.Parse(root.Attribute("Version").Value));
-            output.WriteValueU16(ushort.Parse(root.Attribute("Unknown0").Value));
-            output.WriteValueU16(ushort.Parse(root.Attribute("Unknown1").Value));
-            output.WriteValueU16(ushort.Parse(root.Attribute("Unknown2").Value));
-            output.WriteValueU16(ushort.Parse(root.Attribute("Unknown3").Value));
+            output.WriteValueU16(ushort.Parse(root.Attribute("Version").Value));
+            output.WriteValueU16((ushort)root.Element("FrameGroup0").Elements().Count());
+            output.WriteValueU16((ushort)root.Element("FrameGroup1").Elements().Count());
+            output.WriteValueU16((ushort)root.Element("FrameGroup2").Elements().Count());
+            output.WriteValueU16((ushort)root.Element("FrameGroup3").Elements().Count());
+            output.WriteValueU16((ushort)root.Element("FrameGroup4").Elements().Count());
 
             IEnumerable<XElement> allFrames = root.Descendants("Frame");
             foreach (XElement allFrame in allFrames)
             {
-                float unknown = float.Parse(allFrame.Attribute("Unknown").Value, CultureInfo.InvariantCulture);
-                ulong FileNameHash = ulong.Parse(allFrame.Attribute("FileNameHash").Value);
+                float unknown = float.Parse(allFrame.Attribute("length").Value, CultureInfo.InvariantCulture);
+                ulong FileNameHash = ulong.Parse(allFrame.Attribute("AnimID").Value);
 
                 string tmp = onlyDir + "\\" + FileNameHash.ToString();
                 XElement fcb = allFrame.Element("object");
