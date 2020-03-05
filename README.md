@@ -12,6 +12,7 @@ FCBConverter can compress FCB files. Big files took longer time to convert with 
 * lua (only to luac)
 * xbt, xbts
 * material.bin
+* markup.bin
 * move.bin
 * combinedmovefile.bin
 * cseq
