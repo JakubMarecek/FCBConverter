@@ -46,7 +46,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200305-2015";
+        public static string version = "20200406-1800";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -246,6 +246,21 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\sequence.cseq");
                 Console.WriteLine("    FCBConverter D:\\sequence.cseq.converted.xml");
                 Console.WriteLine("");
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<For *.feu, *.swf files>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <m_File>");
+                Console.WriteLine("    m_File - *.feu or *.swf file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\ui.feu");
+                Console.WriteLine("    FCBConverter D:\\ui.swf");
+                Console.WriteLine("");
                 Console.ResetColor();
                 return;
             }
@@ -260,6 +275,38 @@ namespace FCBConverter
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");
                 isCompressEnabled = false;
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".feu"))
+            {
+                byte[] bytes = File.ReadAllBytes(file);
+
+                bytes[0] = (byte)'F';
+                bytes[1] = (byte)'W';
+                bytes[2] = (byte)'S';
+
+                string newPath = file.Replace(".feu", ".swf");
+
+                File.WriteAllBytes(newPath, bytes);
+
+                FIN();
+            }
+
+            if (file.EndsWith(".swf"))
+            {
+                byte[] bytes = File.ReadAllBytes(file);
+
+                bytes[0] = (byte)'U';
+                bytes[1] = (byte)'E';
+                bytes[2] = (byte)'F';
+
+                string newPath = file.Replace(".swf", ".feu");
+
+                File.WriteAllBytes(newPath, bytes);
+
+                FIN();
             }
 
             // ********************************************************************************************************************************************

@@ -44,6 +44,7 @@ using Gibbed.Dunia2.FileFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -196,6 +197,18 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 writer.WriteAttributeString("legacy", "1");
                                 writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
                             }
+                        }
+                        else if (name == "CNH_CompressedData")
+                        {
+                            BinaryReader binaryReader = new BinaryReader(new MemoryStream(kv.Value));
+                            uint len = binaryReader.ReadUInt32();
+                            byte[] compressed = binaryReader.ReadBytes((int)len);
+                            binaryReader.Close();
+
+                            byte[] decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
+
+
+                            File.WriteAllBytes("a", decompressed);
                         }
                         // *****************************************************************************************************************
                         // list values

@@ -78,12 +78,6 @@
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\NamedDefinitionDictionary.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\XmlLoadException.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ExportException.cs" />
-    <None Include="FCBConverterFileNames.list">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="FCBConverterStrings.list">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs.bak" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ImportException.cs" />
@@ -167,9 +161,7 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FCBNoCompress.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="FCBNoCompress.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
