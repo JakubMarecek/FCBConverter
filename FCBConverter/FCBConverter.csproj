@@ -104,7 +104,6 @@
     <Compile Include="Gibbed.Dunia2.FileFormats\CRC64.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\FileExtensions.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\LZO.cs" />
-    <Compile Include="Gibbed.Dunia2.FileFormats\ProjectHelpers.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\StreamHelpers.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\SubFatFile.cs" />
     <Compile Include="Gibbed.Dunia2.FileFormats\Vector2.cs" />
@@ -135,9 +134,6 @@
     <Compile Include="Gibbed.IO\StreamHelpers\Strings\Internal.cs" />
     <Compile Include="Gibbed.IO\StreamHelpers\Strings\Supplied.cs" />
     <Compile Include="Gibbed.IO\StreamHelpers\Structure.cs" />
-    <Compile Include="Gibbed.ProjectData\HashList.cs" />
-    <Compile Include="Gibbed.ProjectData\Manager.cs" />
-    <Compile Include="Gibbed.ProjectData\Project.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFile.cs" />
     <Compile Include="LZ4Sharp\ILZ4Compressor.cs" />
