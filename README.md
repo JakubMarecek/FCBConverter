@@ -16,6 +16,7 @@ FCBConverter can compress FCB files. Big files took longer time to convert with 
 * move.bin
 * combinedmovefile.bin
 * cseq
+* feu
 
 
 ## Usage
