@@ -46,7 +46,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200406-1800";
+        public static string version = "20200417-2300";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
