@@ -128,17 +128,22 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                     foreach (var kv in node.Fields)
                     {
-                        writer.WriteStartElement("field");
-                        writer.WriteAttributeString("hash", kv.Key.ToString("X8"));
-
                         string prefix = "value-";
 
                         string name = "";
                         if (FCBConverter.Program.strings.ContainsKey(kv.Key))
                         {
                             name = FCBConverter.Program.strings[kv.Key];
-                            writer.WriteAttributeString("name", name);
                         }
+
+                        if (name == "CNH_UncompressedSize")
+                            writer.WriteComment("Do not edit CNH_UncompressedSize and CNH_CompressedSize, they will be changed during converting back to FCB.");
+
+                        writer.WriteStartElement("field");
+                        writer.WriteAttributeString("hash", kv.Key.ToString("X8"));
+
+                        if (name != "")
+                            writer.WriteAttributeString("name", name);
 
                         string str = Encoding.ASCII.GetString(kv.Value, 0, kv.Value.Length - 1);
                         //str = Regex.Replace(str, @"\p{C}+", string.Empty);
@@ -166,16 +171,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else if (name == "ResIds")
                         {
-                            var resIds = Helpers.UnpackArray(kv.Value, 8);
-
-                            foreach (byte[] fileNameBytes in resIds)
-                            {
-                                ulong fileName = BitConverter.ToUInt64(fileNameBytes, 0);
-
-                                writer.WriteStartElement("ResId");
-                                writer.WriteAttributeString("ID", Program.m_HashList.ContainsKey(fileName) ? Program.m_HashList[fileName] : "__Unknown\\" + fileName.ToString("X16"));
-                                writer.WriteEndElement();
-                            }
+                            ReadListFiles(kv.Value, writer, "ResId");
+                        }
+                        else if (name == "ArchetypeResDepList")
+                        {
+                            ReadListFiles(node.Fields[CRC32.Hash("ArchetypeResDepList")], writer, "Resource");
                         }
                         else if (name == "hidDescriptor")
                         {
@@ -198,17 +198,39 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
                             }
                         }
-                        else if (name == "CNH_CompressedData")
+                        else if (name == "CNH_CompressedData" || name == "buffer")
                         {
                             BinaryReader binaryReader = new BinaryReader(new MemoryStream(kv.Value));
-                            uint len = binaryReader.ReadUInt32();
-                            byte[] compressed = binaryReader.ReadBytes((int)len);
+                            int len = kv.Value.Length;
+
+                            if (name != "buffer")
+                                len = binaryReader.ReadInt32();
+                            
+                            byte[] bytes = binaryReader.ReadBytes(len);
                             binaryReader.Close();
 
-                            byte[] decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
+                            if (name != "buffer")
+                                bytes = new LZ4Sharp.LZ4Decompressor64().Decompress(bytes);
 
+                            File.WriteAllBytes(Program.m_Path + "\\tmp", bytes);
+                            Program.ConvertFCB(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
 
-                            File.WriteAllBytes("a", decompressed);
+                            XmlReaderSettings settings = new XmlReaderSettings
+                            {
+                                IgnoreComments = true,
+                                //IgnoreWhitespace = false,
+                                IgnoreWhitespace = true,
+                                IgnoreProcessingInstructions = true
+                            };
+                            XmlReader xmlReader = XmlReader.Create(Program.m_Path + "\\tmpc", settings);
+                            xmlReader.MoveToContent();
+                            writer.WriteStartElement(name);
+                            writer.WriteNode(xmlReader, false);
+                            writer.WriteEndElement();
+                            xmlReader.Close();
+
+                            File.Delete(Program.m_Path + "\\tmp");
+                            File.Delete(Program.m_Path + "\\tmpc");
                         }
                         // *****************************************************************************************************************
                         // list values
@@ -388,7 +410,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // other binhex
                         // *****************************************************************************************************************
-                        else if (!name.Contains("offsetsArray") && !name.Contains("hashesArray") && !name.Contains("sizes") && !name.Contains("rootNodeIds") && !name.Contains("resourcePathIds"))
+                        else if (!name.Contains("offsetsArray") && !name.Contains("hashesArray") && !name.Contains("sizes") && !name.Contains("rootNodeIds") && !name.Contains("resourcePathIds") && !name.Contains("hidIndices") && !name.Contains("hidVertices") && !name.Contains("SectorData") && !name.Contains("ZoneData") && !name.Contains("positions") && !name.Contains("radianceTransferProbes"))
                         {
                             str = Regex.Replace(str, @"\p{C}+", string.Empty).Replace("?", "");
                             if (str != "")
@@ -396,7 +418,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         }
 
-                        if (name != "data" && name != "ResIds" && name != "hidDescriptor")
+                        if (name != "data" && name != "ResIds" && name != "ArchetypeResDepList" && name != "CNH_CompressedData" && name != "buffer" && name != "hidDescriptor")
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
@@ -433,6 +455,20 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             }*/
 
             writer.WriteEndElement();
+        }
+
+        private static void ReadListFiles(byte[] bytes, XmlWriter xmlWriter, string nodeName)
+        {
+            var resIds = Helpers.UnpackArray(bytes, 8);
+
+            foreach (byte[] fileNameBytes in resIds)
+            {
+                ulong fileName = BitConverter.ToUInt64(fileNameBytes, 0);
+
+                xmlWriter.WriteStartElement(nodeName);
+                xmlWriter.WriteAttributeString("ID", Program.m_HashList.ContainsKey(fileName) ? Program.m_HashList[fileName] : "__Unknown\\" + fileName.ToString("X16"));
+                xmlWriter.WriteEndElement();
+            }
         }
     }
 }

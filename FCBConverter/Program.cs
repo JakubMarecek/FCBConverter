@@ -32,7 +32,7 @@ namespace FCBConverter
 {
     class Program
     {
-        static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         static string m_File = @"\FCBConverterFileNames.list";
         public static Dictionary<ulong, string> m_HashList = new Dictionary<ulong, string>();
@@ -46,7 +46,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200417-2300";
+        public static string version = "20200428-1840";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -277,6 +277,11 @@ namespace FCBConverter
                 isCompressEnabled = false;
             }
 
+            if (file.Contains("worldsector"))
+            {
+                isCompressEnabled = false;
+            }
+
             // ********************************************************************************************************************************************
 
             if (file.EndsWith(".feu"))
@@ -311,14 +316,14 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
-            if (file.EndsWith(".cseq"))
+            if (file.EndsWith(".cseq") || file.EndsWith(".gosm.xml") || file.EndsWith(".rml"))
             {
                 string workingOriginalFile;
 
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
                 var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
                 using (var input = File.OpenRead(file))
@@ -343,7 +348,7 @@ namespace FCBConverter
                 FIN();
             }
 
-            if (file.EndsWith(".cseq.converted.xml"))
+            if (file.EndsWith(".cseq.converted.xml") || file.EndsWith(".gosm.xml.converted.xml") || file.EndsWith(".rml.converted.xml"))
             {
                 string workingOriginalFile;
 
@@ -498,7 +503,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
 
                 OasisstringsCompressedFile rez = new OasisstringsCompressedFile();
@@ -533,7 +538,7 @@ namespace FCBConverter
                 {
                     workingOriginalFile = file.Replace(".converted.xml", "");
                     string extension = Path.GetExtension(workingOriginalFile);
-                    workingOriginalFile = Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
                 }
 
                 var rez = new OasisstringsCompressedFile();
@@ -677,7 +682,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
                 if (file.EndsWith(".material.bin"))
                 {
@@ -776,7 +781,7 @@ namespace FCBConverter
             Console.WriteLine("");
         }
 
-        static void ConvertFCB(string inputPath, string outputPath)
+        public static void ConvertFCB(string inputPath, string outputPath)
         {
             var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
             var input = File.OpenRead(inputPath);
@@ -786,7 +791,7 @@ namespace FCBConverter
             Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(outputPath, bof);
         }
 
-        static void ConvertXML(string inputPath, string outputPath)
+        public static void ConvertXML(string inputPath, string outputPath)
         {
             var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
 
