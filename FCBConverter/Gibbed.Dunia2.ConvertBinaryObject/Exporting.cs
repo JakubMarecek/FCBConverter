@@ -242,15 +242,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }*/
 
                         // *****************************************************************************************************************
-                        // specific hash strings
-                        // *****************************************************************************************************************
-                        else if (name == "name")
-                        {
-                            uint result = uint.Parse(binaryHexRev, System.Globalization.NumberStyles.HexNumber);
-                            if (FCBConverter.Program.strings.ContainsKey(result))
-                                writer.WriteAttributeString(prefix + "ComputeHash32", FCBConverter.Program.strings[result]);
-                        }
-                        // *****************************************************************************************************************
                         // hash32
                         // *****************************************************************************************************************
                         else if (isHash32)
