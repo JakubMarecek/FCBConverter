@@ -46,7 +46,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200428-1840";
+        public static string version = "20200507-1950";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -63,6 +63,8 @@ namespace FCBConverter
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
+
+        //public static List<string> aaaa = new List<string>();
 
         static void Main(string[] args)
         {
@@ -675,7 +677,7 @@ namespace FCBConverter
 
                 FIN();
             }
-            else if (file.EndsWith(".fcb") || file.EndsWith(".ndb") || file.EndsWith(".bin") || file.EndsWith(".bwsk") || file.EndsWith(".part"))
+            else if (file.EndsWith(".fcb") || file.EndsWith(".ndb") || file.EndsWith(".bin") || file.EndsWith(".bwsk") || file.EndsWith(".part") || file.EndsWith(".dsc") || file.EndsWith(".skeleton"))
             {
                 string workingOriginalFile;
 
@@ -714,6 +716,7 @@ namespace FCBConverter
 
         static void FIN()
         {
+            //File.WriteAllLines("a.txt", aaaa);
             Console.WriteLine("FIN");
             Environment.Exit(0);
         }
