@@ -44,6 +44,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.XPath;
+using FCBConverter;
 using Gibbed.Dunia2.BinaryObjectInfo;
 using Gibbed.Dunia2.BinaryObjectInfo.Definitions;
 using Gibbed.Dunia2.FileFormats;
@@ -98,17 +99,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
                 else if (fieldName == "ResIds")
                 {
-                    List<byte[]> resIdsBytes = new List<byte[]>();
-
-                    var resIds = fields.Current.Select("ResId");
-                    while (resIds.MoveNext() == true)
-                    {
-                        resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""))));
-                    }
-
-                    resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
-
-                    node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
+                    WriteListFiles(fields, node, fieldNameHash, "ResId");
+                }
+                else if (fieldName == "ArchetypeResDepList")
+                {
+                    WriteListFiles(fields, node, fieldNameHash, "Resource");
                 }
                 else if (fieldName == "hidDescriptor")
                 {
@@ -124,6 +119,46 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
                         node.Fields.Add(fieldNameHash, bytes);
                     }
+                }
+                else if (fieldName == "CNH_CompressedData")
+                {
+                    string CNH_CompressedData = fields.Current.SelectSingleNode("CNH_CompressedData").InnerXml;
+                    File.WriteAllText(Program.m_Path + "\\tmp", CNH_CompressedData);
+                    Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+
+                    byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
+                    byte[] compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+
+                    List<byte[]> output = new List<byte[]>
+                    {
+                        compressedBytes
+                    };
+
+                    output.Insert(0, BitConverter.GetBytes(compressedBytes.Length));
+
+                    node.Fields.Add(fieldNameHash, output.SelectMany(output => output).ToArray());
+
+                    node.Fields.Add(CRC32.Hash("CNH_UncompressedSize"), BitConverter.GetBytes(bytes.Length));
+                    node.Fields.Add(CRC32.Hash("CNH_CompressedSize"), BitConverter.GetBytes(compressedBytes.Length));
+
+                    File.Delete(Program.m_Path + "\\tmp");
+                    File.Delete(Program.m_Path + "\\tmpc");
+                }
+                else if (fieldName == "CNH_UncompressedSize" || fieldName == "CNH_CompressedSize")
+                {
+                    // do nothing
+                }
+                else if (fieldName == "buffer")
+                {
+                    string buffer = fields.Current.SelectSingleNode("buffer").InnerXml;
+                    File.WriteAllText(Program.m_Path + "\\tmp", buffer);
+                    Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+
+                    byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
+                    node.Fields.Add(fieldNameHash, bytes);
+
+                    File.Delete(Program.m_Path + "\\tmp");
+                    File.Delete(Program.m_Path + "\\tmpc");
                 }
                 else
                 {
@@ -156,7 +191,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 FCBConverter.CombinedMoveFile.PerMoveResourceInfo.Serialize(node);
             }
 
-
+            
 
             var children = nav.Select("object");
             while (children.MoveNext() == true)
@@ -269,6 +304,21 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             name = string.IsNullOrWhiteSpace(nameAttribute) == false ? nameAttribute : null;
             hash = name != null ? CRC32.Hash(name) : uint.Parse(hashAttribute, NumberStyles.AllowHexSpecifier);
+        }
+
+        private static void WriteListFiles(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash, string nodeName)
+        {
+            List<byte[]> resIdsBytes = new List<byte[]>();
+
+            var resIds = fields.Current.Select(nodeName);
+            while (resIds.MoveNext() == true)
+            {
+                resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""))));
+            }
+
+            resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
+
+            node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
         }
     }
 }
