@@ -148,9 +148,11 @@ namespace Gibbed.Dunia2.ConvertXml
         */
         public static XmlResourceFile.Node ReadNode(XPathNavigator nav)
         {
+            bool mustStartWithNumber = nav.Name[0] == '_';
+
             var node = new XmlResourceFile.Node
             {
-                Name = nav.Name
+                Name = mustStartWithNumber ? nav.Name.Remove(0, 1) : nav.Name
             };
 
             if (nav.MoveToFirstAttribute() == true)
@@ -194,7 +196,8 @@ namespace Gibbed.Dunia2.ConvertXml
 
         public static void WriteNode(XmlWriter writer, XmlResourceFile.Node node)
         {
-            writer.WriteStartElement(node.Name);
+            bool startWithNumber = char.IsNumber(node.Name[0]);
+            writer.WriteStartElement((startWithNumber ? "_" : "") + node.Name);
 
             foreach (var attribute in node.Attributes)
             {
