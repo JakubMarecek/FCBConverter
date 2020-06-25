@@ -177,6 +177,28 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         {
                             ReadListFiles(node.Fields[CRC32.Hash("ArchetypeResDepList")], writer, "Resource");
                         }
+                        else if (name == "hidShapePoints")
+                        {
+                            byte[] trimmed = kv.Value.Skip(4).ToArray();
+                            List<byte[]> unpA = Helpers.UnpackArraySize(trimmed, 12);
+
+                            foreach (byte[] pnt in unpA)
+                            {
+                                byte[] vecX = pnt.Skip(0).Take(4).ToArray();
+                                byte[] vecY = pnt.Skip(4).Take(4).ToArray();
+                                byte[] vecZ = pnt.Skip(8).Take(4).ToArray();
+
+                                float vecfX = BitConverter.ToSingle(vecX, 0);
+                                float vecfY = BitConverter.ToSingle(vecY, 0);
+                                float vecfZ = BitConverter.ToSingle(vecZ, 0);
+
+                                writer.WriteStartElement("Point");
+                                writer.WriteString(vecfX.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                                    vecfY.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+                                    vecfZ.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                writer.WriteEndElement();
+                            }
+                        }
                         else if (name == "hidDescriptor")
                         {
                             try
@@ -287,7 +309,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // int32
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 8 && (binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId")
+                        else if (binaryHex.Length == 8 && (binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId" || name == "Id")
                         {
                             int v = Int32.Parse(binaryHexRev, NumberStyles.HexNumber);
                             writer.WriteAttributeString(prefix + "Int32", v.ToString());
@@ -420,7 +442,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         }
 
-                        if (name != "data" && name != "ResIds" && name != "ArchetypeResDepList" && name != "CNH_CompressedData" && name != "buffer" && name != "hidDescriptor")
+                        if (name != "data" && name != "ResIds" && name != "ArchetypeResDepList" && name != "CNH_CompressedData" && name != "buffer" && name != "hidDescriptor" && name != "hidShapePoints")
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);

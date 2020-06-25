@@ -105,6 +105,21 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     WriteListFiles(fields, node, fieldNameHash, "Resource");
                 }
+                else if (fieldName == "hidShapePoints")
+                {
+                    List<byte[]> resIdsBytes = new List<byte[]>();
+
+                    var resIds = fields.Current.Select("Point");
+                    while (resIds.MoveNext() == true)
+                    {
+                        var data = FieldTypeSerializers.Serialize(FieldType.Vector3, FieldType.Invalid, resIds.Current);
+                        resIdsBytes.Add(data);
+                    }
+
+                    resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
+
+                    node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
+                }
                 else if (fieldName == "hidDescriptor")
                 {
                     string legacy = fields.Current.GetAttribute("legacy", "");
