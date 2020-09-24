@@ -334,9 +334,9 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // hash64 id64
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 16 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{16}$", RegexOptions.Compiled) && binaryHex != "0000000000000000" && binaryHex != "ffffffffffffffff" && !name.StartsWith("vec") && !name.ContainsCI("value") && !name.StartsWith("text_"))
+                        else if ((binaryHex.Length == 16 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{16}$", RegexOptions.Compiled) && binaryHex != "0000000000000000" && binaryHex != "ffffffffffffffff" && !name.StartsWith("vec") && !name.ContainsCI("value") && !name.StartsWith("text_")) || name == "hash")
                         {
-                            if (binaryHex.GetLast(2) != "00" && !name.ContainsCI("layerid") && !name.StartsWithType("ent") && name != "GameElementId" && !name.EndsWith("Id"))
+                            if ((binaryHex.GetLast(2) != "00" && !name.ContainsCI("layerid") && !name.StartsWithType("ent") && name != "GameElementId" && !name.EndsWith("Id")) || name == "hash")
                             {
                                 writer.WriteAttributeString(prefix + "Hash64", binaryHexRev);
                             }
