@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -46,7 +47,7 @@ namespace FCBConverter
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20200924-0045";
+        public static string version = "20201108-1800";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -312,6 +313,22 @@ namespace FCBConverter
                 string newPath = file.Replace(".swf", ".feu");
 
                 File.WriteAllBytes(newPath, bytes);
+
+                FIN();
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".terrainnode.bdl"))
+            {
+                TerrainNodeBdl(file);
+
+                FIN();
+            }
+
+            if (file.EndsWith(".terrainnode.bdl.converted.xml"))
+            {
+                TerrainNodeXml(file);
 
                 FIN();
             }
@@ -1664,6 +1681,208 @@ namespace FCBConverter
 
             File.Delete(tmp);
             File.Delete(tmp + "c");
+
+            output.Close();
+        }
+
+        static void TerrainNodeBdl(string file)
+        {
+            FileStream TerrainNodeStream = new FileStream(file, FileMode.Open);
+            BinaryReader TerrainNodeReader = new BinaryReader(TerrainNodeStream);
+
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = false,
+                OmitXmlDeclaration = false
+            };
+            var writer = XmlWriter.Create(file + ".converted.xml", settings);
+
+            writer.WriteStartDocument();
+            writer.WriteComment(xmlheader);
+            writer.WriteStartElement("TerrainNodeBundle");
+
+            uint version = TerrainNodeReader.ReadUInt32();
+            uint filesCount = TerrainNodeReader.ReadUInt32();
+
+            writer.WriteAttributeString("Version", version.ToString());
+
+            for (int i = 0; i < filesCount; i++)
+            {
+                ulong pathHash = TerrainNodeReader.ReadUInt64();
+                uint pathLen = TerrainNodeReader.ReadUInt32();
+                uint typeHash = TerrainNodeReader.ReadUInt32();
+                uint typeLen = TerrainNodeReader.ReadUInt32();
+                short unk1 = TerrainNodeReader.ReadInt16();
+                short unk2 = TerrainNodeReader.ReadInt16();
+                uint dataLen = TerrainNodeReader.ReadUInt32();
+
+                int unk3 = TerrainNodeReader.ReadInt32();
+                uint subFilesCount = TerrainNodeReader.ReadUInt32();
+                uint subFilesLen = TerrainNodeReader.ReadUInt32();
+
+                string path = new string(TerrainNodeReader.ReadChars((int)pathLen));
+                string type = new string(TerrainNodeReader.ReadChars((int)typeLen));
+
+                path = path.Remove(path.Length - 1);
+                type = type.Remove(type.Length - 1);
+
+                writer.WriteStartElement("File");
+                //writer.WriteAttributeString("PathHash", m_HashList.ContainsKey(pathHash) ? m_HashList[pathHash] : "__Unknown\\" + pathHash.ToString("X16"));
+                //writer.WriteAttributeString("TypeHash", strings[typeHash]);
+                writer.WriteAttributeString("Unknown1", unk1.ToString());
+                writer.WriteAttributeString("Unknown2", unk2.ToString());
+                writer.WriteAttributeString("Unknown3", unk3.ToString());
+                writer.WriteAttributeString("Path", path);
+                writer.WriteAttributeString("Type", type);
+
+                for (int j = 0; j < subFilesCount; j++)
+                {
+                    ulong subPathHash = TerrainNodeReader.ReadUInt64();
+                    uint subPathLen = TerrainNodeReader.ReadUInt32();
+                    uint subTypeHash = TerrainNodeReader.ReadUInt32();
+                    uint subTypeLen = TerrainNodeReader.ReadUInt32();
+
+                    int subUnk = TerrainNodeReader.ReadInt32();
+
+                    string subPath = new string(TerrainNodeReader.ReadChars((int)subPathLen));
+                    string subType = new string(TerrainNodeReader.ReadChars((int)subTypeLen));
+
+                    subPath = subPath.Remove(subPath.Length - 1);
+                    subType = subType.Remove(subType.Length - 1);
+
+                    writer.WriteStartElement("SubFile");
+                    writer.WriteAttributeString("Unknown", subUnk.ToString());
+                    writer.WriteAttributeString("Path", subPath);
+                    writer.WriteAttributeString("Type", subType);
+                    writer.WriteEndElement();
+                }
+
+                byte[] data = TerrainNodeReader.ReadBytes((int)dataLen);
+
+                // write to file
+                string workingDir = Directory.GetParent(file).FullName;
+                string folderName = Directory.GetParent(path).Name;
+                string fileName = Path.GetFileName(path);
+
+                Directory.CreateDirectory(workingDir + "\\" + folderName);
+                File.WriteAllBytes(workingDir + "\\" + folderName + "\\" + fileName, data);
+
+                writer.WriteEndElement();
+            }
+
+            TerrainNodeReader.Dispose();
+            TerrainNodeStream.Dispose();
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+
+            writer.Flush();
+            writer.Close();
+        }
+
+        static void TerrainNodeXml(string file)
+        {
+            string newName = file.Replace(".terrainnode.bdl.converted.xml", "_new.terrainnode.bdl");
+
+            var output = File.Create(newName);
+
+            var doc = new XPathDocument(file);
+            var nav = doc.CreateNavigator();
+
+            var root = nav.SelectSingleNode("/TerrainNodeBundle");
+            XPathNodeIterator files = root.SelectChildren("File", "");
+
+            uint version = uint.Parse(root.GetAttribute("Version", ""));
+            uint filesCount = (uint)files.Count;
+
+            output.WriteValueU32(version);
+            output.WriteValueU32(filesCount);
+
+            while (files.MoveNext() == true)
+            {
+                XPathNavigator fileXml = files.Current;
+
+                XPathNodeIterator subFiles = fileXml.SelectChildren("SubFile", "");
+                byte[] subFilesBytes = new byte[] { };
+
+                if (subFiles.Count > 0)
+                {
+                    MemoryStream ms = new MemoryStream();
+
+                    while (subFiles.MoveNext() == true)
+                    {
+                        XPathNavigator subFileXml = subFiles.Current;
+
+                        string subPath = subFileXml.GetAttribute("Path", "");
+                        string subType = subFileXml.GetAttribute("Type", "");
+                        string subPathNull = subPath + char.MinValue;
+                        string subTypeNull = subType + char.MinValue;
+
+                        ulong subPathHash = Gibbed.Dunia2.FileFormats.CRC64.Hash(subPath);
+                        uint subPathLen = (uint)subPathNull.Length;
+                        uint subTypeHash = Gibbed.Dunia2.FileFormats.CRC32.Hash(subType);
+                        uint subTypeLen = (uint)subTypeNull.Length;
+
+                        int subUnk = int.Parse(subFileXml.GetAttribute("Unknown", ""));
+
+                        ms.WriteValueU64(subPathHash);
+                        ms.WriteValueU32(subPathLen);
+                        ms.WriteValueU32(subTypeHash);
+                        ms.WriteValueU32(subTypeLen);
+
+                        ms.WriteValueS32(subUnk);
+
+                        ms.WriteString(subPathNull, Encoding.Default);
+                        ms.WriteString(subTypeNull, Encoding.Default);
+                    }
+
+                    subFilesBytes = ms.ToArray();
+                }
+
+                string path = fileXml.GetAttribute("Path", "");
+                string type = fileXml.GetAttribute("Type", "");
+                string pathNull = path + char.MinValue;
+                string typeNull = type + char.MinValue;
+
+                string workingDir = Directory.GetParent(file).FullName;
+                string folderName = Directory.GetParent(path).Name;
+                string fileName = Path.GetFileName(path);
+
+                byte[] fileBytes = File.ReadAllBytes(workingDir + "\\" + folderName + "\\" + fileName);
+
+                ulong pathHash = Gibbed.Dunia2.FileFormats.CRC64.Hash(path);
+                uint pathLen = (uint)pathNull.Length;
+                uint typeHash = Gibbed.Dunia2.FileFormats.CRC32.Hash(type);
+                uint typeLen = (uint)typeNull.Length;
+                short unk1 = short.Parse(fileXml.GetAttribute("Unknown1", ""));
+                short unk2 = short.Parse(fileXml.GetAttribute("Unknown2", ""));
+                uint dataLen = (uint)fileBytes.Length;
+
+                int unk3 = int.Parse(fileXml.GetAttribute("Unknown3", ""));
+                uint subFilesCount = (uint)subFiles.Count;
+                uint subFilesLen = (uint)subFilesBytes.Length;
+
+                output.WriteValueU64(pathHash);
+                output.WriteValueU32(pathLen);
+                output.WriteValueU32(typeHash);
+                output.WriteValueU32(typeLen);
+                output.WriteValueS16(unk1);
+                output.WriteValueS16(unk2);
+                output.WriteValueU32(dataLen);
+
+                output.WriteValueS32(unk3);
+                output.WriteValueU32(subFilesCount);
+                output.WriteValueU32(subFilesLen);
+
+                output.WriteString(pathNull, Encoding.Default);
+                output.WriteString(typeNull, Encoding.Default);
+
+                output.WriteBytes(subFilesBytes);
+
+                output.WriteBytes(fileBytes);
+            }
 
             output.Close();
         }
