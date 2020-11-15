@@ -83,7 +83,25 @@ namespace FCBConverter
 
             if (args.Length < 1)
             {
-                Console.WriteLine("Converts FCB to XML and vice versa. It also converts oasis bin files.");
+                Console.WriteLine("Converts many Far Cry formats to XML and vice versa.");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<Batch files converting>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <folder> <search pattern>");
+                Console.WriteLine("    folder - path for folder");
+                Console.WriteLine("    search pattern - *.fcb for example convert all FCB files");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\file.fcb");
+                Console.WriteLine("    FCBConverter D:\\file.fcb.converted.xml");
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.fcb, *.ndb files>>>");
@@ -282,17 +300,40 @@ namespace FCBConverter
                 return;
             }
 
-            string file = args[0];
-            string outputFile = args.Length > 1 ? args[1] : "";
-
-            Console.Title = "FCBConverter - " + file;
-
             if (File.Exists(m_Path + nocompressFile))
             {
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");
                 isCompressEnabled = false;
             }
+
+            string file = args[0];
+            string outputFile = args.Length > 1 ? args[1] : "";
+
+            if (File.Exists(file))
+            {
+                Proccessing(file, outputFile);
+            }
+            else if (Directory.Exists(file))
+            {
+                DirectoryInfo d = new DirectoryInfo(file);
+                FileInfo[] files = d.GetFiles(outputFile);
+                foreach (FileInfo fileInfo in files)
+                {
+                    Console.WriteLine("Processing: " + fileInfo.FullName + "...");
+                    Proccessing(fileInfo.FullName, "");
+                }
+                Console.WriteLine("Job done!");
+            }
+            else
+            {
+                Console.WriteLine("Input file / directory doesn't exist!");
+            }
+        }
+
+        static void Proccessing(string file, string outputFile)
+        {
+            Console.Title = "FCBConverter - " + file;
 
             if (file.Contains("worldsector"))
             {
@@ -314,6 +355,7 @@ namespace FCBConverter
                 File.WriteAllBytes(newPath, bytes);
 
                 FIN();
+                return;
             }
 
             if (file.EndsWith(".swf"))
@@ -329,6 +371,7 @@ namespace FCBConverter
                 File.WriteAllBytes(newPath, bytes);
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -336,15 +379,15 @@ namespace FCBConverter
             if (file.EndsWith(".terrainnode.bdl"))
             {
                 TerrainNodeBdl(file);
-
                 FIN();
+                return;
             }
 
             if (file.EndsWith(".terrainnode.bdl.converted.xml"))
             {
                 TerrainNodeXml(file);
-
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -379,6 +422,7 @@ namespace FCBConverter
                 }
 
                 FIN();
+                return;
             }
 
             if (file.EndsWith(".cseq.converted.xml") || file.EndsWith(".gosm.xml.converted.xml") || file.EndsWith(".rml.converted.xml"))
@@ -414,6 +458,7 @@ namespace FCBConverter
                 }
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -442,6 +487,7 @@ namespace FCBConverter
                 File.WriteAllBytes(newPathTex, tex);
 
                 FIN();
+                return;
             }
 
             if (file.EndsWith(".dds"))
@@ -496,6 +542,7 @@ namespace FCBConverter
                 File.WriteAllBytes(xbtPath, bts.ToArray());
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -523,6 +570,7 @@ namespace FCBConverter
                 bin.Close();
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -557,6 +605,7 @@ namespace FCBConverter
                 }
 
                 FIN();
+                return;
             }
 
             if (file.EndsWith(".oasis.bin.converted.xml"))
@@ -589,6 +638,7 @@ namespace FCBConverter
                 rez.Serialize(output, Path.GetFileName(file).EndsWith("_nd.oasis.bin.converted.xml"));
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -597,11 +647,13 @@ namespace FCBConverter
             {
                 SoundInfoConvertXml(file);
                 FIN();
+                return;
             }
             else if (file.EndsWith("soundinfo.bin"))
             {
                 SoundInfoConvertBin(file);
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -614,11 +666,13 @@ namespace FCBConverter
             {
                 MarkupConvertXml(file);
                 FIN();
+                return;
             }
             else if (file.EndsWith(".markup.bin"))
             {
                 MarkupConvertBin(file);
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -627,11 +681,13 @@ namespace FCBConverter
             {
                 MoveConvertXml(file);
                 FIN();
+                return;
             }
             else if (file.EndsWith(".move.bin"))
             {
                 MoveConvertBin(file);
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -642,12 +698,14 @@ namespace FCBConverter
                 isCompressEnabled = false;
                 CombinedMoveFileConvertXml(file);
                 FIN();
+                return;
             }
             else if (file.EndsWith("combinedmovefile.bin"))
             {
                 isCombinedMoveFile = true;
                 CombinedMoveFileConvertBin(file);
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -660,11 +718,13 @@ namespace FCBConverter
             {
                 DeploadConvertXml(file);
                 FIN();
+                return;
             }
             else if (file.EndsWith("_depload.dat"))
             {
                 DeploadConvertDat(file);
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -705,6 +765,7 @@ namespace FCBConverter
                 }
 
                 FIN();
+                return;
             }
             else if (file.EndsWith(".fcb") || file.EndsWith(".ndb") || file.EndsWith(".bin") || file.EndsWith(".bwsk") || file.EndsWith(".part") || file.EndsWith(".dsc") || file.EndsWith(".skeleton"))
             {
@@ -736,6 +797,7 @@ namespace FCBConverter
                     ConvertFCB(file, workingOriginalFile);
 
                 FIN();
+                return;
             }
 
             // ********************************************************************************************************************************************
@@ -747,7 +809,7 @@ namespace FCBConverter
         {
             //File.WriteAllLines("a.txt", aaaa);
             Console.WriteLine("FIN");
-            Environment.Exit(0);
+            //Environment.Exit(0);
         }
 
         public static int IndexOf(byte[] arrayToSearchThrough, byte[] patternToFind)
@@ -793,7 +855,6 @@ namespace FCBConverter
             }
 
             Console.WriteLine("Files loaded: " + m_HashList.Count);
-            Console.WriteLine("");
         }
 
         static void LoadString()
@@ -816,7 +877,6 @@ namespace FCBConverter
             }
 
             Console.WriteLine("Strings loaded: " + strings.Count);
-            Console.WriteLine("");
         }
 
         public static void ConvertFCB(string inputPath, string outputPath)
