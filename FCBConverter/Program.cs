@@ -264,6 +264,20 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\ui.feu");
                 Console.WriteLine("    FCBConverter D:\\ui.swf");
                 Console.WriteLine("");
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<For *.bdl files>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <m_File>");
+                Console.WriteLine("    m_File - *.bdl file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\0003_0005_0000_0000.terrainnode.bdl");
+                Console.WriteLine("");
                 Console.ResetColor();
                 return;
             }
@@ -406,8 +420,6 @@ namespace FCBConverter
 
             if (file.EndsWith(".xbt") || file.EndsWith(".xbts"))
             {
-                List<byte> bts = new List<byte>();
-
                 byte[] bytes = File.ReadAllBytes(file);
 
                 int pos = IndexOf(bytes, new byte[] { 68, 68, 83 }); // DDS
@@ -763,6 +775,9 @@ namespace FCBConverter
 
         static void LoadFile()
         {
+            if (m_HashList.Count() > 0)
+                return;
+
             if (!File.Exists(m_Path + m_File))
             {
                 Console.WriteLine(m_Path + m_File + " doesn't exist!");
@@ -783,6 +798,9 @@ namespace FCBConverter
 
         static void LoadString()
         {
+            if (strings.Count() > 0)
+                return;
+
             if (!File.Exists(m_Path + stringsFile))
             {
                 Console.WriteLine(m_Path + stringsFile + " doesn't exist!");
