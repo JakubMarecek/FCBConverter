@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20201115-2315";
+        public static string version = "20201116-0015";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -116,7 +116,7 @@ namespace FCBConverter
                 Console.WriteLine("[Usage]");
                 Console.WriteLine("    FCBConverter <fat file> <output dir>");
                 Console.WriteLine("    fat file - path to fat file");
-                Console.WriteLine("    output dir - output folder path, files will extracted to this newly created folder");
+                Console.WriteLine("    output dir (optional) - output folder path, files will extracted to this newly created folder");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -2061,6 +2061,11 @@ namespace FCBConverter
             {
                 Console.WriteLine("[ERROR]: Input file does not exist!");
                 return;
+            }
+
+            if (m_DstFolder == "")
+            {
+                m_DstFolder = Path.GetDirectoryName(m_FatFile) + @"\" + Path.GetFileNameWithoutExtension(m_FatFile) + "_unpacked";
             }
 
             if (!Directory.Exists(m_DstFolder))
