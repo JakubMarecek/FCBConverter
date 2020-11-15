@@ -17,6 +17,7 @@
  */
 
 using Gibbed.IO;
+using LZ4Sharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -41,13 +42,17 @@ namespace FCBConverter
         static string stringsFile = @"\FCBConverterStrings.list";
         public static Dictionary<uint, string> strings = new Dictionary<uint, string>();
 
-        static string nocompressFile = @"\FCBNoCompress.txt";
+        static string nocompressFile = @"\FCBConverterNoCompress.txt";
+
+        static string excludeFile = @"\FCBConverterCompressExclude.txt";
 
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
 
-        public static string version = "20201108-1800";
+        static string excludeFromCompress = "";
+
+        public static string version = "20201115-2315";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -85,6 +90,9 @@ namespace FCBConverter
             {
                 Console.WriteLine("Converts many Far Cry formats to XML and vice versa.");
                 Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<Batch files converting>>>");
                 Console.WriteLine("");
@@ -96,9 +104,56 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\file.fcb");
-                Console.WriteLine("    FCBConverter D:\\file.fcb.converted.xml");
+                Console.WriteLine("    FCBConverter D:\\fcb_files *.fcb");
                 Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<Unpacking DAT/FAT files>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <fat file> <output dir>");
+                Console.WriteLine("    fat file - path to fat file");
+                Console.WriteLine("    output dir - output folder path, files will extracted to this newly created folder");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\common.fat D:\\common_unpacked");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<Packing to DAT/FAT>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <input folder> <fat file>");
+                Console.WriteLine("    input folder - input folder path with files");
+                Console.WriteLine("    fat file - path to the new fat file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\common_unpacked D:\\common.fat");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<Unpacking one file from DAT/FAT>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <fat file> <output dir> <desired file>");
+                Console.WriteLine("    fat file - path to fat file");
+                Console.WriteLine("    output dir - output folder path, file will extracted to this folder");
+                Console.WriteLine("    desired file - file path inside the FAT file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\common.fat D:\\ common.dbt.fcb");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -116,7 +171,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\file.fcb");
                 Console.WriteLine("    FCBConverter D:\\file.fcb.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.oasis.bin files>>>");
@@ -137,7 +193,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin");
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *_depload.dat files>>>");
@@ -154,7 +211,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\patch_depload.dat");
                 Console.WriteLine("    FCBConverter D:\\patch_depload.dat.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For soundinfo.bin files>>>");
@@ -171,7 +229,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\soundinfo.bin");
                 Console.WriteLine("    FCBConverter D:\\soundinfo.bin.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.lua to *.luac files>>>");
@@ -188,7 +247,8 @@ namespace FCBConverter
                 Console.WriteLine("[Examples]");
                 Console.WriteLine("    FCBConverter D:\\script.lua");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.xbt files>>>");
@@ -205,7 +265,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\texture.xbt");
                 Console.WriteLine("    FCBConverter D:\\texture.dds");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.material.bin files>>>");
@@ -222,7 +283,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\abc.material.bin");
                 Console.WriteLine("    FCBConverter D:\\abc.material.bin.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.move.bin files>>>");
@@ -237,7 +299,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\file.move.bin");
                 Console.WriteLine("    FCBConverter D:\\file.move.bin.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For combinedmovefile.bin file>>>");
@@ -252,7 +315,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin");
                 Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.cseq files>>>");
@@ -267,7 +331,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\sequence.cseq");
                 Console.WriteLine("    FCBConverter D:\\sequence.cseq.converted.xml");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.feu, *.swf files>>>");
@@ -282,7 +347,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\ui.feu");
                 Console.WriteLine("    FCBConverter D:\\ui.swf");
                 Console.WriteLine("");
-                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.bdl files>>>");
@@ -296,6 +362,8 @@ namespace FCBConverter
                 Console.WriteLine("[Examples]");
                 Console.WriteLine("    FCBConverter D:\\0003_0005_0000_0000.terrainnode.bdl");
                 Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.ResetColor();
                 return;
             }
@@ -309,8 +377,29 @@ namespace FCBConverter
 
             string file = args[0];
             string outputFile = args.Length > 1 ? args[1] : "";
+            excludeFromCompress = args.Length > 2 ? args[2] : "";
 
-            if (File.Exists(file))
+            Console.Title = "FCBConverter - " + file;
+
+            if (outputFile.EndsWith(".fat"))
+            {
+                LoadFile();
+                PackBigFile(file, outputFile);
+                FIN();
+            }
+            else if (file.EndsWith(".fat") && Directory.Exists(outputFile) && excludeFromCompress != "") // excludeFromCompress is used as file name
+            {
+                LoadFile();
+                UnpackBigFileOne(file, excludeFromCompress, outputFile);
+                FIN();
+            }
+            else if (file.EndsWith(".fat"))
+            {
+                LoadFile();
+                UnpackBigFile(file, outputFile);
+                FIN();
+            }
+            else if (File.Exists(file))
             {
                 Proccessing(file, outputFile);
             }
@@ -329,6 +418,7 @@ namespace FCBConverter
             {
                 Console.WriteLine("Input file / directory doesn't exist!");
             }
+            return;
         }
 
         static void Proccessing(string file, string outputFile)
@@ -1963,6 +2053,512 @@ namespace FCBConverter
             }
 
             output.Close();
+        }
+
+        static void UnpackBigFile(string m_FatFile, string m_DstFolder)
+        {
+            if (!File.Exists(m_FatFile))
+            {
+                Console.WriteLine("[ERROR]: Input file does not exist!");
+                return;
+            }
+
+            if (!Directory.Exists(m_DstFolder))
+            {
+                Directory.CreateDirectory(m_DstFolder);
+            }
+
+            string m_DatName = Path.GetDirectoryName(m_FatFile) + @"\" + Path.GetFileNameWithoutExtension(m_FatFile) + ".dat";
+
+            FileStream TFATStream = new FileStream(m_FatFile, FileMode.Open);
+            FileStream TDATStream = new FileStream(m_DatName, FileMode.Open);
+
+            BinaryReader TFATReader = new BinaryReader(TFATStream);
+            BinaryReader TDATReader = new BinaryReader(TDATStream);
+
+            int dwMagic = TFATReader.ReadInt32();
+            int dwVersion = TFATReader.ReadInt32();
+            int dwUnknown = TFATReader.ReadInt32();
+            int dwZero1 = TFATReader.ReadInt32();
+            int dwZero2 = TFATReader.ReadInt32();
+            int dwTotalFiles = TFATReader.ReadInt32();
+
+            if (dwMagic != 0x46415432)
+            {
+                Console.WriteLine("[ERROR]: Invalid FAT Index file!");
+                return;
+            }
+
+            if (dwVersion != 10)
+            {
+                Console.WriteLine("[ERROR]: Invalid version of FAT Index file!");
+                return;
+            }
+
+            for (int i = 0; i < dwTotalFiles; i++)
+            {
+                ulong dwHash = TFATReader.ReadUInt64();
+                uint dwUncompressedSize = TFATReader.ReadUInt32();
+                uint dwUnresolvedOffset = TFATReader.ReadUInt32();
+                uint dwCompressedSize = TFATReader.ReadUInt32();
+
+                uint dwFlag = dwUncompressedSize & 3;
+                ulong dwOffset = dwCompressedSize >> 29 | 8ul * dwUnresolvedOffset;
+                dwHash = (dwHash << 32) + (dwHash >> 32);
+                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
+                dwUncompressedSize = (dwUncompressedSize >> 2);
+
+                string m_Hash = dwHash.ToString("X16");
+                string m_FileName = null;
+                if (m_HashList.ContainsKey(dwHash))
+                {
+                    m_HashList.TryGetValue(dwHash, out m_FileName);
+                }
+                else
+                {
+                    m_FileName = @"__Unknown\" + m_Hash;
+                }
+
+                string m_FullPath = m_DstFolder + @"\" + m_FileName;
+
+                Console.WriteLine("[Unpacking]: {0}", m_FileName);
+
+                if (dwFlag == 0)
+                {
+                    TDATStream.Seek((long)dwOffset, SeekOrigin.Begin);
+
+                    byte[] pSrcBuffer = new byte[dwUncompressedSize];
+                    TDATStream.Read(pSrcBuffer, 0, (int)dwUncompressedSize);
+
+                    if (m_FullPath.Contains(@"__Unknown"))
+                    {
+                        uint dwID = BitConverter.ToUInt32(pSrcBuffer, 0);
+                        m_FullPath = UnpackBigFileFileType(m_FullPath, dwID);
+                    }
+                    else
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(m_FullPath)))
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(m_FullPath));
+                        }
+                    }
+
+                    FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
+                    TSaveStream.Write(pSrcBuffer, 0, pSrcBuffer.Length);
+                    TSaveStream.Close();
+
+                }
+                else if (dwFlag == 2)
+                {
+                    TDATStream.Seek((long)dwOffset, SeekOrigin.Begin);
+
+                    byte[] pSrcBuffer = new byte[dwCompressedSize];
+                    byte[] pDstBuffer = new byte[dwUncompressedSize];
+
+                    TDATStream.Read(pSrcBuffer, 0, (int)dwCompressedSize);
+
+                    LZ4Decompressor64 TLZ4Decompressor64 = new LZ4Decompressor64();
+                    TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);
+
+                    if (m_FullPath.Contains(@"__Unknown"))
+                    {
+                        uint dwID = BitConverter.ToUInt32(pDstBuffer, 0);
+                        m_FullPath = UnpackBigFileFileType(m_FullPath, dwID);
+                    }
+                    else
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(m_FullPath)))
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(m_FullPath));
+                        }
+                    }
+
+                    FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
+                    TSaveStream.Write(pSrcBuffer, 0, pSrcBuffer.Length);
+                    TSaveStream.Close();
+
+                }
+                else
+                {
+                    //https://www.youtube.com/watch?v=AXzEcwYs8Eo
+                }
+            }
+
+            TFATReader.Dispose();
+            TDATReader.Dispose();
+            TFATStream.Dispose();
+            TDATStream.Dispose();
+        }
+
+        static string UnpackBigFileFileType(string m_UnknownFileName, uint dwID)
+        {
+            string m_Directory = Path.GetDirectoryName(m_UnknownFileName);
+            string m_FileName = Path.GetFileName(m_UnknownFileName);
+
+            if (dwID == 0x004D4154) //TAM
+            {
+                m_UnknownFileName = m_Directory + @"\MAT\" + m_FileName + ".material.bin";
+            }
+            else
+            if (dwID == 0x474E5089) //PNG
+            {
+                m_UnknownFileName = m_Directory + @"\PNG\" + m_FileName + ".png";
+            }
+            else
+            if (dwID == 0x42444947) //GIDB
+            {
+                m_UnknownFileName = m_Directory + @"\GIDB\" + m_FileName + ".bin";
+            }
+            else
+            if (dwID == 0x4D4F4D41) //MOMA
+            {
+                m_UnknownFileName = m_Directory + @"\ANIM\" + m_FileName + ".bin";
+            }
+            else
+            if (dwID == 0x4D760040) //MOVE
+            {
+                m_UnknownFileName = m_Directory + @"\MOVE\" + m_FileName + ".move.bin";
+            }
+            else
+            if (dwID == 0x00534B4C) //SKL
+            {
+                m_UnknownFileName = m_Directory + @"\SKEL\" + m_FileName + ".skeleton";
+            }
+            else
+            if (dwID == 0x01194170 || dwID == 0x00194170) //pA
+            {
+                m_UnknownFileName = m_Directory + @"\DPAX\" + m_FileName + ".dpax";
+            }
+            else
+            if (dwID == 0x44484B42) //BKHD
+            {
+                m_UnknownFileName = m_Directory + @"\BNK\" + m_FileName + ".bnk";
+            }
+            else
+            if (dwID == 0x8464555) //UEF
+            {
+                m_UnknownFileName = m_Directory + @"\FEU\" + m_FileName + ".feu";
+            }
+            else
+            if (dwID == 0x46464952) //RIFF
+            {
+                m_UnknownFileName = m_Directory + @"\WEM\" + m_FileName + ".wem";
+            }
+            else
+            if (dwID == 0x4D455348) //HSEM
+            {
+                m_UnknownFileName = m_Directory + @"\XBG\" + m_FileName + ".xbg";
+            }
+            else
+            if (dwID == 0x00584254) //XBT
+            {
+                m_UnknownFileName = m_Directory + @"\XBT\" + m_FileName + ".xbt";
+            }
+            else
+            if (dwID == 0x4643626E || dwID == 0x00000004 || dwID == 0x00000023) //nbCF
+            {
+                m_UnknownFileName = m_Directory + @"\FCB\" + m_FileName + ".fcb";
+            }
+            else
+            if (dwID == 0x78647064) //dpdx
+            {
+                m_UnknownFileName = m_Directory + @"\DPDX\" + m_FileName + ".dpdx";
+            }
+            else
+            if (dwID == 0x4341554C) //LUAC
+            {
+                m_UnknownFileName = m_Directory + @"\LUA\" + m_FileName + ".lua";
+            }
+            else
+            if (dwID == 0x5161754C) //LuaQ
+            {
+                m_UnknownFileName = m_Directory + @"\LUA\" + m_FileName + ".lua";
+            }
+            else
+            if (dwID == 0x3CBFBBEF || dwID == 0x6D783F3C || dwID == 0x003CFEFF || dwID == 0x6172673C) //XML, //<graphics
+            {
+                m_UnknownFileName = m_Directory + @"\XML\" + m_FileName + ".xml";
+            }
+            else
+            if (dwID == 0x6E69423C) //<binary
+            {
+                m_UnknownFileName = m_Directory + @"\BINXML\" + m_FileName + ".xml";
+            }
+            else
+            if (dwID == 0x54425043) //CPBT
+            {
+                m_UnknownFileName = m_Directory + @"\CPBT\" + m_FileName + ".cpubt";
+            }
+            else
+            if (dwID == 0xE9001052) //SDAT
+            {
+                m_UnknownFileName = m_Directory + @"\SDAT\" + m_FileName + ".sdat";
+            }
+            else
+            if (dwID == 0x000000B0 || dwID == 0x000000B6) //MAB
+            {
+                m_UnknownFileName = m_Directory + @"\MAB\" + m_FileName + ".mab";
+            }
+            else
+            if (dwID == 0x01) //WSECBDL
+            {
+                m_UnknownFileName = m_Directory + @"\WSECBDL\" + m_FileName + ".wsecbdl";
+            }
+            else
+            if (dwID == 0x694B4942 || dwID == 0x6732424B) //BIKi //KB2g
+            {
+                m_UnknownFileName = m_Directory + @"\BIK\" + m_FileName + ".bik";
+            }
+            else
+            if (dwID == 0x00000032 || dwID == 0x00000036) //hkx
+            {
+                m_UnknownFileName = m_Directory + @"\HKX\" + m_FileName + ".hkx";
+            }
+
+            if (!Directory.Exists(Path.GetDirectoryName(m_UnknownFileName)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(m_UnknownFileName));
+            }
+
+            return m_UnknownFileName;
+        }
+
+        static void PackBigFile(string sourceDir, string outputFile)
+        {
+            if (sourceDir.EndsWith("\\"))
+            {
+                Console.WriteLine("Bad source dir name!");
+                Environment.Exit(0);
+            }
+            if (!outputFile.EndsWith(".fat"))
+            {
+                Console.WriteLine("Output filename is wrong!");
+                Environment.Exit(0);
+            }
+
+            List<string> notCompress = new List<string>();
+
+            string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (File.Exists(m_Path + excludeFile))
+            {
+                notCompress.AddRange(File.ReadAllLines(m_Path + excludeFile));
+                notCompress.RemoveAt(0);
+            }
+
+            if (excludeFromCompress != "")
+            {
+                string[] exts = excludeFromCompress.Split(',');
+                notCompress.AddRange(exts);
+            }
+
+            notCompress = notCompress.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
+
+            if (isCompressEnabled)
+                Console.WriteLine("Excluded extensions from compressing: " + String.Join(", ", notCompress.ToArray()));
+
+            string fatFile = outputFile;
+            string datFile = fatFile.Replace(".fat", ".dat");
+
+            string[] allFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+
+            SortedDictionary<ulong, FatEntry> Entries = new SortedDictionary<ulong, FatEntry>();
+
+            var outputDat = File.Open(datFile, FileMode.OpenOrCreate);
+            outputDat.SetLength(0);
+
+            foreach (string file in allFiles)
+            {
+                string fatFileName = file.Replace(sourceDir + "\\", "");
+                string extension = Path.GetExtension(fatFileName);
+
+                byte[] bytes = File.ReadAllBytes(file);
+
+                FatEntry entry = new FatEntry();
+
+                byte[] outputBytes;
+
+                if (isCompressEnabled && !notCompress.Contains(extension))
+                {
+                    outputBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+
+                    entry.CompressionScheme = CompressionScheme.Zlib;
+                }
+                else
+                {
+                    outputBytes = bytes;
+
+                    entry.CompressionScheme = CompressionScheme.None;
+                }
+
+                entry.NameHash = GetFileHash(fatFileName);
+                entry.UncompressedSize = (uint)bytes.Length;
+                entry.CompressedSize = (uint)outputBytes.Length;
+                entry.Offset = outputDat.Position;
+                Entries[entry.NameHash] = entry;
+
+                outputDat.Write(outputBytes, 0, outputBytes.Length);
+                outputDat.Seek(outputDat.Position.Align(16), SeekOrigin.Begin);
+
+                Console.WriteLine("[Packing]: " + fatFileName);
+            }
+
+            outputDat.Flush();
+            outputDat.Close();
+
+            var output = File.Create(fatFile);
+            output.WriteValueU32(0x46415432, 0);
+            output.WriteValueS32(10, 0);
+            var platform = ((uint)1) & 0xFF;
+            platform |= 0 << 8;
+            output.WriteValueU32(platform, 0);
+            output.WriteValueS32(0, 0);
+            output.WriteValueS32(0, 0);
+            output.WriteValueS32(Entries.Count, 0);
+
+            foreach (ulong entryE in Entries.Keys)
+            {
+                var fatEntry = Entries[entryE];
+
+                uint value = (uint)((ulong)((long)fatEntry.NameHash & -4294967296L) >> 32);
+                uint value2 = (uint)(fatEntry.NameHash & uint.MaxValue);
+                uint num = 0u;
+                num = (uint)((int)num | ((int)(fatEntry.UncompressedSize << 2) & -4));
+                num = (uint)((int)num | (int)((long)(int)fatEntry.CompressionScheme & 3L));
+                uint value3 = (uint)((fatEntry.Offset & 0x7FFFFFFF8) >> 3);
+                uint num2 = 0u;
+                num2 = (uint)((int)num2 | (int)((fatEntry.Offset & 7) << 29));
+                num2 |= (fatEntry.CompressedSize & 0x1FFFFFFF);
+                output.WriteValueU32(value, 0);
+                output.WriteValueU32(value2, 0);
+                output.WriteValueU32(num, 0);
+                output.WriteValueU32(value3, 0);
+                output.WriteValueU32(num2, 0);
+            }
+
+            output.WriteValueU32(0, 0);
+            output.WriteValueU32(0, 0);
+            output.Flush();
+            output.Close();
+        }
+
+        static void UnpackBigFileOne(string fatFile, string fileName, string outFile)
+        {
+            if (!File.Exists(fatFile))
+            {
+                Console.WriteLine("[ERROR]: Input file does not exist!");
+                return;
+            }
+
+            SortedDictionary<ulong, FatEntry> Entries = GetFatEntries(fatFile);
+
+            if (Entries == null)
+                return;
+
+            ulong hash = GetFileHash(fileName);
+
+            if (Entries.TryGetValue(hash, out FatEntry value))
+            {
+                using (FileStream fileStream = File.Open(fatFile.Replace(".fat", ".dat"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    fileStream.Seek(value.Offset, SeekOrigin.Begin);
+                    byte[] result = new byte[value.UncompressedSize];
+
+                    switch (value.CompressionScheme)
+                    {
+                        case CompressionScheme.None:
+                            new BinaryReader(fileStream).Read(result, 0, (int)value.UncompressedSize);
+                            Console.WriteLine("Getting file completed.");
+                            fileStream.Dispose();
+                            fileStream.Close();
+
+                            File.WriteAllBytes(outFile + "\\" + Path.GetFileName(fileName), result);
+                            return;
+                        case CompressionScheme.Zlib:
+                            BinaryReader binaryReader = new BinaryReader(fileStream);
+                            byte[] array = new byte[value.CompressedSize];
+                            binaryReader.Read(array, 0, (int)value.CompressedSize);
+                            new LZ4Sharp.LZ4Decompressor64().Decompress(array, result);
+
+                            Console.WriteLine("Getting file completed.");
+
+                            fileStream.Dispose();
+                            fileStream.Close();
+
+                            File.WriteAllBytes(outFile + "\\" + Path.GetFileName(fileName), result);
+
+                            return;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+
+            Console.WriteLine("File " + fileName + " was not found in " + fatFile);
+        }
+
+        static SortedDictionary<ulong, FatEntry> GetFatEntries(string fatFile)
+        {
+            SortedDictionary<ulong, FatEntry> Entries = new SortedDictionary<ulong, FatEntry>();
+
+            FileStream TFATStream = new FileStream(fatFile, FileMode.Open);
+            BinaryReader TFATReader = new BinaryReader(TFATStream);
+
+            int dwMagic = TFATReader.ReadInt32();
+            int dwVersion = TFATReader.ReadInt32();
+            int dwUnknown = TFATReader.ReadInt32();
+            int dwZero1 = TFATReader.ReadInt32();
+            int dwZero2 = TFATReader.ReadInt32();
+            int dwTotalFiles = TFATReader.ReadInt32();
+
+            if (dwMagic != 0x46415432)
+            {
+                Console.WriteLine("Invalid FAT Index file!");
+                TFATReader.Dispose();
+                TFATStream.Dispose();
+                TFATReader.Close();
+                TFATStream.Close();
+                return null;
+            }
+
+            if (dwVersion != 10)
+            {
+                Console.WriteLine("Invalid version of FAT Index file!");
+                TFATReader.Dispose();
+                TFATStream.Dispose();
+                TFATReader.Close();
+                TFATStream.Close();
+                return null;
+            }
+
+            for (int i = 0; i < dwTotalFiles; i++)
+            {
+                ulong dwHash = TFATReader.ReadUInt64();
+                uint dwUncompressedSize = TFATReader.ReadUInt32();
+                uint dwUnresolvedOffset = TFATReader.ReadUInt32();
+                uint dwCompressedSize = TFATReader.ReadUInt32();
+
+                uint dwFlag = dwUncompressedSize & 3;
+                ulong dwOffset = dwCompressedSize >> 29 | 8ul * dwUnresolvedOffset;
+                dwHash = (dwHash << 32) + (dwHash >> 32);
+                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
+                dwUncompressedSize = (dwUncompressedSize >> 2);
+
+                var entry = new FatEntry();
+                entry.NameHash = dwHash;
+                entry.UncompressedSize = dwUncompressedSize;
+                entry.Offset = (long)dwOffset;
+                entry.CompressedSize = dwCompressedSize;
+                entry.CompressionScheme = dwFlag == 0 ? CompressionScheme.None : CompressionScheme.Zlib;
+
+                Entries[entry.NameHash] = entry;
+            }
+
+            TFATReader.Dispose();
+            TFATStream.Dispose();
+            TFATReader.Close();
+            TFATStream.Close();
+
+            return Entries;
         }
     }
 }

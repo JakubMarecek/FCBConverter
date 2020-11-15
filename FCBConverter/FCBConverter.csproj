@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Depload.cs" />
+    <Compile Include="FatEntry.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\ConditionValueSource.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\ClassDefinition.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\EnumDefinition.cs" />
