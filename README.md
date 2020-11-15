@@ -2,7 +2,7 @@
 
 For converting most binary files in Far Cry 5 and New Dawn. Based on Gibbed's Dunia Tools.
 
-FCBConverter can compress FCB files. Big files took longer time to convert with enabled compression. If you want to disable compression, remove or rename file **FCBNoCompress.txt**
+FCBConverter can compress FCB files. Big files took longer time to convert with enabled compression. If you want to disable compression, remove or rename file **FCBConverterNoCompress.txt**
 
 ### Supported binary files
 * fcb, ndb
@@ -17,6 +17,8 @@ FCBConverter can compress FCB files. Big files took longer time to convert with 
 * combinedmovefile.bin
 * cseq
 * feu
+* bdl
+* fat
 
 
 ## Usage
@@ -24,6 +26,8 @@ FCBConverter can compress FCB files. Big files took longer time to convert with 
 ```
 FCBConverter D:\path\to\file.extension
 ```
+
+Some extensions require more specific params, please see FCBConverter output for more info.
 
 
 ## Authors
