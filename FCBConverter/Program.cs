@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20201116-0015";
+        public static string version = "20201129-1400";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -99,7 +99,7 @@ namespace FCBConverter
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
                 Console.WriteLine("    FCBConverter <folder> <search pattern>");
-                Console.WriteLine("    folder - path for folder");
+                Console.WriteLine("    folder - path for folder, use \\ to run it in the same directory where are you running the exe");
                 Console.WriteLine("    search pattern - *.fcb for example convert all FCB files");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -403,8 +403,11 @@ namespace FCBConverter
             {
                 Proccessing(file, outputFile);
             }
-            else if (Directory.Exists(file))
+            else if (Directory.Exists(file) || file == @"\")
             {
+                if (file == @"\")
+                    file = Directory.GetCurrentDirectory();
+
                 DirectoryInfo d = new DirectoryInfo(file);
                 FileInfo[] files = d.GetFiles(outputFile);
                 foreach (FileInfo fileInfo in files)
@@ -2179,7 +2182,7 @@ namespace FCBConverter
                     }
 
                     FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
-                    TSaveStream.Write(pSrcBuffer, 0, pSrcBuffer.Length);
+                    TSaveStream.Write(pDstBuffer, 0, pDstBuffer.Length);
                     TSaveStream.Close();
 
                 }
