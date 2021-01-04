@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20201129-1400";
+        public static string version = "20210105-0030";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -130,9 +130,10 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <input folder> <fat file>");
+                Console.WriteLine("    FCBConverter <input folder> <fat file> <FAT version>");
                 Console.WriteLine("    input folder - input folder path with files");
                 Console.WriteLine("    fat file - path to the new fat file");
+                Console.WriteLine("    FAT version - can be -v9 (FC4, FC3, FC3BD) or -v5 (FC2), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -192,6 +193,10 @@ namespace FCBConverter
                 Console.WriteLine("[Examples New Dawn]");
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin");
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin.converted.xml");
+                Console.WriteLine("");
+                Console.WriteLine("[Examples FC4]");
+                Console.WriteLine("    FCBConverter D:\\oasisstrings_compressed.bin");
+                Console.WriteLine("    FCBConverter D:\\oasisstrings_compressed.bin.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -383,19 +388,25 @@ namespace FCBConverter
 
             if (outputFile.EndsWith(".fat"))
             {
+                int ver = 10;
+
+                if (excludeFromCompress == "-v9")
+                    ver = 9;
+
+                if (excludeFromCompress == "-v5")
+                    ver = 5;
+
                 LoadFile();
-                PackBigFile(file, outputFile);
+                PackBigFile(file, outputFile, ver);
                 FIN();
             }
             else if (file.EndsWith(".fat") && Directory.Exists(outputFile) && excludeFromCompress != "") // excludeFromCompress is used as file name
             {
-                LoadFile();
-                UnpackBigFileOne(file, excludeFromCompress, outputFile);
+                UnpackBigFile(file, outputFile, excludeFromCompress);
                 FIN();
             }
             else if (file.EndsWith(".fat"))
             {
-                LoadFile();
                 UnpackBigFile(file, outputFile);
                 FIN();
             }
@@ -734,6 +745,71 @@ namespace FCBConverter
                 return;
             }
 
+            if (file.EndsWith("oasisstrings_compressed.bin"))
+            {
+                string workingOriginalFile;
+
+                if (outputFile != "")
+                    workingOriginalFile = outputFile;
+                else
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
+
+                OasisstringsCompressedFileFC4 rez = new OasisstringsCompressedFileFC4();
+
+                var input = File.OpenRead(file);
+                rez.Deserialize(input);
+
+                var settings = new XmlWriterSettings
+                {
+                    Encoding = Encoding.UTF8,
+                    Indent = true,
+                    OmitXmlDeclaration = true
+                };
+
+                using (var writer = XmlWriter.Create(workingOriginalFile, settings))
+                {
+                    writer.WriteStartDocument();
+                    WriteOSNode(writer, rez.Root);
+                    writer.WriteEndDocument();
+                }
+
+                FIN();
+                return;
+            }
+
+            if (file.EndsWith("oasisstrings_compressed.bin.converted.xml"))
+            {
+                string workingOriginalFile;
+
+                if (outputFile != "")
+                    workingOriginalFile = outputFile;
+                else
+                {
+                    workingOriginalFile = file.Replace(".converted.xml", "");
+                    string extension = Path.GetExtension(workingOriginalFile);
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
+                }
+
+                var rez = new OasisstringsCompressedFileFC4();
+
+                var input = File.OpenRead(file);
+                var doc = new XPathDocument(input);
+                var nav = doc.CreateNavigator();
+
+                if (nav.MoveToFirstChild() == false)
+                {
+                    throw new FormatException();
+                }
+
+                rez.Root = ReadOSNode(nav);
+
+                var output = File.Create(workingOriginalFile);
+                rez.Serialize(output);
+
+                FIN();
+                return;
+            }
+
             // ********************************************************************************************************************************************
 
             if (file.EndsWith("soundinfo.bin.converted.xml"))
@@ -928,7 +1004,7 @@ namespace FCBConverter
             return -1;
         }
 
-        static void LoadFile()
+        static void LoadFile(int dwVersion = 10)
         {
             if (m_HashList.Count() > 0)
                 return;
@@ -942,7 +1018,7 @@ namespace FCBConverter
             string[] ss = File.ReadAllLines(m_Path + m_File);
             for (int i = 0; i < ss.Length; i++)
             {
-                ulong a = Gibbed.Dunia2.FileFormats.CRC64.Hash(ss[i]);
+                ulong a = dwVersion == 5 ? Gibbed.Dunia2.FileFormats.CRC32.Hash(ss[i]) : Gibbed.Dunia2.FileFormats.CRC64.Hash(ss[i]);
                 if (!m_HashList.ContainsKey(a))
                     m_HashList.Add(a, ss[i]);
             }
@@ -1091,23 +1167,42 @@ namespace FCBConverter
             return node;
         }
 
-        public static ulong GetFileHash(string fileName)
+        public static ulong GetFileHash(string fileName, int dwVersion = 10)
         {
             if (fileName.ToLowerInvariant().Contains("__unknown"))
             {
                 var partName = Path.GetFileNameWithoutExtension(fileName);
 
-                if (partName.Length > 16)
+                if (dwVersion >= 9)
                 {
-                    partName = partName.Substring(0, 16);
+                    if (partName.Length > 16)
+                    {
+                        partName = partName.Substring(0, 16);
+                    }
+                }
+                if (dwVersion == 5)
+                {
+                    if (partName.Length > 8)
+                    {
+                        partName = partName.Substring(0, 8);
+                    }
                 }
 
                 return ulong.Parse(partName, NumberStyles.AllowHexSpecifier);
             }
             else
             {
-                return Gibbed.Dunia2.FileFormats.CRC64.Hash(fileName);
+                if (dwVersion >= 9)
+                {
+                    return Gibbed.Dunia2.FileFormats.CRC64.Hash(fileName);
+                }
+                if (dwVersion == 5)
+                {
+                    return Gibbed.Dunia2.FileFormats.CRC32.Hash(fileName);
+                }
             }
+
+            return 0;
         }
 
         static void DeploadConvertDat(string file)
@@ -2058,7 +2153,7 @@ namespace FCBConverter
             output.Close();
         }
 
-        static void UnpackBigFile(string m_FatFile, string m_DstFolder)
+        static void UnpackBigFile(string m_FatFile, string m_DstFolder, string oneFile = "")
         {
             if (!File.Exists(m_FatFile))
             {
@@ -2078,123 +2173,145 @@ namespace FCBConverter
 
             string m_DatName = Path.GetDirectoryName(m_FatFile) + @"\" + Path.GetFileNameWithoutExtension(m_FatFile) + ".dat";
 
-            FileStream TFATStream = new FileStream(m_FatFile, FileMode.Open);
-            FileStream TDATStream = new FileStream(m_DatName, FileMode.Open);
+            SortedDictionary<ulong, FatEntry> Entries = GetFatEntries(m_FatFile, out int dwVersion);
 
-            BinaryReader TFATReader = new BinaryReader(TFATStream);
+            LoadFile(dwVersion);
+
+            if (Entries == null)
+            {
+                Console.WriteLine("No files in the FAT were found!");
+                return;
+            }
+
+            FileStream TDATStream = new FileStream(m_DatName, FileMode.Open);
             BinaryReader TDATReader = new BinaryReader(TDATStream);
 
-            int dwMagic = TFATReader.ReadInt32();
-            int dwVersion = TFATReader.ReadInt32();
-            int dwUnknown = TFATReader.ReadInt32();
-            int dwZero1 = TFATReader.ReadInt32();
-            int dwZero2 = TFATReader.ReadInt32();
-            int dwTotalFiles = TFATReader.ReadInt32();
+            bool oneFileFound = false;
+            ulong oneFileHash = GetFileHash(oneFile);
 
-            if (dwMagic != 0x46415432)
+            foreach (KeyValuePair<ulong, FatEntry> pair in Entries)
             {
-                Console.WriteLine("[ERROR]: Invalid FAT Index file!");
-                return;
-            }
+                FatEntry fatEntry = pair.Value;
 
-            if (dwVersion != 10)
-            {
-                Console.WriteLine("[ERROR]: Invalid version of FAT Index file!");
-                return;
-            }
-
-            for (int i = 0; i < dwTotalFiles; i++)
-            {
-                ulong dwHash = TFATReader.ReadUInt64();
-                uint dwUncompressedSize = TFATReader.ReadUInt32();
-                uint dwUnresolvedOffset = TFATReader.ReadUInt32();
-                uint dwCompressedSize = TFATReader.ReadUInt32();
-
-                uint dwFlag = dwUncompressedSize & 3;
-                ulong dwOffset = dwCompressedSize >> 29 | 8ul * dwUnresolvedOffset;
-                dwHash = (dwHash << 32) + (dwHash >> 32);
-                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
-                dwUncompressedSize = (dwUncompressedSize >> 2);
-
-                string m_Hash = dwHash.ToString("X16");
-                string m_FileName = null;
-                if (m_HashList.ContainsKey(dwHash))
+                if (oneFile != "")
                 {
-                    m_HashList.TryGetValue(dwHash, out m_FileName);
+                    if (fatEntry.NameHash != oneFileHash)
+                        continue;
+
+                    oneFileFound = true;
+                }
+
+                string m_Hash = fatEntry.NameHash.ToString(dwVersion >= 9 ? "X16" : "X8");
+                string m_FileName;
+                if (m_HashList.ContainsKey(fatEntry.NameHash))
+                {
+                    m_HashList.TryGetValue(fatEntry.NameHash, out m_FileName);
                 }
                 else
                 {
                     m_FileName = @"__Unknown\" + m_Hash;
                 }
 
+                if (oneFileFound)
+                {
+                    m_FileName = Path.GetFileName(m_FileName);
+                }
+
                 string m_FullPath = m_DstFolder + @"\" + m_FileName;
 
                 Console.WriteLine("[Unpacking]: {0}", m_FileName);
 
-                if (dwFlag == 0)
+                byte[] pDstBuffer = new byte[] { };
+
+                if (fatEntry.CompressionScheme == CompressionScheme.None)
                 {
-                    TDATStream.Seek((long)dwOffset, SeekOrigin.Begin);
+                    TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
 
-                    byte[] pSrcBuffer = new byte[dwUncompressedSize];
-                    TDATStream.Read(pSrcBuffer, 0, (int)dwUncompressedSize);
-
-                    if (m_FullPath.Contains(@"__Unknown"))
+                    if (dwVersion == 10)
                     {
-                        uint dwID = BitConverter.ToUInt32(pSrcBuffer, 0);
-                        m_FullPath = UnpackBigFileFileType(m_FullPath, dwID);
+                        pDstBuffer = new byte[fatEntry.UncompressedSize];
+                        TDATStream.Read(pDstBuffer, 0, (int)fatEntry.UncompressedSize);
                     }
-                    else
+                    if (dwVersion <= 9) // because in FAT ver 9 and below there is this weird thing
                     {
-                        if (!Directory.Exists(Path.GetDirectoryName(m_FullPath)))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(m_FullPath));
-                        }
+                        pDstBuffer = new byte[fatEntry.CompressedSize];
+                        TDATStream.Read(pDstBuffer, 0, (int)fatEntry.CompressedSize);
                     }
-
-                    FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
-                    TSaveStream.Write(pSrcBuffer, 0, pSrcBuffer.Length);
-                    TSaveStream.Close();
-
                 }
-                else if (dwFlag == 2)
+                else if (fatEntry.CompressionScheme == CompressionScheme.LZO1x)
                 {
-                    TDATStream.Seek((long)dwOffset, SeekOrigin.Begin);
+                    TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
 
-                    byte[] pSrcBuffer = new byte[dwCompressedSize];
-                    byte[] pDstBuffer = new byte[dwUncompressedSize];
+                    byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
+                    pDstBuffer = new byte[fatEntry.UncompressedSize];
 
-                    TDATStream.Read(pSrcBuffer, 0, (int)dwCompressedSize);
+                    TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
+
+                    int actualUncompressedLength = (int)fatEntry.UncompressedSize;
+
+                    var result = Gibbed.Dunia2.FileFormats.LZO.Decompress(pSrcBuffer,
+                                                0,
+                                                pSrcBuffer.Length,
+                                                pDstBuffer,
+                                                0,
+                                                ref actualUncompressedLength);
+
+                    if (result != Gibbed.Dunia2.FileFormats.LZO.ErrorCode.Success)
+                    {
+                        throw new FormatException(string.Format("LZO decompression failure ({0})", result));
+                    }
+
+                    if (actualUncompressedLength != fatEntry.UncompressedSize)
+                    {
+                        throw new FormatException("LZO decompression failure (uncompressed size mismatch)");
+                    }
+                }
+                else if (fatEntry.CompressionScheme == CompressionScheme.LZ4)
+                {
+                    TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
+
+                    byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
+                    pDstBuffer = new byte[fatEntry.UncompressedSize];
+
+                    TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
 
                     LZ4Decompressor64 TLZ4Decompressor64 = new LZ4Decompressor64();
                     TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);
-
-                    if (m_FullPath.Contains(@"__Unknown"))
-                    {
-                        uint dwID = BitConverter.ToUInt32(pDstBuffer, 0);
-                        m_FullPath = UnpackBigFileFileType(m_FullPath, dwID);
-                    }
-                    else
-                    {
-                        if (!Directory.Exists(Path.GetDirectoryName(m_FullPath)))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(m_FullPath));
-                        }
-                    }
-
-                    FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
-                    TSaveStream.Write(pDstBuffer, 0, pDstBuffer.Length);
-                    TSaveStream.Close();
-
                 }
                 else
                 {
                     //https://www.youtube.com/watch?v=AXzEcwYs8Eo
+                    throw new Exception("WHAT THE FUCK???");
                 }
+
+                if (m_FullPath.Contains(@"__Unknown"))
+                {
+                    uint dwID = 0;
+
+                    if (pDstBuffer.Length > 4)
+                        dwID = BitConverter.ToUInt32(pDstBuffer, 0);
+
+                    m_FullPath = UnpackBigFileFileType(m_FullPath, dwID);
+                }
+                else
+                {
+                    if (!Directory.Exists(Path.GetDirectoryName(m_FullPath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(m_FullPath));
+                    }
+                }
+
+                FileStream TSaveStream = new FileStream(m_FullPath, FileMode.Create);
+                TSaveStream.Write(pDstBuffer, 0, pDstBuffer.Length);
+                TSaveStream.Close();
             }
 
-            TFATReader.Dispose();
+            if (oneFile != "" && !oneFileFound)
+            {
+                Console.WriteLine("File " + oneFile + " was not found in " + m_FatFile);
+            }
+
             TDATReader.Dispose();
-            TFATStream.Dispose();
             TDATStream.Dispose();
         }
 
@@ -2331,7 +2448,7 @@ namespace FCBConverter
             return m_UnknownFileName;
         }
 
-        static void PackBigFile(string sourceDir, string outputFile)
+        static void PackBigFile(string sourceDir, string outputFile, int dwVersion = 10)
         {
             if (sourceDir.EndsWith("\\"))
             {
@@ -2342,6 +2459,12 @@ namespace FCBConverter
             {
                 Console.WriteLine("Output filename is wrong!");
                 Environment.Exit(0);
+            }
+
+            if (dwVersion < 10)
+            {
+                isCompressEnabled = false;
+                Console.WriteLine("Compression is not available for older FATs.");
             }
 
             List<string> notCompress = new List<string>();
@@ -2389,17 +2512,22 @@ namespace FCBConverter
                 {
                     outputBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
 
-                    entry.CompressionScheme = CompressionScheme.Zlib;
+                    entry.CompressionScheme = CompressionScheme.LZ4;
+                    entry.UncompressedSize = (uint)bytes.Length;
                 }
                 else
                 {
                     outputBytes = bytes;
 
                     entry.CompressionScheme = CompressionScheme.None;
+
+                    if (dwVersion == 10)
+                        entry.UncompressedSize = (uint)bytes.Length;
+                    else if (dwVersion <= 9)
+                        entry.UncompressedSize = 0;
                 }
 
-                entry.NameHash = GetFileHash(fatFileName);
-                entry.UncompressedSize = (uint)bytes.Length;
+                entry.NameHash = GetFileHash(fatFileName, dwVersion);
                 entry.CompressedSize = (uint)outputBytes.Length;
                 entry.Offset = outputDat.Position;
                 Entries[entry.NameHash] = entry;
@@ -2415,11 +2543,14 @@ namespace FCBConverter
 
             var output = File.Create(fatFile);
             output.WriteValueU32(0x46415432, 0);
-            output.WriteValueS32(10, 0);
-            var platform = ((uint)1) & 0xFF;
-            platform |= 0 << 8;
-            output.WriteValueU32(platform, 0);
-            output.WriteValueS32(0, 0);
+            output.WriteValueS32(dwVersion, 0);
+
+            output.WriteByte(1);
+            output.WriteByte(0);
+            //output.WriteByte(3);
+            output.WriteValueU16(0);
+
+            output.WriteValueS32(0, 0); // sub FATs are hard to edit, so they aren't supported by packing process
             output.WriteValueS32(0, 0);
             output.WriteValueS32(Entries.Count, 0);
 
@@ -2427,84 +2558,71 @@ namespace FCBConverter
             {
                 var fatEntry = Entries[entryE];
 
-                uint value = (uint)((ulong)((long)fatEntry.NameHash & -4294967296L) >> 32);
-                uint value2 = (uint)(fatEntry.NameHash & uint.MaxValue);
-                uint num = 0u;
-                num = (uint)((int)num | ((int)(fatEntry.UncompressedSize << 2) & -4));
-                num = (uint)((int)num | (int)((long)(int)fatEntry.CompressionScheme & 3L));
-                uint value3 = (uint)((fatEntry.Offset & 0x7FFFFFFF8) >> 3);
-                uint num2 = 0u;
-                num2 = (uint)((int)num2 | (int)((fatEntry.Offset & 7) << 29));
-                num2 |= (fatEntry.CompressedSize & 0x1FFFFFFF);
-                output.WriteValueU32(value, 0);
-                output.WriteValueU32(value2, 0);
-                output.WriteValueU32(num, 0);
-                output.WriteValueU32(value3, 0);
-                output.WriteValueU32(num2, 0);
+                if (dwVersion == 10)
+                {
+                    uint value = (uint)((ulong)((long)fatEntry.NameHash & -4294967296L) >> 32);
+                    uint value2 = (uint)(fatEntry.NameHash & uint.MaxValue);
+                    uint num = 0u;
+                    num = (uint)((int)num | ((int)(fatEntry.UncompressedSize << 2) & -4));
+                    num = (uint)((int)num | (int)((long)(int)fatEntry.CompressionScheme & 3L));
+                    uint value3 = (uint)((fatEntry.Offset & 0x7FFFFFFF8) >> 3);
+                    uint num2 = 0u;
+                    num2 = (uint)((int)num2 | (int)((fatEntry.Offset & 7) << 29));
+                    num2 |= (fatEntry.CompressedSize & 0x1FFFFFFF);
+
+                    output.WriteValueU32(value, 0);
+                    output.WriteValueU32(value2, 0);
+                    output.WriteValueU32(num, 0);
+                    output.WriteValueU32(value3, 0);
+                    output.WriteValueU32(num2, 0);
+                }
+                if (dwVersion == 9)
+                {
+                    var a = (uint)((fatEntry.NameHash & 0xFFFFFFFF00000000ul) >> 32);
+                    var b = (uint)((fatEntry.NameHash & 0x00000000FFFFFFFFul) >> 0);
+
+                    uint c = 0;
+                    c |= ((fatEntry.UncompressedSize << 2) & 0xFFFFFFFCu);
+                    c |= (uint)(((byte)fatEntry.CompressionScheme << 0) & 0x00000003u);
+
+                    var d = (uint)((fatEntry.Offset & 0X00000003FFFFFFFCL) >> 2);
+
+                    uint e = 0;
+                    e |= (uint)((fatEntry.Offset & 0X0000000000000003L) << 30);
+                    e |= (fatEntry.CompressedSize & 0x3FFFFFFFu) << 0;
+
+                    output.WriteValueU32(a, 0);
+                    output.WriteValueU32(b, 0);
+                    output.WriteValueU32(c, 0);
+                    output.WriteValueU32(d, 0);
+                    output.WriteValueU32(e, 0);
+                }
+                if (dwVersion == 5)
+                {
+                    uint a = (uint)fatEntry.NameHash;
+                    uint b = 0;
+                    b |= ((fatEntry.UncompressedSize << 2) & 0xFFFFFFFCu);
+                    b |= (uint)(((byte)fatEntry.CompressionScheme << 0) & 0x00000003u);
+                    ulong c = 0;
+                    c |= ((ulong)(fatEntry.Offset << 30) & 0xFFFFFFFFC0000000ul);
+                    c |= (ulong)((fatEntry.CompressedSize << 0) & 0x000000003FFFFFFFul);
+
+                    output.WriteValueU32(a, 0);
+                    output.WriteValueU32(b, 0);
+                    output.WriteValueU64(c, 0);
+                }
             }
 
             output.WriteValueU32(0, 0);
-            output.WriteValueU32(0, 0);
+
+            if (dwVersion >= 9)
+                output.WriteValueU32(0, 0);
+
             output.Flush();
             output.Close();
         }
 
-        static void UnpackBigFileOne(string fatFile, string fileName, string outFile)
-        {
-            if (!File.Exists(fatFile))
-            {
-                Console.WriteLine("[ERROR]: Input file does not exist!");
-                return;
-            }
-
-            SortedDictionary<ulong, FatEntry> Entries = GetFatEntries(fatFile);
-
-            if (Entries == null)
-                return;
-
-            ulong hash = GetFileHash(fileName);
-
-            if (Entries.TryGetValue(hash, out FatEntry value))
-            {
-                using (FileStream fileStream = File.Open(fatFile.Replace(".fat", ".dat"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    fileStream.Seek(value.Offset, SeekOrigin.Begin);
-                    byte[] result = new byte[value.UncompressedSize];
-
-                    switch (value.CompressionScheme)
-                    {
-                        case CompressionScheme.None:
-                            new BinaryReader(fileStream).Read(result, 0, (int)value.UncompressedSize);
-                            Console.WriteLine("Getting file completed.");
-                            fileStream.Dispose();
-                            fileStream.Close();
-
-                            File.WriteAllBytes(outFile + "\\" + Path.GetFileName(fileName), result);
-                            return;
-                        case CompressionScheme.Zlib:
-                            BinaryReader binaryReader = new BinaryReader(fileStream);
-                            byte[] array = new byte[value.CompressedSize];
-                            binaryReader.Read(array, 0, (int)value.CompressedSize);
-                            new LZ4Sharp.LZ4Decompressor64().Decompress(array, result);
-
-                            Console.WriteLine("Getting file completed.");
-
-                            fileStream.Dispose();
-                            fileStream.Close();
-
-                            File.WriteAllBytes(outFile + "\\" + Path.GetFileName(fileName), result);
-
-                            return;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-            }
-
-            Console.WriteLine("File " + fileName + " was not found in " + fatFile);
-        }
-
-        static SortedDictionary<ulong, FatEntry> GetFatEntries(string fatFile)
+        static SortedDictionary<ulong, FatEntry> GetFatEntries(string fatFile, out int dwVersion)
         {
             SortedDictionary<ulong, FatEntry> Entries = new SortedDictionary<ulong, FatEntry>();
 
@@ -2512,11 +2630,8 @@ namespace FCBConverter
             BinaryReader TFATReader = new BinaryReader(TFATStream);
 
             int dwMagic = TFATReader.ReadInt32();
-            int dwVersion = TFATReader.ReadInt32();
+            dwVersion = TFATReader.ReadInt32();
             int dwUnknown = TFATReader.ReadInt32();
-            int dwZero1 = TFATReader.ReadInt32();
-            int dwZero2 = TFATReader.ReadInt32();
-            int dwTotalFiles = TFATReader.ReadInt32();
 
             if (dwMagic != 0x46415432)
             {
@@ -2528,7 +2643,11 @@ namespace FCBConverter
                 return null;
             }
 
-            if (dwVersion != 10)
+            // versions
+            // 10 - FC5, FCND
+            // 9 - FC3, FC3BD, FC4
+            // 5 - FC2
+            if (dwVersion != 10 && dwVersion != 9 && dwVersion != 5)
             {
                 Console.WriteLine("Invalid version of FAT Index file!");
                 TFATReader.Dispose();
@@ -2538,27 +2657,48 @@ namespace FCBConverter
                 return null;
             }
 
+            int dwSubfatTotalEntryCount = 0;
+            int dwSubfatCount = 0;
+
+            if (dwVersion >= 9)
+            {
+                dwSubfatTotalEntryCount = TFATReader.ReadInt32();
+                dwSubfatCount = TFATReader.ReadInt32();
+            }
+
+            int dwTotalFiles = TFATReader.ReadInt32();
+
             for (int i = 0; i < dwTotalFiles; i++)
             {
-                ulong dwHash = TFATReader.ReadUInt64();
-                uint dwUncompressedSize = TFATReader.ReadUInt32();
-                uint dwUnresolvedOffset = TFATReader.ReadUInt32();
-                uint dwCompressedSize = TFATReader.ReadUInt32();
-
-                uint dwFlag = dwUncompressedSize & 3;
-                ulong dwOffset = dwCompressedSize >> 29 | 8ul * dwUnresolvedOffset;
-                dwHash = (dwHash << 32) + (dwHash >> 32);
-                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
-                dwUncompressedSize = (dwUncompressedSize >> 2);
-
-                var entry = new FatEntry();
-                entry.NameHash = dwHash;
-                entry.UncompressedSize = dwUncompressedSize;
-                entry.Offset = (long)dwOffset;
-                entry.CompressedSize = dwCompressedSize;
-                entry.CompressionScheme = dwFlag == 0 ? CompressionScheme.None : CompressionScheme.Zlib;
-
+                FatEntry entry = GetFatEntriesDeserialize(TFATReader, dwVersion);
                 Entries[entry.NameHash] = entry;
+            }
+
+            uint unknown1Count = TFATReader.ReadUInt32();
+            for (uint i = 0; i < unknown1Count; i++)
+            {
+                throw new NotSupportedException();
+                TFATReader.ReadBytes(16);
+            }
+
+            if (dwVersion >= 7)
+            {
+                uint unknown2Count = TFATReader.ReadUInt32();
+                for (uint i = 0; i < unknown2Count; i++)
+                {
+                    TFATReader.ReadBytes(16);
+                }
+            }
+
+            // we support sub fats, but for packing it's better and easier to remove them
+            for (int i = 0; i < dwSubfatCount; i++)
+            {
+                uint subfatEntryCount = TFATReader.ReadUInt32();
+                for (uint j = 0; j < subfatEntryCount; j++)
+                {
+                    FatEntry entry = GetFatEntriesDeserialize(TFATReader, dwVersion);
+                    Entries[entry.NameHash] = entry;
+                }
             }
 
             TFATReader.Dispose();
@@ -2567,6 +2707,61 @@ namespace FCBConverter
             TFATStream.Close();
 
             return Entries;
+        }
+
+        static FatEntry GetFatEntriesDeserialize(BinaryReader TFATReader, int dwVersion)
+        {
+            ulong dwHash = 0;
+
+            if (dwVersion == 10 || dwVersion == 9)
+            {
+                dwHash = TFATReader.ReadUInt64();
+                dwHash = (dwHash << 32) + (dwHash >> 32);
+            }
+            if (dwVersion == 5)
+            {
+                dwHash = TFATReader.ReadUInt32();
+            }
+
+            uint dwUncompressedSize = TFATReader.ReadUInt32();
+            uint dwUnresolvedOffset = TFATReader.ReadUInt32();
+            uint dwCompressedSize = TFATReader.ReadUInt32();
+
+            uint dwFlag = 0;
+            ulong dwOffset = 0;
+
+            if (dwVersion == 10)
+            {
+                dwFlag = dwUncompressedSize & 3;
+                dwOffset = dwCompressedSize >> 29 | 8ul * dwUnresolvedOffset;
+                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
+                dwUncompressedSize = (dwUncompressedSize >> 2);
+            }
+            if (dwVersion == 9)
+            {
+                dwFlag = (dwUncompressedSize & 0x00000003u) >> 0;
+                dwOffset = (ulong)dwUnresolvedOffset << 2;
+                dwOffset |= (dwCompressedSize & 0xC0000000u) >> 30;
+                dwCompressedSize = (uint)((dwCompressedSize & 0x3FFFFFFFul) >> 0);
+                dwUncompressedSize = (dwUncompressedSize & 0xFFFFFFFCu) >> 2;
+            }
+            if (dwVersion == 5)
+            {
+                dwFlag = (dwUncompressedSize & 0x00000003u) >> 0;
+                dwOffset = (ulong)dwCompressedSize << 2;
+                dwOffset |= (dwUnresolvedOffset & 0xC0000000u) >> 30;
+                dwCompressedSize = (uint)((dwUnresolvedOffset & 0x3FFFFFFFul) >> 0);
+                dwUncompressedSize = (dwUncompressedSize & 0xFFFFFFFCu) >> 2;
+            }
+
+            var entry = new FatEntry();
+            entry.NameHash = dwHash;
+            entry.UncompressedSize = dwUncompressedSize;
+            entry.Offset = (long)dwOffset;
+            entry.CompressedSize = dwCompressedSize;
+            entry.CompressionScheme = (CompressionScheme)dwFlag;
+
+            return entry;
         }
     }
 }

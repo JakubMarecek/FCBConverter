@@ -22,7 +22,7 @@ namespace FCBConverter
     {
         None = 0,
         LZO1x = 1,
-        Zlib = 2,
+        LZ4 = 2,
         Unknown3 = 3,
     }
 

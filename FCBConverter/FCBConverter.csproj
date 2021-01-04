@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -136,6 +136,7 @@
     <Compile Include="Gibbed.IO\StreamHelpers\Strings\Supplied.cs" />
     <Compile Include="Gibbed.IO\StreamHelpers\Structure.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFileFC4.cs" />
     <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFile.cs" />
     <Compile Include="LZ4Sharp\ILZ4Compressor.cs" />
     <Compile Include="LZ4Sharp\ILZ4Decompressor.cs" />
@@ -159,6 +160,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FCBNoCompress.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lzo_64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
