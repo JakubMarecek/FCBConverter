@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20210105-0030";
+        public static string version = "20210119-1915";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";

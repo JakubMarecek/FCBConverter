@@ -309,7 +309,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // int32
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 8 && (binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId" || name == "Id")
+                        else if (binaryHex.Length == 8 && ((binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId" || name == "Id"))
                         {
                             int v = Int32.Parse(binaryHexRev, NumberStyles.HexNumber);
                             writer.WriteAttributeString(prefix + "Int32", v.ToString());
