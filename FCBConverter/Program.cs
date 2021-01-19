@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20210119-1915";
+        public static string version = "20210110-2115";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -69,6 +69,7 @@ namespace FCBConverter
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
+        public static string xmlheaderoasis = "Special thanks to: AOY";
 
         //public static List<string> aaaa = new List<string>();
 
@@ -704,6 +705,7 @@ namespace FCBConverter
                 using (var writer = XmlWriter.Create(workingOriginalFile, settings))
                 {
                     writer.WriteStartDocument();
+                    writer.WriteComment(xmlheader);
                     WriteOSNode(writer, rez.Root);
                     writer.WriteEndDocument();
                 }
@@ -769,6 +771,8 @@ namespace FCBConverter
                 using (var writer = XmlWriter.Create(workingOriginalFile, settings))
                 {
                     writer.WriteStartDocument();
+                    writer.WriteComment(xmlheader);
+                    writer.WriteComment(xmlheaderoasis);
                     WriteOSNode(writer, rez.Root);
                     writer.WriteEndDocument();
                 }
