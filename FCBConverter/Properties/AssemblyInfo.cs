@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ArmanIII")]
 [assembly: AssemblyProduct("FCBConverter")]
-[assembly: AssemblyCopyright("Copyright © ArmanIII 2019")]
+[assembly: AssemblyCopyright("Copyright © ArmanIII 2019-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
