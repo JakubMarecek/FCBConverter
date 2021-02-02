@@ -201,8 +201,21 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else if (name == "hidDescriptor")
                         {
-                            try
+                            if (kv.Value[0] == 0)
                             {
+                                // legacy, RML format
+                                MemoryStream ms = new MemoryStream(kv.Value);
+
+                                var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
+                                rez.Deserialize(ms);
+
+                                writer.WriteAttributeString("legacy", "1");
+
+                                Gibbed.Dunia2.ConvertXml.Program.WriteNode(writer, rez.Root);
+                            }
+                            else
+                            {
+                                // new format XML
                                 XmlReaderSettings settings = new XmlReaderSettings
                                 {
                                     IgnoreComments = true,
@@ -212,12 +225,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 };
                                 XmlReader xmlReader = XmlReader.Create(new System.IO.StringReader(str), settings);
                                 writer.WriteNode(xmlReader, false);
-                            }
-                            catch (Exception)
-                            {
-                                writer.WriteAttributeString("type", FieldType.BinHex.GetString());
-                                writer.WriteAttributeString("legacy", "1");
-                                writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
                             }
                         }
                         else if (name == "CNH_CompressedData" || name == "buffer")

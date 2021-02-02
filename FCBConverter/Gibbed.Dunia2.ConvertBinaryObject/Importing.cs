@@ -125,8 +125,13 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     string legacy = fields.Current.GetAttribute("legacy", "");
                     if (legacy == "1")
                     {
-                        byte[] bytes = FCBConverter.Helpers.StringToByteArray(fields.Current.Value);
-                        node.Fields.Add(fieldNameHash, bytes);
+                        MemoryStream ms = new MemoryStream();
+
+                        var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
+                        rez.Root = Gibbed.Dunia2.ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("hidDescriptor"));
+                        rez.Serialize(ms);
+
+                        node.Fields.Add(fieldNameHash, ms.ToArray());
                     }
                     else
                     {

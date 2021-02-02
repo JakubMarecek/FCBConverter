@@ -36,15 +36,15 @@ namespace FCBConverter
     {
         public static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        static string m_File = @"\FCBConverterFileNames.list";
+        static readonly string m_File = @"\FCBConverterFileNames.list";
         public static Dictionary<ulong, string> m_HashList = new Dictionary<ulong, string>();
 
-        static string stringsFile = @"\FCBConverterStrings.list";
+        static readonly string stringsFile = @"\FCBConverterStrings.list";
         public static Dictionary<uint, string> strings = new Dictionary<uint, string>();
 
-        static string nocompressFile = @"\FCBConverterNoCompress.txt";
+        static readonly string nocompressFile = @"\FCBConverterNoCompress.txt";
 
-        static string excludeFile = @"\FCBConverterCompressExclude.txt";
+        static readonly string excludeFile = @"\FCBConverterCompressExclude.txt";
 
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
@@ -52,7 +52,7 @@ namespace FCBConverter
 
         static string excludeFromCompress = "";
 
-        public static string version = "20210201-1830";
+        public static string version = "20210203-0000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -497,14 +497,18 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
-            if (file.EndsWith(".cseq") || file.EndsWith(".gosm.xml") || file.EndsWith(".rml"))
+            var tmpformat = File.OpenRead(file);
+            ushort fmt = tmpformat.ReadValueU8();
+            tmpformat.Close();
+
+            if (file.EndsWith(".cseq") || file.EndsWith(".gosm.xml") || file.EndsWith(".rml") || (file.EndsWith(".ndb") && fmt == 0))
             {
                 string workingOriginalFile;
 
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + (file.EndsWith(".ndb") ? ".rml" : "") + ".converted.xml";
 
                 var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
                 using (var input = File.OpenRead(file))
@@ -538,7 +542,7 @@ namespace FCBConverter
                     workingOriginalFile = outputFile;
                 else
                 {
-                    workingOriginalFile = file.Replace(".converted.xml", "");
+                    workingOriginalFile = file.EndsWith(".ndb.rml.converted.xml") ? file.Replace(".rml.converted.xml", "") : file.Replace(".converted.xml", "");
                     string extension = Path.GetExtension(workingOriginalFile);
                     workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
                 }
@@ -918,6 +922,67 @@ namespace FCBConverter
 
                     File.WriteAllBytes(newFileName, bts.ToArray());
                 }
+                else if (file.EndsWith(".part.converted.xml") && File.Exists(file.Replace(".part.converted.xml", ".pt")))
+                {
+                    string newFileName = file.Replace(".converted.xml", "");
+                    string matFile = newFileName.Replace(".part", ".pt");
+                    newFileName = newFileName.Replace(".part", "_new.part");
+
+                    ConvertXML(file, newFileName);
+
+                    List<byte> bts = new List<byte>();
+                    bts.AddRange(File.ReadAllBytes(matFile));
+                    bts.AddRange(File.ReadAllBytes(newFileName));
+
+                    File.WriteAllBytes(newFileName, bts.ToArray());
+                }
+                else if (file.EndsWith(".fcb.lzo.converted.xml"))
+                {
+                    string workingOriginalFile;
+
+                    if (outputFile != "")
+                        workingOriginalFile = outputFile;
+                    else
+                    {
+                        workingOriginalFile = file.Replace(".lzo.converted.xml", "");
+                        string extension = Path.GetExtension(workingOriginalFile);
+                        workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
+                    }
+
+                    var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
+
+                    var basePath = Path.ChangeExtension(file, null);
+
+                    var doc = new XPathDocument(file);
+                    var nav = doc.CreateNavigator();
+
+                    var root = nav.SelectSingleNode("/object");
+
+                    var importing = new Gibbed.Dunia2.ConvertBinaryObject.Importing();
+                    bof.Root = importing.Import(basePath, root);
+
+                    MemoryStream ms = new MemoryStream();
+                    bof.Serialize(ms);
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    byte[] uncompressedBytes = ms.ToArray();
+
+                    byte[] compressedBytes = new byte[uncompressedBytes.Length + (uncompressedBytes.Length / 16) + 64 + 3]; // weird magic
+                    int outputSize = compressedBytes.Length;
+
+                    var result = Gibbed.Dunia2.FileFormats.LZO.Compress(uncompressedBytes,
+                                                0,
+                                                uncompressedBytes.Length,
+                                                compressedBytes,
+                                                0,
+                                                ref outputSize);
+
+                    var output = File.Create(workingOriginalFile);
+                    output.WriteValueS32(uncompressedBytes.Length);
+                    output.WriteBytes(compressedBytes);
+                    output.Flush();
+                    output.Close();
+                }
                 else
                 {
                     string workingOriginalFile;
@@ -949,25 +1014,79 @@ namespace FCBConverter
                 else
                     workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
-                if (file.EndsWith(".material.bin"))
+                tmpformat = File.OpenRead(file);
+                uint nbCF = tmpformat.ReadValueU32();
+                uint ver = tmpformat.ReadValueU32();
+                tmpformat.Close();
+
+                if (nbCF != 1178821230 && file.EndsWith(".fcb")) // nbCF
                 {
-                    byte[] bytes = File.ReadAllBytes(file);
+                    var aaa = File.OpenRead(file);
+                    int bbb = (int)aaa.ReadValueU32();
 
-                    int pos = IndexOf(bytes, new byte[] { 0x6E, 0x62, 0x43, 0x46 }); // nbCF
+                    byte[] buffer = new byte[16 * 1024];
+                    MemoryStream ms = new MemoryStream();
+                    int read;
+                    while ((read = aaa.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        ms.Write(buffer, 0, read);
+                    }
+                    byte[] ddd = ms.ToArray();
 
-                    byte[] mat = bytes.Take(pos).ToArray();
-                    byte[] fcb = bytes.Skip(pos).Take(bytes.Length).ToArray();
+                    aaa.Close();
 
-                    string newPathMat = file.Replace(".bin", ".mat");
-                    File.WriteAllBytes(newPathMat, mat);
-                    File.WriteAllBytes(file + "tmp", fcb);
+                    byte[] eee = new byte[bbb];
 
-                    ConvertFCB(file + "tmp", workingOriginalFile);
+                    var result = Gibbed.Dunia2.FileFormats.LZO.Decompress(ddd,
+                                                0,
+                                                ddd.Length,
+                                                eee,
+                                                0,
+                                                ref bbb);
 
-                    File.Delete(file + "tmp");
+                    var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
+                    bof.Deserialize(new MemoryStream(eee));
+                    Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(workingOriginalFile.Replace(".fcb", ".fcb.lzo"), bof);
                 }
                 else
-                    ConvertFCB(file, workingOriginalFile);
+                {
+                    if (file.EndsWith(".material.bin"))
+                    {
+                        byte[] bytes = File.ReadAllBytes(file);
+
+                        int pos = IndexOf(bytes, new byte[] { 0x6E, 0x62, 0x43, 0x46 }); // nbCF
+
+                        byte[] mat = bytes.Take(pos).ToArray();
+                        byte[] fcb = bytes.Skip(pos).Take(bytes.Length).ToArray();
+
+                        string newPathMat = file.Replace(".bin", ".mat");
+                        File.WriteAllBytes(newPathMat, mat);
+                        File.WriteAllBytes(file + "tmp", fcb);
+
+                        ConvertFCB(file + "tmp", workingOriginalFile);
+
+                        File.Delete(file + "tmp");
+                    }
+                    else if (ver != 2 && file.EndsWith(".part"))
+                    {
+                        byte[] bytes = File.ReadAllBytes(file);
+
+                        int pos = IndexOf(bytes, new byte[] { 0x6E, 0x62, 0x43, 0x46, 0x02, 0x00 }); // nbCF
+
+                        byte[] mat = bytes.Take(pos).ToArray();
+                        byte[] fcb = bytes.Skip(pos).Take(bytes.Length).ToArray();
+
+                        string newPathMat = file.Replace(".part", ".pt");
+                        File.WriteAllBytes(newPathMat, mat);
+                        File.WriteAllBytes(file + "tmp", fcb);
+
+                        ConvertFCB(file + "tmp", workingOriginalFile);
+
+                        File.Delete(file + "tmp");
+                    }
+                    else
+                        ConvertFCB(file, workingOriginalFile);
+                }
 
                 FIN();
                 return;
