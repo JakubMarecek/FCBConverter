@@ -12,6 +12,11 @@ namespace FCBConverterGUI
             "Dependency loader|*_depload.dat|" +
             "Sound info|soundinfo.bin|" +
             "Animation markup file|*.markup.bin|" +
+            "Far Cry 5 Strings file|oasisstrings.oasis.bin|" +
+            "Far Cry New Dawn Strings file|oasisstrings_nd.oasis.bin|" +
+            "Far Cry 4 Strings file|oasisstrings_compressed.bin|" +
+            "Lua file (adds LUAC header)|*.lua|" +
+            "Material file|*.material.bin|" +
             "Texture|*.xbt|" +
             "Terrain texture|*.xbts|" +
             "Animation move file|*.move.bin|" +
