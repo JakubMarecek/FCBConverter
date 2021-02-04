@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace FCBConverterGUI
@@ -27,6 +29,11 @@ namespace FCBConverterGUI
             "File allocation table (DAT header file)|*.fat|" +
             "Converted files|*.converted.xml";
 
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
+
+        private PrivateFontCollection fonts = new PrivateFontCollection();
+
         private void CallFCBConverter(string launchParams)
         {
             Process process = new Process();
@@ -37,14 +44,90 @@ namespace FCBConverterGUI
             process.WaitForExit();
         }
 
+        private FontFamily GetFont(byte[] fontData)
+        {
+            IntPtr fontPtr = System.Runtime.InteropServices.Marshal.AllocCoTaskMem(fontData.Length);
+            System.Runtime.InteropServices.Marshal.Copy(fontData, 0, fontPtr, fontData.Length);
+            uint dummy = 0;
+            fonts.AddMemoryFont(fontPtr, fontData.Length);
+            AddFontMemResourceEx(fontPtr, (uint)fontData.Length, IntPtr.Zero, ref dummy);
+            System.Runtime.InteropServices.Marshal.FreeCoTaskMem(fontPtr);
+            return fonts.Families[0];
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            Font FCZTitle = new Font(GetFont(Properties.Resources.FCZTitle), 80);
+            Font DINNextW1G_Regular = new Font(GetFont(Properties.Resources.DINNextW1G_Regular), 12);
+            Font TradeGothicLT_Bold = new Font(GetFont(Properties.Resources.TradeGothicLT_Bold), 12);
+
+            label1.Font = FCZTitle;
+            label2.Font = TradeGothicLT_Bold;
+            label3.Font = TradeGothicLT_Bold;
+            label4.Font = TradeGothicLT_Bold;
+            label5.Font = TradeGothicLT_Bold;
+            label6.Font = TradeGothicLT_Bold;
+            label7.Font = TradeGothicLT_Bold;
+            label8.Font = TradeGothicLT_Bold;
+            label9.Font = TradeGothicLT_Bold;
+            label10.Font = TradeGothicLT_Bold;
+            label11.Font = TradeGothicLT_Bold;
+            label12.Font = TradeGothicLT_Bold;
+            label13.Font = TradeGothicLT_Bold;
+            label14.Font = TradeGothicLT_Bold;
+            label15.Font = TradeGothicLT_Bold;
+            label16.Font = DINNextW1G_Regular;
+            label17.Font = TradeGothicLT_Bold;
+            label18.Font = TradeGothicLT_Bold;
+            label19.Font = TradeGothicLT_Bold;
+            label20.Font = TradeGothicLT_Bold;
+            label21.Font = TradeGothicLT_Bold;
+            tabControl1.Font = DINNextW1G_Regular;
+            button1.Font = TradeGothicLT_Bold;
+            button2.Font = TradeGothicLT_Bold;
+            button3.Font = TradeGothicLT_Bold;
+            button4.Font = TradeGothicLT_Bold;
+            button5.Font = TradeGothicLT_Bold;
+            button6.Font = TradeGothicLT_Bold;
+            button7.Font = TradeGothicLT_Bold;
+            button8.Font = TradeGothicLT_Bold;
+            button9.Font = TradeGothicLT_Bold;
+            button10.Font = TradeGothicLT_Bold;
+            button11.Font = TradeGothicLT_Bold;
+            button12.Font = TradeGothicLT_Bold;
+            button13.Font = TradeGothicLT_Bold;
+            checkBox2.Font = TradeGothicLT_Bold;
+            textBox1.Font = TradeGothicLT_Bold;
+            textBox2.Font = TradeGothicLT_Bold;
+            textBox3.Font = TradeGothicLT_Bold;
+            textBox4.Font = TradeGothicLT_Bold;
+            textBox5.Font = TradeGothicLT_Bold;
+            textBox6.Font = TradeGothicLT_Bold;
+            textBox7.Font = TradeGothicLT_Bold;
+            textBox8.Font = TradeGothicLT_Bold;
+            radioButton1.Font = TradeGothicLT_Bold;
+            radioButton2.Font = TradeGothicLT_Bold;
+            radioButton3.Font = TradeGothicLT_Bold;
+            radioButton4.Font = TradeGothicLT_Bold;
+            radioButton5.Font = TradeGothicLT_Bold;
+            radioButton6.Font = TradeGothicLT_Bold;
+            radioButton7.Font = TradeGothicLT_Bold;
+            radioButton8.Font = TradeGothicLT_Bold;
+            radioButton9.Font = TradeGothicLT_Bold;
+            radioButton10.Font = TradeGothicLT_Bold;
+            radioButton11.Font = TradeGothicLT_Bold;
+            radioButton12.Font = TradeGothicLT_Bold;
+            radioButton13.Font = TradeGothicLT_Bold;
+            radioButton14.Font = TradeGothicLT_Bold;
+            radioButton15.Font = TradeGothicLT_Bold;
+            radioButton16.Font = TradeGothicLT_Bold;
+            radioButton17.Font = TradeGothicLT_Bold;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         private void button9_Click(object sender, EventArgs e)
