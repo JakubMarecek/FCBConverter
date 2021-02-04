@@ -147,7 +147,28 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
 
                     byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
-                    byte[] compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+
+                    string compressionType = fields.Current.SelectSingleNode("CNH_CompressedData").GetAttribute("CompressionType", "");
+
+                    byte[] compressedBytes = null;
+
+                    if (compressionType == "LZ4")
+                        compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+
+                    if (compressionType == "LZO")
+                    {
+                        int compressedSize = bytes.Length + (bytes.Length / 16) + 64 + 3; // weird magic
+                        compressedBytes = new byte[compressedSize];
+
+                        var result = Gibbed.Dunia2.FileFormats.LZO.Compress(bytes,
+                                                    0,
+                                                    bytes.Length,
+                                                    compressedBytes,
+                                                    0,
+                                                    ref compressedSize);
+
+                        Array.Resize(ref compressedBytes, compressedSize);
+                    }
 
                     List<byte[]> output = new List<byte[]>
                     {

@@ -49,10 +49,10 @@ namespace FCBConverter
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
+        public static string excludeFilesFromCompress = "";
+        public static string excludeFilesFromPack = "";
 
-        static string excludeFromCompress = "";
-
-        public static string version = "20210203-0000";
+        public static string version = "20210204-0900";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -374,46 +374,70 @@ namespace FCBConverter
                 return;
             }
 
-            if (File.Exists(m_Path + nocompressFile))
+            string file = args[0];
+            string param2 = args.Length > 1 ? args[1] : "";
+            string param3 = args.Length > 2 ? args[2] : "";
+            string param4 = args.Length > 3 ? args[3] : "";
+
+            string enC = "-enablecompress";
+            string disC = "-disablecompress";
+
+            if (File.Exists(m_Path + nocompressFile) && param2 != enC && param3 != enC && param4 != enC)
             {
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");
                 isCompressEnabled = false;
             }
 
-            string file = args[0];
-            string outputFile = args.Length > 1 ? args[1] : "";
-            excludeFromCompress = args.Length > 2 ? args[2] : "";
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i].StartsWith("-excludeFilesFromCompress="))
+                {
+                    excludeFilesFromCompress = args[i].Replace("-excludeFilesFromCompress=", "");
+                }
+
+                if (args[i].StartsWith("-excludeFilesFromPack="))
+                {
+                    excludeFilesFromPack = args[i].Replace("-excludeFilesFromPack=", "");
+                }
+
+                if (args[i] == disC)
+                {
+                    Console.WriteLine("Compression disabled via param.");
+                    Console.WriteLine("");
+                    isCompressEnabled = false;
+                }
+            }
 
             Console.Title = "FCBConverter - " + file;
 
-            if (outputFile.EndsWith(".fat"))
+            if (param2.EndsWith(".fat"))
             {
                 int ver = 10;
 
-                if (excludeFromCompress == "-v9")
+                if (param3 == "-v9")
                     ver = 9;
 
-                if (excludeFromCompress == "-v5")
+                if (param3 == "-v5")
                     ver = 5;
 
                 LoadFile();
-                PackBigFile(file, outputFile, ver);
+                PackBigFile(file, param2, ver);
                 FIN();
             }
-            else if (file.EndsWith(".fat") && Directory.Exists(outputFile) && excludeFromCompress != "") // excludeFromCompress is used as file name
+            else if (file.EndsWith(".fat") && Directory.Exists(param2) && param3 != "") // excludeFromCompress is used as file name
             {
-                UnpackBigFile(file, outputFile, excludeFromCompress);
+                UnpackBigFile(file, param2, param3);
                 FIN();
             }
             else if (file.EndsWith(".fat"))
             {
-                UnpackBigFile(file, outputFile);
+                UnpackBigFile(file, param2);
                 FIN();
             }
             else if (File.Exists(file))
             {
-                Proccessing(file, outputFile);
+                Proccessing(file, param2);
             }
             else if (Directory.Exists(file) || file == @"\")
             {
@@ -421,7 +445,7 @@ namespace FCBConverter
                     file = Directory.GetCurrentDirectory();
 
                 DirectoryInfo d = new DirectoryInfo(file);
-                FileInfo[] files = d.GetFiles(outputFile);
+                FileInfo[] files = d.GetFiles(param2);
                 foreach (FileInfo fileInfo in files)
                 {
                     Console.WriteLine("Processing: " + fileInfo.FullName + "...");
@@ -976,6 +1000,8 @@ namespace FCBConverter
                                                 compressedBytes,
                                                 0,
                                                 ref outputSize);
+
+                    Array.Resize(ref compressedBytes, outputSize);
 
                     var output = File.Create(workingOriginalFile);
                     output.WriteValueS32(uncompressedBytes.Length);
@@ -2593,15 +2619,15 @@ namespace FCBConverter
             List<string> notCompress = new List<string>();
 
             string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (File.Exists(m_Path + excludeFile))
+            if (File.Exists(m_Path + excludeFile) && excludeFilesFromCompress == "")
             {
                 notCompress.AddRange(File.ReadAllLines(m_Path + excludeFile));
                 notCompress.RemoveAt(0);
             }
 
-            if (excludeFromCompress != "")
+            if (excludeFilesFromCompress != "")
             {
-                string[] exts = excludeFromCompress.Split(',');
+                string[] exts = excludeFilesFromCompress.Split(',');
                 notCompress.AddRange(exts);
             }
 
@@ -2624,6 +2650,8 @@ namespace FCBConverter
             {
                 string fatFileName = file.Replace(sourceDir + "\\", "");
                 string extension = Path.GetExtension(fatFileName);
+
+                if (excludeFilesFromPack != "" && excludeFilesFromPack.Contains(extension)) continue;
 
                 byte[] bytes = File.ReadAllBytes(file);
 

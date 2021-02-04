@@ -238,8 +238,31 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                             byte[] bytes = binaryReader.ReadBytes(len);
                             binaryReader.Close();
 
+                            string compressionType = "";
+
                             if (name != "buffer")
-                                bytes = new LZ4Sharp.LZ4Decompressor64().Decompress(bytes);
+                            {
+                                try
+                                {
+                                    bytes = new LZ4Sharp.LZ4Decompressor64().Decompress(bytes);
+                                    compressionType = "LZ4";
+                                }
+                                catch (Exception)
+                                {
+                                    int uncompressedSize = BitConverter.ToInt32(node.Fields[CRC32.Hash("CNH_UncompressedSize")], 0);
+                                    byte[] bytesOut = new byte[uncompressedSize];
+
+                                    var result = Gibbed.Dunia2.FileFormats.LZO.Decompress(bytes,
+                                                                0,
+                                                                bytes.Length,
+                                                                bytesOut,
+                                                                0,
+                                                                ref uncompressedSize);
+
+                                    bytes = bytesOut;
+                                    compressionType = "LZO";
+                                }
+                            }
 
                             File.WriteAllBytes(Program.m_Path + "\\tmp", bytes);
                             Program.ConvertFCB(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
@@ -254,6 +277,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                             XmlReader xmlReader = XmlReader.Create(Program.m_Path + "\\tmpc", settings);
                             xmlReader.MoveToContent();
                             writer.WriteStartElement(name);
+                            writer.WriteAttributeString("CompressionType", compressionType.ToString());
                             writer.WriteNode(xmlReader, false);
                             writer.WriteEndElement();
                             xmlReader.Close();
