@@ -69,36 +69,26 @@ namespace FCBConverterGUI
             label4.Font = TradeGothicLT_Bold;
             label5.Font = TradeGothicLT_Bold;
             label6.Font = TradeGothicLT_Bold;
-            label7.Font = TradeGothicLT_Bold;
             label8.Font = TradeGothicLT_Bold;
             label9.Font = TradeGothicLT_Bold;
-            label10.Font = TradeGothicLT_Bold;
             label11.Font = TradeGothicLT_Bold;
             label12.Font = TradeGothicLT_Bold;
             label13.Font = TradeGothicLT_Bold;
             label14.Font = TradeGothicLT_Bold;
             label15.Font = TradeGothicLT_Bold;
-            label16.Font = DINNextW1G_Regular;
             label17.Font = TradeGothicLT_Bold;
             label18.Font = TradeGothicLT_Bold;
-            label19.Font = TradeGothicLT_Bold;
-            label20.Font = TradeGothicLT_Bold;
             label21.Font = TradeGothicLT_Bold;
             tabControl1.Font = DINNextW1G_Regular;
             button1.Font = TradeGothicLT_Bold;
             button2.Font = TradeGothicLT_Bold;
-            button3.Font = TradeGothicLT_Bold;
-            button4.Font = TradeGothicLT_Bold;
             button5.Font = TradeGothicLT_Bold;
             button6.Font = TradeGothicLT_Bold;
-            button7.Font = TradeGothicLT_Bold;
-            button8.Font = TradeGothicLT_Bold;
             button9.Font = TradeGothicLT_Bold;
             button10.Font = TradeGothicLT_Bold;
             button11.Font = TradeGothicLT_Bold;
             button12.Font = TradeGothicLT_Bold;
             button13.Font = TradeGothicLT_Bold;
-            checkBox2.Font = TradeGothicLT_Bold;
             textBox1.Font = TradeGothicLT_Bold;
             textBox2.Font = TradeGothicLT_Bold;
             textBox3.Font = TradeGothicLT_Bold;
@@ -112,18 +102,6 @@ namespace FCBConverterGUI
             radioButton3.Font = TradeGothicLT_Bold;
             radioButton4.Font = TradeGothicLT_Bold;
             radioButton5.Font = TradeGothicLT_Bold;
-            radioButton6.Font = TradeGothicLT_Bold;
-            radioButton7.Font = TradeGothicLT_Bold;
-            radioButton8.Font = TradeGothicLT_Bold;
-            radioButton9.Font = TradeGothicLT_Bold;
-            radioButton10.Font = TradeGothicLT_Bold;
-            radioButton11.Font = TradeGothicLT_Bold;
-            radioButton12.Font = TradeGothicLT_Bold;
-            radioButton13.Font = TradeGothicLT_Bold;
-            radioButton14.Font = TradeGothicLT_Bold;
-            radioButton15.Font = TradeGothicLT_Bold;
-            radioButton16.Font = TradeGothicLT_Bold;
-            radioButton17.Font = TradeGothicLT_Bold;
         }
 
         private void Form1_Load(object sender, EventArgs e)
