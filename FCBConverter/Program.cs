@@ -24,7 +24,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -52,7 +51,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210204-0900";
+        public static string version = "20210301-1815";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -872,6 +871,12 @@ namespace FCBConverter
             else if (file.EndsWith(".markup.bin"))
             {
                 MarkupConvertBin(file);
+                FIN();
+                return;
+            }
+            else if (file.EndsWith(".mab"))
+            {
+                FC4MarkupExtr(file);
                 FIN();
                 return;
             }
@@ -1853,6 +1858,58 @@ namespace FCBConverter
             }
 
             output.Close();
+        }
+
+        static void FC4MarkupExtr(string file)
+        {
+            string onlyDir = Path.GetDirectoryName(file);
+
+            XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+
+            xmlDoc.Add(new XComment(xmlheader));
+            xmlDoc.Add(new XComment(xmlheadermarkup));
+
+            XElement root = new XElement("CMarkupResource");
+
+            FileStream MabStream = new FileStream(file, FileMode.Open);
+
+            byte[] byteSequence = new byte[] { 0x61, 0x4E, 0x69, 0x2F, 0x01, 0x40 }; // aNi/@
+            var afterSequence = MabStream.ScanUntilFound(byteSequence);
+
+            MabStream.Seek(afterSequence, SeekOrigin.Begin);
+            MabStream.ReadBytes(15);
+            ushort framesCount = MabStream.ReadValueU16();
+            MabStream.ReadBytes(25);
+
+            for (int i = 0; i < framesCount; i++)
+            {
+                ulong hash = MabStream.ReadValueU64();
+                uint unknown = MabStream.ReadValueU32();
+                ushort fcbLen = MabStream.ReadValueU16();
+                ushort secLen = MabStream.ReadValueU16();
+                byte[] fcbBytes = MabStream.ReadBytes(fcbLen);
+
+                long align = (4 - (MabStream.Position % 4)) % 4;
+                MabStream.Seek(MabStream.Position + align, SeekOrigin.Begin);
+
+                string tmp = onlyDir + "\\" + hash.ToString();
+                File.WriteAllBytes(tmp, fcbBytes);
+                ConvertFCB(tmp, tmp + "c");
+                XDocument doc = XDocument.Load(tmp + "c");
+
+                XElement xFrame = new XElement("Frame");
+                xFrame.Add(new XAttribute("AnimID", hash.ToString()));
+                xFrame.Add(doc.Root);
+                root.Add(xFrame);
+
+                File.Delete(tmp);
+                File.Delete(tmp + "c");
+            }
+
+            MabStream.Dispose();
+
+            xmlDoc.Add(root);
+            xmlDoc.Save(file + ".converted.xml");
         }
 
         static void MoveConvertBin(string file)
