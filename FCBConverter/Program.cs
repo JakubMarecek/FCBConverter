@@ -51,7 +51,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210301-1815";
+        public static string version = "20210302-1945";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1873,24 +1873,23 @@ namespace FCBConverter
 
             FileStream MabStream = new FileStream(file, FileMode.Open);
 
-            byte[] byteSequence = new byte[] { 0x61, 0x4E, 0x69, 0x2F, 0x01, 0x40 }; // aNi/@
-            var afterSequence = MabStream.ScanUntilFound(byteSequence);
+            MemoryStream ms = new MemoryStream();
+            MabStream.CopyTo(ms);
 
-            MabStream.Seek(afterSequence, SeekOrigin.Begin);
-            MabStream.ReadBytes(15);
-            ushort framesCount = MabStream.ReadValueU16();
-            MabStream.ReadBytes(25);
+            byte[] byteSequence = new byte[] { 0x6E, 0x62, 0x43, 0x46 }; // nbCF
+            int[] poses = Helpers.SearchBytesMultiple(ms.ToArray(), byteSequence);
 
-            for (int i = 0; i < framesCount; i++)
+            foreach (int pos in poses)
             {
-                ulong hash = MabStream.ReadValueU64();
+                MabStream.Seek(pos - 16, SeekOrigin.Begin);
+
+                uint hash = MabStream.ReadValueU32();
+                float time = MabStream.ReadValueF32();
                 uint unknown = MabStream.ReadValueU32();
                 ushort fcbLen = MabStream.ReadValueU16();
                 ushort secLen = MabStream.ReadValueU16();
-                byte[] fcbBytes = MabStream.ReadBytes(fcbLen);
 
-                long align = (4 - (MabStream.Position % 4)) % 4;
-                MabStream.Seek(MabStream.Position + align, SeekOrigin.Begin);
+                byte[] fcbBytes = MabStream.ReadBytes(fcbLen);
 
                 string tmp = onlyDir + "\\" + hash.ToString();
                 File.WriteAllBytes(tmp, fcbBytes);
@@ -1899,6 +1898,8 @@ namespace FCBConverter
 
                 XElement xFrame = new XElement("Frame");
                 xFrame.Add(new XAttribute("AnimID", hash.ToString()));
+                xFrame.Add(new XAttribute("Time", time.ToString(CultureInfo.InvariantCulture)));
+                xFrame.Add(new XAttribute("Unknown", unknown.ToString()));
                 xFrame.Add(doc.Root);
                 root.Add(xFrame);
 
