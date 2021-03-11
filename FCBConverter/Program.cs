@@ -52,7 +52,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210311-0115";
+        public static string version = "20210312-0115";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -70,6 +70,7 @@ namespace FCBConverter
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheaderoasis = "Special thanks to: AOY";
+        public static string xmlheaderbnk = "Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.";
 
         //public static List<string> aaaa = new List<string>();
 
@@ -2994,12 +2995,136 @@ namespace FCBConverter
 
         static void BNKExtract(string file)
         {
+            // https://wiki.xentax.com/index.php/Wwise_SoundBank_(*.bnk)
+
+            Dictionary<uint, string> eventActionScopes = new Dictionary<uint, string>
+            {
+                {0x01, "GameObjectSwitchOrTrigger" },
+                {0x02, "Global" },
+                {0x03, "GameObjectRefID" },
+                {0x04, "GameObjectState" },
+                {0x05, "All" },
+                {0x09, "AllExceptRefID" }
+            };
+            Dictionary<uint, string> eventActionTypes = new Dictionary<uint, string>
+            {
+                {0x01, "Stop" },
+                {0x02, "Pause" },
+                {0x03, "Resume" },
+                {0x04, "Play" },
+                {0x05, "Trigger" },
+                {0x06, "Mute" },
+                {0x07, "UnMute" },
+                {0x08, "SetVoicePitch" },
+                {0x09, "ResetVoicePitch" },
+                {0x0A, "SetVoiceVolume" },
+                {0x0B, "ResetVoiceVolume" },
+                {0x0C, "SetBusVolume" },
+                {0x0D, "ResetBusVolume" },
+                {0x0E, "SetVoiceLowpassFilter" },
+                {0x0F, "ResetVoiceLowpassFilter" },
+                {0x10, "EnableState" },
+                {0x11, "DisableState" },
+                {0x12, "SetState" },
+                {0x13, "SetGameParameter" },
+                {0x14, "ResetGameParameter" },
+                {0x19, "SetSwitch" },
+                {0x1A, "EnableBypassOrDisableBypass" },
+                {0x1B, "ResetBypassEffect" },
+                {0x1C, "Break" },
+                {0x1E, "Seek" },
+            };
+            Dictionary<uint, string> eventActionParams = new Dictionary<uint, string>
+            {
+                {0x0E, "Delay" },
+                {0x0F, "Play" },
+                {0x10, "Probability" }
+            };
+            Dictionary<uint, string> eventActionSettings = new Dictionary<uint, string>
+            {
+                {0x00, "VoiceVolume" },
+                {0x03, "VoiceLowpassFilter" },
+            };
+            Dictionary<uint, string> eventActionIncluded = new Dictionary<uint, string>
+            {
+                {0x00, "Embedded" },
+                {0x01, "Streamed" },
+                {0x02, "StreamedZeroLatency" },
+            };
+            Dictionary<uint, string> eventActionSoundType = new Dictionary<uint, string>
+            {
+                {0x00, "SoundSFX" },
+                {0x01, "SoundVoice" },
+            };
+            Dictionary<uint, string> eventActionAddsParams = new Dictionary<uint, string>
+            {
+                {0x00, "GeneralSettingsVoiceVolume" },
+                {0x02, "GeneralSettingsVoicePitch" },
+                {0x03, "GeneralSettingsVoiceLowpassFilter" },
+                {0x05, "AdvancedSettingsPlaybackPriorityPriority" },
+                {0x06, "AdvancedSettingsPlaybackPriorityOffset" },
+                {0x07, "Loop" },
+                {0x08, "MotionVolumeOffset" },
+                {0x0B, "Positioning2DPannerX" },
+                {0x0C, "Positioning2DPannerY" },
+                {0x0D, "PositioningCenterPercent" },
+                {0x12, "GeneralSettingsUserDefinedAuxiliarySendsBus0Volume" },
+                {0x13, "GeneralSettingsUserDefinedAuxiliarySendsBus1Volume" },
+                {0x14, "GeneralSettingsUserDefinedAuxiliarySendsBus2Volume" },
+                {0x15, "GeneralSettingsUserDefinedAuxiliarySendsBus3Volume" },
+                {0x16, "GeneralSettingsGameDefinedAuxiliarySendsVolume" },
+                {0x17, "GeneralSettingsOutputBusVolume" },
+                {0x18, "GeneralSettingsOutputBusLowpassFilter" },
+            };
+
+            Dictionary<uint, string> hircObjects = new Dictionary<uint, string>
+            {
+                {0x01, "Settings" },
+                {0x02, "Sound" },
+                {0x03, "EventAction" },
+                {0x04, "Event" },
+                {0x05, "SequenceContainer" },
+                {0x06, "SwitchContainer" },
+                {0x07, "ActorMixer" },
+                {0x08, "AudioBus" },
+                {0x09, "BlendContainer" },
+                {0x0A, "MusicSegment" },
+                {0x0B, "MusicTrack" },
+                {0x0C, "MusicSwitchContainer" },
+                {0x0D, "MusicPlaylistContainer" },
+                {0x0E, "Attenuation" },
+                {0x0F, "DialogueEvent" },
+                {0x10, "MotionBus" },
+                {0x11, "MotionFX" },
+                {0x12, "Effect" },
+                {0x13, "AuxiliaryBus" },
+            };
+            Dictionary<uint, string> sectionsNames = new Dictionary<uint, string>
+            {
+                {0x44484B42, "BKHD_BankHeader" },
+                {0x58444944, "DIDX_DataIndex" },
+                {0x41544144, "DATA" },
+                {0x53564E45, "ENVS_Environments" },
+                {0x52505846, "FXPR_EffectsProduction" },
+                {0x43524948, "HIRC" },
+                {0x44495453, "STID_SoundTypeID" },
+                {0x474D5453, "STMG" },
+            };
+
+            // ****************************
+
             List<uint> wemIDs = new List<uint>();
             List<uint> wemOffsets = new List<uint>();
             List<uint> wemLengths = new List<uint>();
 
             string onlyDir = Path.GetDirectoryName(file);
             string fileName = Path.GetFileNameWithoutExtension(file);
+            string fileNameXml = file + ".converted.xml";
+
+            XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            xmlDoc.Add(new XComment(xmlheader));
+            xmlDoc.Add(new XComment(xmlheaderbnk));
+            XElement rootXml = new XElement("SoundBank");
 
             FileStream BNKStream = new FileStream(file, FileMode.Open);
 
@@ -3007,9 +3132,34 @@ namespace FCBConverter
             {
                 uint sectionName = BNKStream.ReadValueU32();
                 uint sectionLength = BNKStream.ReadValueU32();
+                long pos = BNKStream.Position;
 
-                if (sectionName == 1480870212) // DIDX
+                if (sectionName == 0x44484B42) // BKHD
                 {
+                    uint version = BNKStream.ReadValueU32();
+                    uint bnkID = BNKStream.ReadValueU32();
+                    uint unknown1 = BNKStream.ReadValueU32();
+                    uint unknown2 = BNKStream.ReadValueU32();
+                    uint unknown3 = BNKStream.ReadValueU32();
+                    uint unknown4 = BNKStream.ReadValueU32();
+                    uint unknown5 = BNKStream.ReadValueU32();
+                    uint unknown6 = BNKStream.ReadValueU32();
+
+                    XElement bkhd = new XElement(sectionsNames[sectionName]);
+                    bkhd.Add(new XAttribute("Version", version));
+                    bkhd.Add(new XAttribute("SoundBankID", bnkID));
+                    bkhd.Add(new XAttribute("Unknown1", unknown1));
+                    bkhd.Add(new XAttribute("Unknown2", unknown2));
+                    bkhd.Add(new XAttribute("Unknown3", unknown3));
+                    bkhd.Add(new XAttribute("Unknown4", unknown4));
+                    bkhd.Add(new XAttribute("Unknown5", unknown5));
+                    bkhd.Add(new XAttribute("Unknown6", unknown6));
+                    rootXml.Add(bkhd);
+                }
+                else if (sectionName == 0x58444944) // DIDX
+                {
+                    XElement didx = new XElement(sectionsNames[sectionName]);
+
                     uint filesCount = sectionLength / 12;
 
                     for (int i = 0; i < filesCount; i++)
@@ -3021,10 +3171,20 @@ namespace FCBConverter
                         wemIDs.Add(wemID);
                         wemOffsets.Add(wemOffset);
                         wemLengths.Add(wemLength);
+
+                        XElement objFile = new XElement("WEMFile");
+                        objFile.Add(new XAttribute("ID", wemID.ToString()));
+                        objFile.Add(new XAttribute("Offset", wemOffset.ToString()));
+                        objFile.Add(new XAttribute("Length", wemLength.ToString()));
+                        didx.Add(objFile);
                     }
+
+                    rootXml.Add(didx);
                 }
-                else if (sectionName == 1096040772) // DATA
+                else if (sectionName == 0x41544144) // DATA
                 {
+                    XElement data = new XElement(sectionsNames[sectionName]);
+
                     long dataPosStart = BNKStream.Position;
 
                     for (int i = 0; i < wemIDs.Count(); i++)
@@ -3033,22 +3193,270 @@ namespace FCBConverter
                         BNKStream.Seek(offset, SeekOrigin.Begin);
 
                         byte[] wem = BNKStream.ReadBytes((int)wemLengths[i]);
-                        string wemFileName = onlyDir + "\\" + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".wem";
+                        string wemFN = fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".wem";
+                        string wemFileName = onlyDir + "\\" + wemFN;
                         string wavFileName = onlyDir + "\\" + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".ogg";
 
                         File.WriteAllBytes(wemFileName, wem);
 
                         WEMToOGG(wemFileName, wavFileName);
+
+                        XElement objFile = new XElement("WEMFile");
+                        objFile.Add(new XAttribute("FileName", wemFN));
+                        data.Add(objFile);
                     }
+
+                    rootXml.Add(data);
+                }
+                else if (sectionName == 0x43524948) // HIRC
+                {
+                    XElement hirc = new XElement(sectionsNames[sectionName]);
+
+                    uint objectsCount = BNKStream.ReadValueU32();
+
+                    for (int i = 0; i < objectsCount; i++)
+                    {
+                        byte type = (byte)BNKStream.ReadByte();
+                        uint objectLength = BNKStream.ReadValueU32() - 4;
+                        uint objectID = BNKStream.ReadValueU32();
+
+                        if (type == 0x01) // 1 Settings
+                        {
+                            XElement xObj = new XElement(hircObjects[type]);
+                            xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
+
+                            byte countSettings = (byte)BNKStream.ReadByte();
+
+                            List<byte> settings = new List<byte>();
+                            for (int j = 0; j < countSettings; j++)
+                            {
+                                byte typeSetting = (byte)BNKStream.ReadByte();
+                                settings.Add(typeSetting);
+                            }
+
+                            for (int j = 0; j < countSettings; j++)
+                            {
+                                ushort settingUnknown = BNKStream.ReadValueU16();
+                                float settingVal = BNKStream.ReadValueF32();
+
+                                string settingName = "UnknownSetting" + settings[j].ToString();
+                                if (eventActionSettings.ContainsKey(settings[j])) settingName = eventActionSettings[settings[j]];
+
+                                XElement xSett = new XElement("Setting");
+                                xSett.Add(new XAttribute("Unknown", settingUnknown.ToString()));
+                                xSett.Add(new XAttribute(settingName, settingVal.ToString(CultureInfo.InvariantCulture)));
+                                xObj.Add(xSett);
+                            }
+
+                            hirc.Add(xObj);
+                        }
+                        else if (type == 0x02) // 2 Sound SFX/Sound Voice
+                        {
+                            XElement xObj = new XElement(hircObjects[type]);
+                            xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
+
+                            long posT = BNKStream.Position;
+
+                            byte unknown1 = (byte)BNKStream.ReadByte();
+                            byte unknown2 = (byte)BNKStream.ReadByte();
+                            byte unknown3 = (byte)BNKStream.ReadByte();
+                            byte unknown4 = (byte)BNKStream.ReadByte();
+                            byte included = (byte)BNKStream.ReadByte();
+                            uint wemID = BNKStream.ReadValueU32();
+                            uint wemSize = BNKStream.ReadValueU32();
+                            byte soundType = (byte)BNKStream.ReadByte();
+
+                            byte overrideParentEffects = (byte)BNKStream.ReadByte();
+                            byte effectsCount = (byte)BNKStream.ReadByte();
+
+                            xObj.Add(new XElement("Unknown1", unknown1));
+                            xObj.Add(new XElement("Unknown2", unknown2));
+                            xObj.Add(new XElement("Unknown3", unknown3));
+                            xObj.Add(new XElement("Unknown4", unknown4));
+                            xObj.Add(new XElement("Included", eventActionIncluded[included]));
+                            xObj.Add(new XElement("WemID", wemID));
+                            xObj.Add(new XElement("WemSize", wemSize));
+                            xObj.Add(new XElement("SoundType", eventActionSoundType[soundType]));
+                            xObj.Add(new XElement("OverrideParentEffects", overrideParentEffects.ToString()));
+
+                            if (effectsCount > 0)
+                            {
+                                byte bitMaskEffectBypass = (byte)BNKStream.ReadByte();
+                                xObj.Add(new XElement("bitMaskEffectBypass", bitMaskEffectBypass.ToString()));
+                            }
+
+                            XElement xEffects = new XElement("Effects");
+                            for (int j = 0; j < effectsCount; j++)
+                            {
+                                byte effectIdx = (byte)BNKStream.ReadByte();
+                                uint effectObjID = BNKStream.ReadValueU32();
+                                byte unkEff1 = (byte)BNKStream.ReadByte();
+                                byte unkEff2 = (byte)BNKStream.ReadByte();
+
+                                XElement xEffect = new XElement("Effects");
+                                xEffect.Add(new XAttribute("EffectIndex", effectIdx.ToString()));
+                                xEffect.Add(new XAttribute("EffectObjectID", effectObjID.ToString()));
+                                xEffect.Add(new XAttribute("Unknown1", unkEff1.ToString()));
+                                xEffect.Add(new XAttribute("Unknown2", unkEff2.ToString()));
+                                xEffects.Add(xEffect);
+                            }
+                            xObj.Add(xEffects);
+
+                            BNKStream.ReadByte(); // always zero
+
+                            uint outputBusID = BNKStream.ReadValueU32();
+                            uint parentObjID = BNKStream.ReadValueU32();
+
+                            byte overrideParentPlaybackPriority = (byte)BNKStream.ReadByte();
+                            byte additionalParams = (byte)BNKStream.ReadByte();
+
+                            xObj.Add(new XElement("OutputBusID", outputBusID.ToString()));
+                            xObj.Add(new XElement("ParentObjID", parentObjID.ToString()));
+                            xObj.Add(new XElement("OverrideParentPlaybackPriority", overrideParentPlaybackPriority.ToString()));
+
+                            XElement xAddParams = new XElement("AdditionalParameters");
+                            List<byte> addParams = new List<byte>();
+                            for (int j = 0; j < additionalParams; j++)
+                            {
+                                byte addParamType = (byte)BNKStream.ReadByte();
+                                addParams.Add(addParamType);
+                            }
+                            for (int j = 0; j < additionalParams; j++)
+                            {
+                                float addParamVal = BNKStream.ReadValueF32();
+
+                                string paramName = "UnknownParam" + addParams[j].ToString();
+                                if (eventActionAddsParams.ContainsKey(addParams[j])) paramName = eventActionAddsParams[addParams[j]];
+
+                                xAddParams.Add(new XElement(paramName, addParamVal.ToString(CultureInfo.InvariantCulture)));
+                            }
+                            xObj.Add(xAddParams);
+
+                            posT = posT + objectLength - BNKStream.Position;
+                            byte[] soundStruct = BNKStream.ReadBytes((int)posT);
+
+                            xObj.Add(new XElement("SoundStructure", Helpers.ByteArrayToString(soundStruct).ToUpper()));
+
+                            hirc.Add(xObj);
+                        }
+                        else if (type == 0x03) // 3 Event Action
+                        {
+                            XElement xObj = new XElement(hircObjects[type]);
+                            xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
+
+                            byte scope = (byte)BNKStream.ReadByte();
+                            byte actionType = (byte)BNKStream.ReadByte();
+                            uint refGameObjID = BNKStream.ReadValueU32();
+                            BNKStream.ReadByte(); // always zero
+                            byte additionalParamsLen = (byte)BNKStream.ReadByte();
+
+                            xObj.Add(new XAttribute("Scope", eventActionScopes[scope]));
+                            xObj.Add(new XAttribute("ActionType", eventActionTypes[actionType]));
+                            xObj.Add(new XAttribute("ReferenceID", refGameObjID.ToString()));
+
+                            XElement xParams = new XElement("Params");
+
+                            List<byte> paramTypes = new List<byte>();
+                            for (int j = 0; j < additionalParamsLen; j++)
+                            {
+                                byte paramType = (byte)BNKStream.ReadByte();
+                                paramTypes.Add(paramType);
+                            }
+                            for (int j = 0; j < additionalParamsLen; j++)
+                            {
+                                //if (paramTypes[j] == 0x0E || paramTypes[j] == 0x0F || paramTypes[j] == 0x10)
+                                //{
+                                //}
+                                uint paramVal = BNKStream.ReadValueU32();
+                                xParams.Add(new XElement(eventActionParams[paramTypes[j]], paramVal.ToString()));
+                            }
+
+                            xObj.Add(xParams);
+
+
+                            byte nextParams = (byte)BNKStream.ReadByte(); // should be always zero
+
+                            XElement xNextParams = new XElement("NextParams");
+                            paramTypes = new List<byte>();
+                            for (int j = 0; j < nextParams; j++)
+                            {
+                                byte paramType = (byte)BNKStream.ReadByte();
+                                paramTypes.Add(paramType);
+                            }
+                            for (int j = 0; j < nextParams; j++)
+                            {
+                                int paramVal1 = BNKStream.ReadValueS32();
+                                uint paramVal2 = BNKStream.ReadValueU32();
+                                XElement xNPVal = new XElement(eventActionParams[paramTypes[j]]);
+                                xNPVal.Add(new XAttribute("Value1", paramVal1.ToString()));
+                                xNPVal.Add(new XAttribute("Value2", paramVal2.ToString()));
+                                xNextParams.Add(xNPVal);
+                            }
+                            xObj.Add(xNextParams);
+
+
+                            byte unknown = (byte)BNKStream.ReadByte();
+
+                            xObj.Add(new XElement("Unknown", unknown.ToString()));
+
+                            if (actionType == 0x01 || actionType == 0x04) // Stop Play
+                            {
+                                uint soundBankID = BNKStream.ReadValueU32();
+                                xObj.Add(new XElement("SoundBankID", soundBankID.ToString()));
+                            }
+                            if (actionType == 0x1E) // Seek
+                            {
+                                byte[] objData = BNKStream.ReadBytes(17);
+                                xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                            }
+
+                            hirc.Add(xObj);
+                        }
+                        else if (type == 0x04) // 4 Event
+                        {
+                            XElement xObj = new XElement(hircObjects[type]);
+                            xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
+
+                            byte countEvents = (byte)BNKStream.ReadByte();
+
+                            for (int j = 0; j < countEvents; j++)
+                            {
+                                uint evID = BNKStream.ReadValueU32();
+                                xObj.Add(new XElement("EventActionID", evID));
+                            }
+
+                            hirc.Add(xObj);
+                        }
+                        else
+                        {
+                            byte[] objData = BNKStream.ReadBytes((int)objectLength);
+
+                            XElement xObj = new XElement(hircObjects[type]);
+                            xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
+                            xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                            hirc.Add(xObj);
+                        }
+                    }
+
+                    rootXml.Add(hirc);
                 }
                 else // every other sections - skip them
                 {
-                    BNKStream.ReadBytes((int)sectionLength);
+                    byte[] section = BNKStream.ReadBytes((int)sectionLength);
+
+                    XElement xSec = new XElement(sectionsNames[sectionName]);
+                    xSec.Add(new XElement("Binary", Helpers.ByteArrayToString(section).ToUpper()));
+                    rootXml.Add(xSec);
                 }
+
+                BNKStream.Seek(pos + sectionLength, SeekOrigin.Begin);
             }
             while (BNKStream.Position < BNKStream.Length);
 
             BNKStream.Close();
+
+            xmlDoc.Add(rootXml);
+            xmlDoc.Save(fileNameXml);
         }
 
         static void WEMToOGG(string file, string output = "")
@@ -3058,19 +3466,26 @@ namespace FCBConverter
                 output = file.Replace(".wem", ".ogg");
             }
 
-            WEMSharp.WEMFile wemFile = new WEMSharp.WEMFile(file, WEMSharp.WEMForcePacketFormat.ForceModPackets);
-            wemFile.GenerateOGG(output, "packed_codebooks_aoTuV_603.bin", false, false);
+            try
+            {
+                WEMSharp.WEMFile wemFile = new WEMSharp.WEMFile(file, WEMSharp.WEMForcePacketFormat.NoForcePacketFormat);
+                wemFile.GenerateOGG(output, "packed_codebooks_aoTuV_603.bin", false, false);
 
-            Process process = new Process();
-            process.StartInfo.FileName = "revorb.exe";
-            process.StartInfo.Arguments = output;
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.ErrorDialog = false;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.UseShellExecute = false;
-            process.Start();
-            process.WaitForExit();
+                Process process = new Process();
+                process.StartInfo.FileName = "revorb.exe";
+                process.StartInfo.Arguments = output;
+                process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.ErrorDialog = false;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.UseShellExecute = false;
+                process.Start();
+                process.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
     }
 }
