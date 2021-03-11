@@ -82,6 +82,13 @@
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\NamedDefinitionDictionary.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\XmlLoadException.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ExportException.cs" />
+    <Compile Include="WEMSharp\BitStream.cs" />
+    <Compile Include="WEMSharp\CodebookLibrary.cs" />
+    <Compile Include="WEMSharp\CRC32.cs" />
+    <Compile Include="WEMSharp\OggStream.cs" />
+    <Compile Include="WEMSharp\Packet.cs" />
+    <Compile Include="WEMSharp\Packet8.cs" />
+    <Compile Include="WEMSharp\WEMFile.cs" />
     <None Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs.bak" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ImportException.cs" />
@@ -154,6 +161,9 @@
     <Compile Include="CombinedMoveFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="packed_codebooks_aoTuV_603.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -171,6 +181,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dunia_Engine.ico" />
+    <None Include="revorb.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

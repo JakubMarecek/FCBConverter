@@ -20,6 +20,7 @@ using Gibbed.IO;
 using LZ4Sharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210302-1945";
+        public static string version = "20210311-0115";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -497,6 +498,24 @@ namespace FCBConverter
                 string newPath = file.Replace(".swf", ".feu");
 
                 File.WriteAllBytes(newPath, bytes);
+
+                FIN();
+                return;
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".bnk"))
+            {
+                BNKExtract(file);
+
+                FIN();
+                return;
+            }
+
+            if (file.EndsWith(".wem"))
+            {
+                WEMToOGG(file);
 
                 FIN();
                 return;
@@ -2971,6 +2990,87 @@ namespace FCBConverter
             entry.CompressionScheme = (CompressionScheme)dwFlag;
 
             return entry;
+        }
+
+        static void BNKExtract(string file)
+        {
+            List<uint> wemIDs = new List<uint>();
+            List<uint> wemOffsets = new List<uint>();
+            List<uint> wemLengths = new List<uint>();
+
+            string onlyDir = Path.GetDirectoryName(file);
+            string fileName = Path.GetFileNameWithoutExtension(file);
+
+            FileStream BNKStream = new FileStream(file, FileMode.Open);
+
+            do
+            {
+                uint sectionName = BNKStream.ReadValueU32();
+                uint sectionLength = BNKStream.ReadValueU32();
+
+                if (sectionName == 1480870212) // DIDX
+                {
+                    uint filesCount = sectionLength / 12;
+
+                    for (int i = 0; i < filesCount; i++)
+                    {
+                        uint wemID = BNKStream.ReadValueU32();
+                        uint wemOffset = BNKStream.ReadValueU32();
+                        uint wemLength = BNKStream.ReadValueU32();
+
+                        wemIDs.Add(wemID);
+                        wemOffsets.Add(wemOffset);
+                        wemLengths.Add(wemLength);
+                    }
+                }
+                else if (sectionName == 1096040772) // DATA
+                {
+                    long dataPosStart = BNKStream.Position;
+
+                    for (int i = 0; i < wemIDs.Count(); i++)
+                    {
+                        long offset = dataPosStart + wemOffsets[i];
+                        BNKStream.Seek(offset, SeekOrigin.Begin);
+
+                        byte[] wem = BNKStream.ReadBytes((int)wemLengths[i]);
+                        string wemFileName = onlyDir + "\\" + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".wem";
+                        string wavFileName = onlyDir + "\\" + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".ogg";
+
+                        File.WriteAllBytes(wemFileName, wem);
+
+                        WEMToOGG(wemFileName, wavFileName);
+                    }
+                }
+                else // every other sections - skip them
+                {
+                    BNKStream.ReadBytes((int)sectionLength);
+                }
+            }
+            while (BNKStream.Position < BNKStream.Length);
+
+            BNKStream.Close();
+        }
+
+        static void WEMToOGG(string file, string output = "")
+        {
+            if (output == "")
+            {
+                output = file.Replace(".wem", ".ogg");
+            }
+
+            WEMSharp.WEMFile wemFile = new WEMSharp.WEMFile(file, WEMSharp.WEMForcePacketFormat.ForceModPackets);
+            wemFile.GenerateOGG(output, "packed_codebooks_aoTuV_603.bin", false, false);
+
+            Process process = new Process();
+            process.StartInfo.FileName = "revorb.exe";
+            process.StartInfo.Arguments = output;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.ErrorDialog = false;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.UseShellExecute = false;
+            process.Start();
+            process.WaitForExit();
         }
     }
 }
