@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BNKNames.cs" />
     <Compile Include="Depload.cs" />
     <Compile Include="FatEntry.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\ConditionValueSource.cs" />
@@ -82,13 +83,6 @@
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\NamedDefinitionDictionary.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\XmlLoadException.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ExportException.cs" />
-    <Compile Include="WEMSharp\BitStream.cs" />
-    <Compile Include="WEMSharp\CodebookLibrary.cs" />
-    <Compile Include="WEMSharp\CRC32.cs" />
-    <Compile Include="WEMSharp\OggStream.cs" />
-    <Compile Include="WEMSharp\Packet.cs" />
-    <Compile Include="WEMSharp\Packet8.cs" />
-    <Compile Include="WEMSharp\WEMFile.cs" />
     <None Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs.bak" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ImportException.cs" />
@@ -181,6 +175,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dunia_Engine.ico" />
+    <None Include="ww2ogg.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="revorb.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
