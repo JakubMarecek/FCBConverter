@@ -52,7 +52,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210313-2300";
+        public static string version = "20210314-1530";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -3248,6 +3248,99 @@ namespace FCBConverter
                             }
                             xObj.Add(xAddParams);
 
+                            // -------------------------------------------------------------------------------------------------------------------------------------
+                            /*BNKStream.ReadByte(); // always zero
+
+                            byte positionIncluded = (byte)BNKStream.ReadByte();
+
+                            if (positionIncluded == 0x01)
+                            {
+                                byte posType = (byte)BNKStream.ReadByte();
+
+                                if (posType == 0x00)
+                                {
+                                    byte enablePanner = (byte)BNKStream.ReadByte();
+                                }
+                                if (posType == 0x01)
+                                {
+                                    uint posSource = BNKStream.ReadValueU32();
+                                    uint attenuationID = BNKStream.ReadValueU32();
+                                    byte enableSpatialization = (byte)BNKStream.ReadByte();
+
+                                    if (posSource == 0x02)
+                                    {
+                                        uint playType = BNKStream.ReadValueU32();
+                                        byte toLoop = (byte)BNKStream.ReadByte();
+                                        uint transitionTime = BNKStream.ReadValueU32();
+                                        byte followListenerOrientation = (byte)BNKStream.ReadByte();
+                                    }
+                                    if (posSource == 0x03)
+                                    {
+                                        byte updateAtEachFrame = (byte)BNKStream.ReadByte();
+                                    }
+                                }
+                            }
+
+                            byte ovrdPrntSettGmAuxSnds = (byte)BNKStream.ReadByte();
+                            byte useGmAuxSnds = (byte)BNKStream.ReadByte();
+                            byte ovrdPrntSettUsrAuxSnds = (byte)BNKStream.ReadByte();
+                            byte usrAuxSndsExists = (byte)BNKStream.ReadByte();
+
+                            if (usrAuxSndsExists == 0x01)
+                            {
+                                uint auxBus1ID = BNKStream.ReadValueU32();
+                                uint auxBus2ID = BNKStream.ReadValueU32();
+                                uint auxBus3ID = BNKStream.ReadValueU32();
+                                uint auxBus4ID = BNKStream.ReadValueU32();
+                            }
+
+                            byte unknownParamPlaybackLimit = (byte)BNKStream.ReadByte();
+
+                            if (unknownParamPlaybackLimit == 0x01)
+                            {
+                                byte doWhenPriority = (byte)BNKStream.ReadByte();
+                                byte doWhenLimitRchd = (byte)BNKStream.ReadByte();
+                                ushort limitSoundInstances = BNKStream.ReadValueU16();
+                            }
+
+                            byte howToLimitSndInst = (byte)BNKStream.ReadByte();
+                            byte virtVoiceBehav = (byte)BNKStream.ReadByte();
+                            byte ovrdPrntSettPlaybackLimit = (byte)BNKStream.ReadByte();
+                            byte ovrdPrntSettVirtualVoice = (byte)BNKStream.ReadByte();
+                            byte numStateGroups = (byte)BNKStream.ReadByte();
+
+                            for (int j = 0; j < numStateGroups; j++)
+                            {
+                                uint groupStateID = BNKStream.ReadValueU32();
+                                byte occursAt = (byte)BNKStream.ReadByte();
+                                ushort numStatesDiffer = BNKStream.ReadValueU16();
+
+                                for (int k = 0; k < numStatesDiffer; k++)
+                                {
+                                    uint differGroupStateID = BNKStream.ReadValueU32();
+                                    uint objIDContainSett = BNKStream.ReadValueU32();
+                                }
+                            }
+
+                            byte numRTPCs = (byte)BNKStream.ReadByte();
+
+                            for (int j = 0; j < numRTPCs; j++)
+                            {
+                                uint gameParamXID = BNKStream.ReadValueU32();
+                                uint yAxType = BNKStream.ReadValueU32();
+                                uint unknownID = BNKStream.ReadValueU32();
+                                byte unk1 = (byte)BNKStream.ReadByte();
+                                byte numPoints = (byte)BNKStream.ReadByte();
+                                byte unk2 = (byte)BNKStream.ReadByte();
+
+                                for (int k = 0; k < numPoints; k++)
+                                {
+                                    float xCoords = BNKStream.ReadValueF32();
+                                    float yCoords = BNKStream.ReadValueF32();
+                                    uint shapeCurveFlw = BNKStream.ReadValueU32();
+                                }
+                            }*/
+    
                             posT = posT + objectLength - BNKStream.Position;
                             byte[] soundStruct = BNKStream.ReadBytes((int)posT);
 
@@ -3326,10 +3419,32 @@ namespace FCBConverter
                                     byte[] objData = BNKStream.ReadBytes(7);
                                     xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
                                 }
-                                if (actionType == 0x0B || actionType == 0x1E || actionType == 0x0A) // ResetVoiceVolume Seek SetVoiceVolume
+                                if (actionType == 0x1E) // Seek
                                 {
                                     byte[] objData = BNKStream.ReadBytes(17);
                                     xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                                }
+                                if (actionType == 0x13 || actionType == 0x14) // SetGameParameter ResetGameParameter
+                                {
+                                    byte[] objData = BNKStream.ReadBytes(18);
+                                    xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                                }
+
+                                if (bnkVersion == 120)
+                                {
+                                    if (actionType == 0x0B || actionType == 0x0A) // ResetVoiceVolume SetVoiceVolume
+                                    {
+                                        byte[] objData = BNKStream.ReadBytes(17);
+                                        xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                                    }
+                                }
+                                if (bnkVersion == 128)
+                                {
+                                    if (actionType == 0x0B || actionType == 0x0A) // ResetVoiceVolume SetVoiceVolume
+                                    {
+                                        byte[] objData = BNKStream.ReadBytes(14);
+                                        xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                                    }
                                 }
                             }
                         }
@@ -3623,7 +3738,7 @@ namespace FCBConverter
                                 {
                                     BNKStream.WriteValueU32(uint.Parse(obj.Element("SoundBankID").Value));
                                 }
-                                if (actionType == 0x0B || actionType == 0x12 || actionType == 0x1E || actionType == 0x02 || actionType == 0x0A) // ResetVoiceVolume SetState Seek Pause SetVoiceVolume
+                                if (actionType == 0x0B || actionType == 0x12 || actionType == 0x1E || actionType == 0x02 || actionType == 0x0A || actionType == 0x13 || actionType == 0x14) // SetGameParameter ResetGameParameter ResetVoiceVolume SetState Seek Pause SetVoiceVolume
                                 {
                                     byte[] objData = Helpers.StringToByteArray(obj.Element("Binary").Value);
                                     BNKStream.WriteBytes(objData);
