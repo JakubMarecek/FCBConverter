@@ -101,13 +101,14 @@ namespace FCBConverter
         public static Dictionary<uint, string> eventActionIncluded = new Dictionary<uint, string>
         {
             {0x00, "Embedded" },
-            {0x01, "Streamed" },
-            {0x02, "StreamedZeroLatency" },
+            {0x02, "Streamed" },
+            {0x01, "StreamedZeroLatency" },
         };
         public static Dictionary<uint, string> eventActionSoundType = new Dictionary<uint, string>
         {
             {0x00, "SoundSFX" },
             {0x01, "SoundVoice" },
+            {0x08, "NonCachable" },
         };
         public static Dictionary<uint, string> eventActionAddsParams = new Dictionary<uint, string>
         {
@@ -121,19 +122,24 @@ namespace FCBConverter
             {0x0B, "Positioning2DPannerX" },
             {0x0C, "Positioning2DPannerY" },
             {0x0E, "PositioningCenterPercent" },
-            {0x12, "GeneralSettingsUserDefinedAuxiliarySendsBus0Volume" },
-            {0x13, "GeneralSettingsUserDefinedAuxiliarySendsBus1Volume" },
-            {0x14, "GeneralSettingsUserDefinedAuxiliarySendsBus2Volume" },
-            {0x15, "GeneralSettingsUserDefinedAuxiliarySendsBus3Volume" },
-            {0x16, "GeneralSettingsUserDefinedAuxiliarySendsBus4Volume" },
+            {0x13, "GeneralSettingsUserDefinedAuxiliarySendsBus0Volume" },
+            {0x14, "GeneralSettingsUserDefinedAuxiliarySendsBus1Volume" },
+            {0x15, "GeneralSettingsUserDefinedAuxiliarySendsBus2Volume" },
+            {0x16, "GeneralSettingsUserDefinedAuxiliarySendsBus3Volume" },
             {0x17, "GeneralSettingsGameDefinedAuxiliarySendsVolume" },
-            {0x44, "GeneralSettingsGameDefinedAuxiliarySendsLPF" },
-            {0x45, "GeneralSettingsGameDefinedAuxiliarySendsHPF" },
             {0x18, "GeneralSettingsOutputBusVolume" },
             {0x1A, "GeneralSettingsOutputBusLowpassFilter" },
             {0x19, "GeneralSettingsOutputBusHighpassFilter" },
             {0x3A, "LoopCount" },
             {0x3B, "GeneralSettingsInitialDelay" },
+            {0x3C, "GeneralSettingsUserDefinedAuxiliaryLPF0" },
+            {0x3D, "GeneralSettingsUserDefinedAuxiliaryLPF1" },
+            {0x3E, "GeneralSettingsUserDefinedAuxiliaryLPF2" },
+            {0x3F, "GeneralSettingsUserDefinedAuxiliaryLPF3" },
+            {0x40, "GeneralSettingsUserDefinedAuxiliaryHPF0" },
+            {0x41, "GeneralSettingsUserDefinedAuxiliaryHPF1" },
+            {0x42, "GeneralSettingsUserDefinedAuxiliaryHPF2" },
+            {0x43, "GeneralSettingsUserDefinedAuxiliaryHPF3" },
         };
 
         public static Dictionary<uint, string> hircObjects = new Dictionary<uint, string>

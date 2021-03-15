@@ -3167,7 +3167,7 @@ namespace FCBConverter
                             xObj.Add(new XAttribute("Unknown2", unknown2));
                             xObj.Add(new XAttribute("Unknown3", unknown3));
                             xObj.Add(new XAttribute("Unknown4", unknown4));
-                            xObj.Add(new XAttribute("Included", BNKGetKnownName(included, BNKNames.eventActionIncluded, "Included")));
+                            xObj.Add(new XAttribute("Stream", BNKGetKnownName(included, BNKNames.eventActionIncluded, "Included")));
 
                             if (unknown1 == 2)
                             {
@@ -3184,15 +3184,16 @@ namespace FCBConverter
                             xObj.Add(new XAttribute("WemID", wemID));
                             xObj.Add(new XAttribute("WemSize", wemSize));
                             xObj.Add(new XAttribute("SoundType", BNKGetKnownName(soundType, BNKNames.eventActionSoundType, "SoundType")));
-                            xObj.Add(new XAttribute("OverrideParentEffects", overrideParentEffects.ToString()));
 
+                            XElement xEffects = new XElement("Effects");
+
+                            xEffects.Add(new XAttribute("OverrideParentEffects", overrideParentEffects.ToString()));
                             if (effectsCount > 0)
                             {
                                 byte bitMaskEffectBypass = (byte)BNKStream.ReadByte();
-                                xObj.Add(new XAttribute("bitMaskEffectBypass", bitMaskEffectBypass.ToString()));
+                                xEffects.Add(new XAttribute("bitMaskEffectBypass", bitMaskEffectBypass.ToString()));
                             }
 
-                            XElement xEffects = new XElement("Effects");
                             for (int j = 0; j < effectsCount; j++)
                             {
                                 byte effectIdx = (byte)BNKStream.ReadByte();
@@ -3247,147 +3248,214 @@ namespace FCBConverter
 
                             // -------------------------------------------------------------------------------------------------------------------------------------
 
-                            BNKStream.ReadByte(); // always zero
+                            //BNKStream.ReadByte(); // always zero
+                            byte unknownParams = (byte)BNKStream.ReadByte();
+
+                            XElement xUnkParams = new XElement("UnknownRangeParameters");
+                            List<byte> aunkParams = new List<byte>();
+                            for (int j = 0; j < unknownParams; j++)
+                            {
+                                byte unkParamType = (byte)BNKStream.ReadByte();
+                                aunkParams.Add(unkParamType);
+                            }
+                            for (int j = 0; j < unknownParams; j++)
+                            {
+                                string pname = BNKGetKnownName(aunkParams[j], BNKNames.eventActionAddsParams, "Param");
+
+                                XElement unElm = new XElement(pname);
+                                float unkParamVal1 = BNKStream.ReadValueF32();
+                                float unkParamVal2 = BNKStream.ReadValueF32();
+                                unElm.Add(new XAttribute("Min", unkParamVal1.ToString(CultureInfo.InvariantCulture)));
+                                unElm.Add(new XAttribute("Max", unkParamVal2.ToString(CultureInfo.InvariantCulture)));
+                                xUnkParams.Add(unElm);
+                            }
+                            xObj.Add(xUnkParams);
+
+                            XElement xPositioning = new XElement("Positioning");
 
                             byte positioningType = (byte)BNKStream.ReadByte();
+                            xPositioning.Add(new XAttribute("Type", positioningType.ToString()));
+
+                            // maybe ((positioningType % 7) == 3)      && positioningType != 199 && positioningType != 192
+                            if (positioningType > 15 && (positioningType % 7) != 3)
+                            {
+                                byte positioningSettings = (byte)BNKStream.ReadByte();
+                                xPositioning.Add(new XAttribute("Settings", positioningSettings.ToString()));
+
+                                uint attenuationID = BNKStream.ReadValueU32();
+                                xPositioning.Add(new XAttribute("AttenuationID", attenuationID.ToString()));
+                            }
+
+                            xObj.Add(xPositioning);
+
+                            XElement xAuxiliary = new XElement("Auxiliary");
+
+                            byte auxSettings = (byte)BNKStream.ReadByte();
+                            xAuxiliary.Add(new XAttribute("Settings", auxSettings.ToString()));
+
+                            if (auxSettings > 7)
+                            {
+                                uint auxBus1 = BNKStream.ReadValueU32();
+                                uint auxBus2 = BNKStream.ReadValueU32();
+                                uint auxBus3 = BNKStream.ReadValueU32();
+                                uint auxBus4 = BNKStream.ReadValueU32();
+
+                                XElement usrDfnAuxSnds = new XElement("UserDefinedAuxiliarySends");
+                                usrDfnAuxSnds.Add(new XElement("AuxiliaryBus1", auxBus1.ToString()));
+                                usrDfnAuxSnds.Add(new XElement("AuxiliaryBus2", auxBus2.ToString()));
+                                usrDfnAuxSnds.Add(new XElement("AuxiliaryBus3", auxBus3.ToString()));
+                                usrDfnAuxSnds.Add(new XElement("AuxiliaryBus4", auxBus4.ToString()));
+                                xAuxiliary.Add(usrDfnAuxSnds);
+                            }
+
+                            xObj.Add(xAuxiliary);
+
+                            /*byte positioningType = (byte)BNKStream.ReadByte();
                             byte positioningSettings = (byte)BNKStream.ReadByte();
 
                             xObj.Add(new XAttribute("PositioningType", positioningType.ToString()));
                             xObj.Add(new XAttribute("PositioningSettings", positioningSettings.ToString()));
 
-                            if (true)
+                            if (positioningSettings > 3 || (positioningSettings == 0x01 && bnkVersion == 120))
                             {
-                                if (positioningSettings > 2 || (positioningSettings == 0x01 && bnkVersion == 120))
+                                byte auxSettings = 0;
+
+                                if ((positioningSettings == 0x0F && bnkVersion == 128))
+                                {
+                                }
+                                else
                                 {
                                     uint attenuationID = BNKStream.ReadValueU32();
                                     xObj.Add(new XAttribute("AttenuationID", attenuationID.ToString()));
 
-                                    byte auxSettings = (byte)BNKStream.ReadByte();
+                                    auxSettings = (byte)BNKStream.ReadByte();
                                     xObj.Add(new XAttribute("AuxiliarySettings", auxSettings.ToString()));
-
-                                    if (auxSettings > 7)
-                                    {
-                                        uint auxBus1 = BNKStream.ReadValueU32();
-                                        uint auxBus2 = BNKStream.ReadValueU32();
-                                        uint auxBus3 = BNKStream.ReadValueU32();
-                                        uint auxBus4 = BNKStream.ReadValueU32();
-
-                                        xObj.Add(new XAttribute("AuxiliaryBus1", auxBus1.ToString()));
-                                        xObj.Add(new XAttribute("AuxiliaryBus2", auxBus2.ToString()));
-                                        xObj.Add(new XAttribute("AuxiliaryBus3", auxBus3.ToString()));
-                                        xObj.Add(new XAttribute("AuxiliaryBus4", auxBus4.ToString()));
-                                    }
                                 }
 
-                                byte playbackSettings = (byte)BNKStream.ReadByte();
-                                byte onRetPhysVoice = (byte)BNKStream.ReadByte();
-                                byte limitSndInst = (byte)BNKStream.ReadByte();
-                                byte posUnknown2 = (byte)BNKStream.ReadByte();
-                                byte virtualVoiceBehav = (byte)BNKStream.ReadByte();
-
-                                xObj.Add(new XAttribute("PlaybackSettings", playbackSettings.ToString()));
-                                xObj.Add(new XAttribute("OnReturnToPhysVoice", onRetPhysVoice.ToString()));
-                                xObj.Add(new XAttribute("LimitSoundInstances", limitSndInst.ToString()));
-                                xObj.Add(new XAttribute("PosUnknown", posUnknown2.ToString()));
-                                xObj.Add(new XAttribute("VirtualVoiceBehavior", virtualVoiceBehav.ToString()));
-
-                                BNKStream.ReadByte(); // always zero
-                                if (bnkVersion == 120)
+                                if (auxSettings > 7 || (positioningSettings == 0x0F && bnkVersion == 128))
                                 {
-                                    BNKStream.ReadByte();
-                                    BNKStream.ReadByte();
+                                    uint auxBus1 = BNKStream.ReadValueU32();
+                                    uint auxBus2 = BNKStream.ReadValueU32();
+                                    uint auxBus3 = BNKStream.ReadValueU32();
+                                    uint auxBus4 = BNKStream.ReadValueU32();
+
+                                    XElement usrDfnAuxSnds = new XElement("UserDefinedAuxiliarySends");
+                                    usrDfnAuxSnds.Add(new XElement("AuxiliaryBus1", auxBus1.ToString()));
+                                    usrDfnAuxSnds.Add(new XElement("AuxiliaryBus2", auxBus2.ToString()));
+                                    usrDfnAuxSnds.Add(new XElement("AuxiliaryBus3", auxBus3.ToString()));
+                                    usrDfnAuxSnds.Add(new XElement("AuxiliaryBus4", auxBus4.ToString()));
+                                    xObj.Add(usrDfnAuxSnds);
                                 }
+                            }*/
 
-                                byte statesPropsCnt = (byte)BNKStream.ReadByte();
+                            byte playbackSettings = (byte)BNKStream.ReadByte();
+                            byte onRetPhysVoice = (byte)BNKStream.ReadByte();
+                            byte limitSndInst = (byte)BNKStream.ReadByte();
+                            byte posUnknown2 = (byte)BNKStream.ReadByte();
+                            byte virtualVoiceBehav = (byte)BNKStream.ReadByte();
 
-                                XElement statesProps = new XElement("StatesProperties");
-                                for (int j = 0; j < statesPropsCnt; j++)
-                                {
-                                    byte propUnk1 = (byte)BNKStream.ReadByte();
-                                    byte propUnk2 = (byte)BNKStream.ReadByte();
-                                    byte propUnk3 = (byte)BNKStream.ReadByte();
+                            xObj.Add(new XAttribute("PlaybackSettings", playbackSettings.ToString()));
+                            xObj.Add(new XAttribute("OnReturnToPhysVoice", onRetPhysVoice.ToString()));
+                            xObj.Add(new XAttribute("LimitSoundInstances", limitSndInst.ToString()));
+                            xObj.Add(new XAttribute("PosUnknown", posUnknown2.ToString()));
+                            xObj.Add(new XAttribute("VirtualVoiceBehavior", virtualVoiceBehav.ToString()));
 
-                                    XElement stPrp = new XElement("Property");
-                                    stPrp.Add(new XAttribute("Unknown1", propUnk1.ToString()));
-                                    stPrp.Add(new XAttribute("Unknown2", propUnk2.ToString()));
-                                    stPrp.Add(new XAttribute("Unknown3", propUnk3.ToString()));
-                                    statesProps.Add(stPrp);
-                                }
-                                xObj.Add(statesProps);
-
-                                byte stateGroupsCnt = (byte)BNKStream.ReadByte();
-
-                                XElement statesGrps = new XElement("StateGroups");
-                                for (int j = 0; j < stateGroupsCnt; j++)
-                                {
-                                    uint stateGroupID = BNKStream.ReadValueU32();
-                                    byte changeOccursAt = (byte)BNKStream.ReadByte();
-
-                                    XElement stGrp = new XElement("Property");
-                                    stGrp.Add(new XAttribute("StateGroupID", stateGroupID.ToString()));
-                                    stGrp.Add(new XAttribute("ChangeOccursAt", changeOccursAt.ToString()));
-
-                                    byte settsDiffCnt = (byte)BNKStream.ReadByte();
-
-                                    XElement settDiffs = new XElement("SettingsDiffs");
-                                    for (int k = 0; k < settsDiffCnt; k++)
-                                    {
-                                        uint stateObjID = BNKStream.ReadValueU32();
-                                        uint settingsID = BNKStream.ReadValueU32();
-
-                                        XElement stGrpS = new XElement("Diff");
-                                        stGrpS.Add(new XAttribute("StateObjID", stateObjID.ToString()));
-                                        stGrpS.Add(new XAttribute("SettingsID", settingsID.ToString()));
-                                        settDiffs.Add(stGrpS);
-                                    }
-                                    stGrp.Add(settDiffs);
-
-                                    statesGrps.Add(stGrp);
-                                }
-                                xObj.Add(statesGrps);
-
-                                ushort rtcpCnt = BNKStream.ReadValueU16();
-
-                                XElement rtpcs = new XElement("RTPCs");
-                                for (int j = 0; j < rtcpCnt; j++)
-                                {
-                                    uint gameParamID = BNKStream.ReadValueU32();
-                                    byte axisType = (byte)BNKStream.ReadByte();
-                                    byte rtcpUnk1 = (byte)BNKStream.ReadByte();
-                                    byte rtcpUnk2 = (byte)BNKStream.ReadByte();
-                                    uint rtcpUnkID = BNKStream.ReadValueU32();
-                                    byte rtcpUnk3 = (byte)BNKStream.ReadByte();
-                                    byte pointsCnt = (byte)BNKStream.ReadByte();
-                                    byte rtcpUnk4 = (byte)BNKStream.ReadByte();
-
-                                    XElement rtpc = new XElement("RTPC");
-                                    rtpc.Add(new XAttribute("GameParamID", gameParamID.ToString()));
-                                    rtpc.Add(new XAttribute("AxisType", axisType.ToString()));
-                                    rtpc.Add(new XAttribute("Unknown1", rtcpUnk1.ToString()));
-                                    rtpc.Add(new XAttribute("Unknown2", rtcpUnk2.ToString()));
-                                    rtpc.Add(new XAttribute("UnknownID", rtcpUnkID.ToString()));
-                                    rtpc.Add(new XAttribute("Unknown3", rtcpUnk3.ToString()));
-                                    rtpc.Add(new XAttribute("Unknown4", rtcpUnk4.ToString()));
-
-                                    XElement rtpcPoints = new XElement("Points");
-                                    for (int k = 0; k < pointsCnt; k++)
-                                    {
-                                        float posX = BNKStream.ReadValueF32();
-                                        float posY = BNKStream.ReadValueF32();
-                                        uint shapeCurve = BNKStream.ReadValueU32();
-
-                                        XElement rtpcPoint = new XElement("Point");
-                                        rtpcPoint.Add(new XAttribute("PosX", posX.ToString(CultureInfo.InvariantCulture)));
-                                        rtpcPoint.Add(new XAttribute("PosY", posY.ToString(CultureInfo.InvariantCulture)));
-                                        rtpcPoint.Add(new XAttribute("Shape", BNKGetKnownName(shapeCurve, BNKNames.rtpcShape, "Shape")));
-                                        rtpcPoints.Add(rtpcPoint);
-                                    }
-                                    rtpc.Add(rtpcPoints);
-
-                                    rtpcs.Add(rtpc);
-                                }
-                                xObj.Add(rtpcs);
+                            BNKStream.ReadByte(); // always zero
+                            if (bnkVersion == 120)
+                            {
+                                BNKStream.ReadByte();
+                                BNKStream.ReadByte();
                             }
+
+                            byte statesPropsCnt = (byte)BNKStream.ReadByte();
+
+                            XElement statesProps = new XElement("StatesProperties");
+                            for (int j = 0; j < statesPropsCnt; j++)
+                            {
+                                byte propSettName = (byte)BNKStream.ReadByte();
+                                byte propUnk1 = (byte)BNKStream.ReadByte();
+                                byte propUnk2 = (byte)BNKStream.ReadByte();
+
+                                XElement stPrp = new XElement("Property");
+                                stPrp.Add(new XAttribute("SettingName", BNKGetKnownName(propSettName, BNKNames.eventActionSettings, "Setting")));
+                                stPrp.Add(new XAttribute("Unknown1", propUnk1.ToString()));
+                                stPrp.Add(new XAttribute("Unknown2", propUnk2.ToString()));
+                                statesProps.Add(stPrp);
+                            }
+                            xObj.Add(statesProps);
+
+                            byte stateGroupsCnt = (byte)BNKStream.ReadByte();
+
+                            XElement statesGrps = new XElement("StateGroups");
+                            for (int j = 0; j < stateGroupsCnt; j++)
+                            {
+                                uint stateGroupID = BNKStream.ReadValueU32();
+                                byte changeOccursAt = (byte)BNKStream.ReadByte();
+
+                                XElement stGrp = new XElement("Property");
+                                stGrp.Add(new XAttribute("StateGroupID", stateGroupID.ToString()));
+                                stGrp.Add(new XAttribute("ChangeOccursAt", changeOccursAt.ToString()));
+
+                                byte settsDiffCnt = (byte)BNKStream.ReadByte();
+
+                                XElement settDiffs = new XElement("SettingsDiffs");
+                                for (int k = 0; k < settsDiffCnt; k++)
+                                {
+                                    uint stateObjID = BNKStream.ReadValueU32();
+                                    uint settingsID = BNKStream.ReadValueU32();
+
+                                    XElement stGrpS = new XElement("Diff");
+                                    stGrpS.Add(new XAttribute("StateObjID", stateObjID.ToString()));
+                                    stGrpS.Add(new XAttribute("SettingsID", settingsID.ToString()));
+                                    settDiffs.Add(stGrpS);
+                                }
+                                stGrp.Add(settDiffs);
+
+                                statesGrps.Add(stGrp);
+                            }
+                            xObj.Add(statesGrps);
+
+                            ushort rtcpCnt = BNKStream.ReadValueU16();
+
+                            XElement rtpcs = new XElement("RTPCs");
+                            for (int j = 0; j < rtcpCnt; j++)
+                            {
+                                uint gameParamID = BNKStream.ReadValueU32();
+                                byte rtcpUnk1 = (byte)BNKStream.ReadByte();
+                                byte rtcpUnk2 = (byte)BNKStream.ReadByte();
+                                byte axisType = (byte)BNKStream.ReadByte();
+                                uint rtcpUnkID = BNKStream.ReadValueU32();
+                                byte rtcpUnk3 = (byte)BNKStream.ReadByte();
+                                byte pointsCnt = (byte)BNKStream.ReadByte();
+                                byte rtcpUnk4 = (byte)BNKStream.ReadByte();
+
+                                XElement rtpc = new XElement("RTPC");
+                                rtpc.Add(new XAttribute("GameParamID", gameParamID.ToString()));
+                                rtpc.Add(new XAttribute("AxisType", BNKGetKnownName(axisType, BNKNames.eventActionSettings, "Type")));
+                                rtpc.Add(new XAttribute("Unknown1", rtcpUnk1.ToString()));
+                                rtpc.Add(new XAttribute("Unknown2", rtcpUnk2.ToString()));
+                                rtpc.Add(new XAttribute("UnknownID", rtcpUnkID.ToString()));
+                                rtpc.Add(new XAttribute("Unknown3", rtcpUnk3.ToString()));
+                                rtpc.Add(new XAttribute("Unknown4", rtcpUnk4.ToString()));
+
+                                XElement rtpcPoints = new XElement("Points");
+                                for (int k = 0; k < pointsCnt; k++)
+                                {
+                                    float posX = BNKStream.ReadValueF32();
+                                    float posY = BNKStream.ReadValueF32();
+                                    uint shapeCurve = BNKStream.ReadValueU32();
+
+                                    XElement rtpcPoint = new XElement("Point");
+                                    rtpcPoint.Add(new XAttribute("PosX", posX.ToString(CultureInfo.InvariantCulture)));
+                                    rtpcPoint.Add(new XAttribute("PosY", posY.ToString(CultureInfo.InvariantCulture)));
+                                    rtpcPoint.Add(new XAttribute("Shape", BNKGetKnownName(shapeCurve, BNKNames.rtpcShape, "Shape")));
+                                    rtpcPoints.Add(rtpcPoint);
+                                }
+                                rtpc.Add(rtpcPoints);
+
+                                rtpcs.Add(rtpc);
+                            }
+                            xObj.Add(rtpcs);
 
                             posT = posT + objectLength - BNKStream.Position;
                             byte[] soundStruct = BNKStream.ReadBytes((int)posT);
@@ -3690,15 +3758,17 @@ namespace FCBConverter
                             byte soundType = (byte)BNKGetValFromKnownName(obj.Attribute("SoundType").Value, BNKNames.eventActionSoundType, "SoundType");
                             BNKStream.WriteByte(soundType);
 
-                            BNKStream.WriteByte(byte.Parse(obj.Attribute("OverrideParentEffects").Value));
+                            XElement effsPrnt = obj.Element("Effects");
 
-                            IEnumerable<XElement> effects = obj.Element("Effects").Elements("Effect");
+                            BNKStream.WriteByte(byte.Parse(effsPrnt.Attribute("OverrideParentEffects").Value));
+
+                            IEnumerable<XElement> effects = effsPrnt.Elements("Effect");
 
                             BNKStream.WriteByte((byte)effects.Count());
 
                             if (effects.Count() > 0)
                             {
-                                BNKStream.WriteByte(byte.Parse(obj.Attribute("bitMaskEffectBypass").Value));
+                                BNKStream.WriteByte(byte.Parse(effsPrnt.Attribute("bitMaskEffectBypass").Value));
                             }
 
                             foreach (XElement efft in effects)
@@ -3732,6 +3802,60 @@ namespace FCBConverter
                                 else
                                     BNKStream.WriteValueF32(float.Parse(addsParam.Value, CultureInfo.InvariantCulture));
                             }
+
+                            IEnumerable<XElement> unkParams = obj.Element("UnknownRangeParameters").Elements();
+
+                            BNKStream.WriteByte((byte)unkParams.Count());
+
+                            foreach (XElement unkParam in unkParams)
+                            {
+                                BNKStream.WriteByte((byte)BNKGetValFromKnownName(unkParam.Name.ToString(), BNKNames.eventActionAddsParams, "Param"));
+                            }
+
+                            foreach (XElement unkParam in unkParams)
+                            {
+                                byte pname = (byte)BNKGetValFromKnownName(unkParam.Name.ToString(), BNKNames.eventActionAddsParams, "Param");
+                                BNKStream.WriteValueF32(float.Parse(unkParam.Attribute("Min").Value, CultureInfo.InvariantCulture));
+                                BNKStream.WriteValueF32(float.Parse(unkParam.Attribute("Max").Value, CultureInfo.InvariantCulture));
+                            }
+
+                            XElement xPositioning = obj.Element("Positioning");
+                            byte positioningType = byte.Parse(xPositioning.Attribute("Type").Value);
+
+                            BNKStream.WriteByte(positioningType);
+
+                            if (positioningType > 15)
+                            {
+                                BNKStream.WriteByte(byte.Parse(xPositioning.Attribute("Settings").Value));
+                                BNKStream.WriteValueU32(uint.Parse(xPositioning.Attribute("AttenuationID").Value));
+                            }
+
+                            XElement xAuxiliary = obj.Element("Auxiliary");
+                            byte auxSettings = byte.Parse(xAuxiliary.Attribute("Settings").Value);
+
+                            BNKStream.WriteByte(auxSettings);
+
+                            if (auxSettings > 7)
+                            {
+                                XElement usrDfnAuxSnds = xAuxiliary.Element("UserDefinedAuxiliarySends");
+
+                                BNKStream.WriteValueU32(uint.Parse(usrDfnAuxSnds.Element("AuxiliaryBus1").Value));
+                                BNKStream.WriteValueU32(uint.Parse(usrDfnAuxSnds.Element("AuxiliaryBus2").Value));
+                                BNKStream.WriteValueU32(uint.Parse(usrDfnAuxSnds.Element("AuxiliaryBus3").Value));
+                                BNKStream.WriteValueU32(uint.Parse(usrDfnAuxSnds.Element("AuxiliaryBus4").Value));
+                            }
+
+
+
+
+
+
+
+
+
+
+
+
 
                             byte[] soundStruct = Helpers.StringToByteArray(obj.Element("SoundStructure").Value);
                             BNKStream.WriteBytes(soundStruct);
