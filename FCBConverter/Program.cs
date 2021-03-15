@@ -3392,8 +3392,8 @@ namespace FCBConverter
                                 uint stateGroupID = BNKStream.ReadValueU32();
                                 byte changeOccursAt = (byte)BNKStream.ReadByte();
 
-                                XElement stGrp = new XElement("Property");
-                                stGrp.Add(new XAttribute("StateGroupID", stateGroupID.ToString()));
+                                XElement stGrp = new XElement("StateGroup");
+                                stGrp.Add(new XAttribute("ID", stateGroupID.ToString()));
                                 stGrp.Add(new XAttribute("ChangeOccursAt", changeOccursAt.ToString()));
 
                                 byte settsDiffCnt = (byte)BNKStream.ReadByte();
@@ -3461,7 +3461,7 @@ namespace FCBConverter
                             byte[] soundStruct = BNKStream.ReadBytes((int)posT);
 
                             if (soundStruct.Length > 0)
-                                xObj.Add(new XElement("SoundStructure", Helpers.ByteArrayToString(soundStruct).ToUpper()));
+                                xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(soundStruct).ToUpper()));
                         }
                         else if (type == 0x03) // 3 Event Action
                         {
@@ -3740,7 +3740,7 @@ namespace FCBConverter
                             BNKStream.WriteByte(byte.Parse(obj.Attribute("Unknown3").Value));
                             BNKStream.WriteByte(byte.Parse(obj.Attribute("Unknown4").Value));
 
-                            byte included = (byte)BNKGetValFromKnownName(obj.Attribute("Included").Value, BNKNames.eventActionIncluded, "Included");
+                            byte included = (byte)BNKGetValFromKnownName(obj.Attribute("Stream").Value, BNKNames.eventActionIncluded, "Included");
                             BNKStream.WriteByte(included);
 
                             if (unknown1 == 2)
@@ -3803,6 +3803,8 @@ namespace FCBConverter
                                     BNKStream.WriteValueF32(float.Parse(addsParam.Value, CultureInfo.InvariantCulture));
                             }
 
+                            // -------------------------------------------------------------------------------------------------------------------------------------
+
                             IEnumerable<XElement> unkParams = obj.Element("UnknownRangeParameters").Elements();
 
                             BNKStream.WriteByte((byte)unkParams.Count());
@@ -3824,7 +3826,7 @@ namespace FCBConverter
 
                             BNKStream.WriteByte(positioningType);
 
-                            if (positioningType > 15)
+                            if (positioningType > 15 && (positioningType % 7) != 3)
                             {
                                 BNKStream.WriteByte(byte.Parse(xPositioning.Attribute("Settings").Value));
                                 BNKStream.WriteValueU32(uint.Parse(xPositioning.Attribute("AttenuationID").Value));
@@ -3845,20 +3847,87 @@ namespace FCBConverter
                                 BNKStream.WriteValueU32(uint.Parse(usrDfnAuxSnds.Element("AuxiliaryBus4").Value));
                             }
 
+                            BNKStream.WriteByte(byte.Parse(obj.Attribute("PlaybackSettings").Value));
+                            BNKStream.WriteByte(byte.Parse(obj.Attribute("OnReturnToPhysVoice").Value));
+                            BNKStream.WriteByte(byte.Parse(obj.Attribute("LimitSoundInstances").Value));
+                            BNKStream.WriteByte(byte.Parse(obj.Attribute("PosUnknown").Value));
+                            BNKStream.WriteByte(byte.Parse(obj.Attribute("VirtualVoiceBehavior").Value));
 
+                            BNKStream.WriteByte(0);
+                            if (bnkVersion == 120)
+                            {
+                                BNKStream.WriteByte(0);
+                                BNKStream.WriteByte(0);
+                            }
 
+                            IEnumerable<XElement> statesProps = obj.Element("StatesProperties").Elements("Property");
 
+                            BNKStream.WriteByte((byte)statesProps.Count());
 
+                            foreach (XElement stateProp in statesProps)
+                            {
+                                byte settName = (byte)BNKGetValFromKnownName(stateProp.Attribute("SettingName").Value, BNKNames.eventActionSettings, "Setting");
 
+                                BNKStream.WriteByte(settName);
+                                BNKStream.WriteByte(byte.Parse(stateProp.Attribute("Unknown1").Value));
+                                BNKStream.WriteByte(byte.Parse(stateProp.Attribute("Unknown2").Value));
+                            }
 
+                            IEnumerable<XElement> statesGrps = obj.Element("StateGroups").Elements("StateGroup");
 
+                            BNKStream.WriteByte((byte)statesGrps.Count());
 
+                            foreach (XElement statesGrp in statesGrps)
+                            {
+                                BNKStream.WriteValueU32(uint.Parse(statesGrp.Attribute("ID").Value));
+                                BNKStream.WriteByte(byte.Parse(statesGrp.Attribute("ChangeOccursAt").Value));
 
+                                IEnumerable<XElement> settDiffs = statesGrp.Element("SettingsDiffs").Elements("Diff");
 
+                                BNKStream.WriteByte((byte)settDiffs.Count());
 
+                                foreach (XElement settDiff in settDiffs)
+                                {
+                                    BNKStream.WriteValueU32(uint.Parse(settDiff.Attribute("StateObjID").Value));
+                                    BNKStream.WriteValueU32(uint.Parse(settDiff.Attribute("SettingsID").Value));
+                                }
+                            }
 
-                            byte[] soundStruct = Helpers.StringToByteArray(obj.Element("SoundStructure").Value);
-                            BNKStream.WriteBytes(soundStruct);
+                            IEnumerable<XElement> rtpcs = obj.Element("RTPCs").Elements("RTPC");
+
+                            BNKStream.WriteValueU16((ushort)rtpcs.Count());
+
+                            foreach (XElement rtpc in rtpcs)
+                            {
+                                byte axisType = (byte)BNKGetValFromKnownName(rtpc.Attribute("AxisType").Value, BNKNames.eventActionSettings, "Type");
+
+                                IEnumerable<XElement> rtpcPoints = rtpc.Element("Points").Elements("Point");
+
+                                BNKStream.WriteValueU32(uint.Parse(rtpc.Attribute("GameParamID").Value));
+                                BNKStream.WriteByte(byte.Parse(rtpc.Attribute("Unknown1").Value));
+                                BNKStream.WriteByte(byte.Parse(rtpc.Attribute("Unknown2").Value));
+                                BNKStream.WriteByte(axisType);
+                                BNKStream.WriteValueU32(uint.Parse(rtpc.Attribute("UnknownID").Value));
+                                BNKStream.WriteByte(byte.Parse(rtpc.Attribute("Unknown3").Value));
+                                BNKStream.WriteByte((byte)rtpcPoints.Count());
+                                BNKStream.WriteByte(byte.Parse(rtpc.Attribute("Unknown4").Value));
+
+                                foreach (XElement rtcpPoint in rtpcPoints)
+                                {
+                                    byte shapeCurve = (byte)BNKGetValFromKnownName(rtcpPoint.Attribute("Shape").Value, BNKNames.rtpcShape, "Shape");
+
+                                    BNKStream.WriteValueF32(float.Parse(rtcpPoint.Attribute("PosX").Value, CultureInfo.InvariantCulture));
+                                    BNKStream.WriteValueF32(float.Parse(rtcpPoint.Attribute("PosY").Value, CultureInfo.InvariantCulture));
+                                    BNKStream.WriteValueU32(shapeCurve);
+                                }
+                            }
+
+                            XElement binary = obj.Element("Binary");
+                            if (binary != null)
+                            {
+                                byte[] soundStruct = Helpers.StringToByteArray(binary.Value);
+                                BNKStream.WriteBytes(soundStruct);
+                            }
                         }
                         else if (type == 0x03) // 3 Event Action
                         {
