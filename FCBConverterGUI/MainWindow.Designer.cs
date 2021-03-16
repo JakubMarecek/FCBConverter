@@ -73,6 +73,7 @@ namespace FCBConverterGUI
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -86,14 +87,15 @@ namespace FCBConverterGUI
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 80.24999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(30, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(622, 120);
+            this.label1.Size = new System.Drawing.Size(736, 120);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Dunia Tools";
+            this.label1.Text = "FCBConverter";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage2.Controls.Add(this.checkBox1);
             this.tabPage2.Controls.Add(this.button13);
             this.tabPage2.Controls.Add(this.label9);
             this.tabPage2.Controls.Add(this.textBox8);
@@ -110,14 +112,14 @@ namespace FCBConverterGUI
             this.tabPage2.Location = new System.Drawing.Point(4, 27);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(931, 368);
+            this.tabPage2.Size = new System.Drawing.Size(926, 368);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Advanced";
             // 
             // button13
             // 
             this.button13.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button13.Location = new System.Drawing.Point(741, 169);
+            this.button13.Location = new System.Drawing.Point(754, 228);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(25, 25);
             this.button13.TabIndex = 52;
@@ -157,7 +159,7 @@ namespace FCBConverterGUI
             // label18
             // 
             this.label18.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label18.Location = new System.Drawing.Point(0, 120);
+            this.label18.Location = new System.Drawing.Point(13, 179);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(931, 2);
             this.label18.TabIndex = 21;
@@ -165,7 +167,7 @@ namespace FCBConverterGUI
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(235, 170);
+            this.textBox6.Location = new System.Drawing.Point(248, 229);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(500, 24);
             this.textBox6.TabIndex = 8;
@@ -183,7 +185,7 @@ namespace FCBConverterGUI
             // 
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button6.Location = new System.Drawing.Point(806, 167);
+            this.button6.Location = new System.Drawing.Point(819, 226);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(100, 30);
             this.button6.TabIndex = 6;
@@ -195,7 +197,7 @@ namespace FCBConverterGUI
             // 
             this.label17.AutoSize = true;
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.Location = new System.Drawing.Point(418, 145);
+            this.label17.Location = new System.Drawing.Point(431, 204);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(138, 20);
             this.label17.TabIndex = 5;
@@ -205,7 +207,7 @@ namespace FCBConverterGUI
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(54, 172);
+            this.label15.Location = new System.Drawing.Point(67, 231);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(84, 20);
             this.label15.TabIndex = 3;
@@ -270,7 +272,7 @@ namespace FCBConverterGUI
             this.tabPage1.Location = new System.Drawing.Point(4, 27);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(931, 368);
+            this.tabPage1.Size = new System.Drawing.Size(926, 368);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Game Manager";
             // 
@@ -551,18 +553,31 @@ namespace FCBConverterGUI
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabControl1.Location = new System.Drawing.Point(-1, 198);
+            this.tabControl1.Location = new System.Drawing.Point(0, 135);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(939, 399);
+            this.tabControl1.Size = new System.Drawing.Size(934, 399);
             this.tabControl1.TabIndex = 27;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.checkBox1.Location = new System.Drawing.Point(248, 113);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.checkBox1.Size = new System.Drawing.Size(152, 23);
+            this.checkBox1.TabIndex = 53;
+            this.checkBox1.Text = "Include subfolders";
+            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(934, 596);
+            this.ClientSize = new System.Drawing.Size(934, 534);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -630,5 +645,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.Button button13;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

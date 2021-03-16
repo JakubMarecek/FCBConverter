@@ -26,6 +26,8 @@ namespace FCBConverterGUI
             "Sequence file|*.cseq|" +
             "Flash UI file|*.feu|" +
             "Bundle file|*.bdl|" +
+            "Wwise SoundBank file|*.bnk|" +
+            "Wwise Encoded Media|*.wem|" +
             "File allocation table (DAT header file)|*.fat|" +
             "Converted files|*.converted.xml";
 
@@ -59,7 +61,7 @@ namespace FCBConverterGUI
         {
             InitializeComponent();
 
-            Font FCZTitle = new Font(GetFont(Properties.Resources.FCZTitle), 80);
+            Font FCZTitle = new Font(GetFont(Properties.Resources.FCZTitle), 70);
             Font DINNextW1G_Regular = new Font(GetFont(Properties.Resources.DINNextW1G_Regular), 12);
             Font TradeGothicLT_Bold = new Font(GetFont(Properties.Resources.TradeGothicLT_Bold), 12);
 
@@ -102,6 +104,7 @@ namespace FCBConverterGUI
             radioButton3.Font = TradeGothicLT_Bold;
             radioButton4.Font = TradeGothicLT_Bold;
             radioButton5.Font = TradeGothicLT_Bold;
+            checkBox1.Font = TradeGothicLT_Bold;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -186,7 +189,12 @@ namespace FCBConverterGUI
 
         private void button5_Click(object sender, EventArgs e)
         {
-            CallFCBConverter(textBox5.Text + " " + textBox8.Text);
+            string subf = "";
+
+            if (checkBox1.Checked)
+                subf = "-subfolders";
+
+            CallFCBConverter(textBox5.Text + " " + textBox8.Text + " " + subf);
         }
 
         private void button13_Click(object sender, EventArgs e)

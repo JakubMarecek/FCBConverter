@@ -52,7 +52,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210315-2300";
+        public static string version = "20210316-1000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -70,7 +70,8 @@ namespace FCBConverter
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheaderoasis = "Special thanks to: AOY";
-        public static string xmlheaderbnk = "Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.";
+        public static string xmlheaderbnk = "Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA." + Environment.NewLine +
+            "Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
         //public static List<string> aaaa = new List<string>();
 
@@ -476,12 +477,16 @@ namespace FCBConverter
         {
             DirectoryInfo d = new DirectoryInfo(folder);
 
-            FileInfo[] files = d.GetFiles(filter);
-
-            foreach (FileInfo fileInfo in files)
+            string[] searchPatterns = filter.Split(',');
+            foreach (string sep in searchPatterns)
             {
-                Console.WriteLine("Processing: " + fileInfo.FullName + "...");
-                Proccessing(fileInfo.FullName, "");
+                FileInfo[] files = d.GetFiles(sep);
+
+                foreach (FileInfo fileInfo in files)
+                {
+                    Console.WriteLine("Processing: " + fileInfo.FullName + "...");
+                    Proccessing(fileInfo.FullName, "");
+                }
             }
 
             if (subFolders)
