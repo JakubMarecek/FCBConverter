@@ -3282,7 +3282,7 @@ namespace FCBConverter
                             xPositioning.Add(new XAttribute("Type", positioningType.ToString()));
 
                             // maybe ((positioningType % 7) == 3)      && positioningType != 199 && positioningType != 192
-                            if (positioningType > 15 && (positioningType % 7) != 3)
+                            if (positioningType > 15 && (positioningType % 7) != 3 && positioningType != 195)
                             {
                                 byte positioningSettings = (byte)BNKStream.ReadByte();
                                 xPositioning.Add(new XAttribute("Settings", positioningSettings.ToString()));
