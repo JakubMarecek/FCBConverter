@@ -52,7 +52,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210316-1000";
+        public static string version = "20210318-1930";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -430,7 +430,12 @@ namespace FCBConverter
 
             Console.Title = "FCBConverter - " + file;
 
-            if (param2.EndsWith(".fat"))
+            if (file.EndsWith("_replace.txt"))
+            {
+                BinaryReplaceValues(file);
+                FIN();
+            }
+            else if (param2.EndsWith(".fat"))
             {
                 int ver = 10;
 
@@ -4085,6 +4090,65 @@ namespace FCBConverter
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex.ToString());
                 Console.ResetColor();
+            }
+        }
+
+        static void BinaryReplaceValues(string file)
+        {
+            if (!File.Exists(file))
+                return;
+
+            string onlyDir = Path.GetDirectoryName(file);
+            byte[] bytes = null;
+            FileStream fileStream = null;
+            Gibbed.Dunia2.BinaryObjectInfo.FieldType fieldTypeSearch = Gibbed.Dunia2.BinaryObjectInfo.FieldType.Invalid;
+            Gibbed.Dunia2.BinaryObjectInfo.FieldType fieldTypeReplace = Gibbed.Dunia2.BinaryObjectInfo.FieldType.Invalid;
+            int lineStart = 0;
+
+            string[] lines = File.ReadAllLines(file);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (File.Exists(onlyDir + "\\" + lines[i]))
+                {
+                    string ff = onlyDir + "\\" + lines[i];
+
+                    string fileName = Path.GetFileNameWithoutExtension(ff);
+                    string ext = Path.GetExtension(ff);
+                    string newFileName = onlyDir + "\\" + fileName + "_new" + ext;
+
+                    File.Copy(ff, newFileName, true);
+                    bytes = File.ReadAllBytes(newFileName);
+                    fileStream = new FileStream(newFileName, FileMode.Open, FileAccess.ReadWrite);
+
+                    lineStart = i;
+                }
+                else if (lineStart + 1 == i)
+                {
+                    string[] lineSplit = lines[i].Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+
+                    Enum.TryParse(lineSplit[0], true, out fieldTypeSearch);
+                    Enum.TryParse(lineSplit[1], true, out fieldTypeReplace);
+                }
+                else if (lines[i] == "END")
+                {
+                    fileStream.Dispose();
+                    fileStream.Close();
+                }
+                else
+                {
+                    string[] lineSplit = lines[i].Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+
+                    byte[] search = Gibbed.Dunia2.BinaryObjectInfo.FieldTypeSerializers.Serialize(fieldTypeSearch, lineSplit[0]);
+                    byte[] replace = Gibbed.Dunia2.BinaryObjectInfo.FieldTypeSerializers.Serialize(fieldTypeReplace, lineSplit[1]);
+
+                    int[] poses = Helpers.SearchBytesMultiple(bytes, search);
+
+                    foreach (int pos in poses)
+                    {
+                        fileStream.Position = pos;
+                        fileStream.Write(replace, 0, replace.Length);
+                    }
+                }
             }
         }
     }
