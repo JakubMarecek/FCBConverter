@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -52,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210318-1930";
+        public static string version = "20210320-1815";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -669,7 +670,7 @@ namespace FCBConverter
 
             if (file.EndsWith(".xbt") || file.EndsWith(".xbts"))
             {
-                byte[] bytes = File.ReadAllBytes(file);
+                /*byte[] bytes = File.ReadAllBytes(file);
 
                 int pos = IndexOf(bytes, new byte[] { 68, 68, 83 }); // DDS
 
@@ -688,15 +689,16 @@ namespace FCBConverter
                 }
 
                 File.WriteAllBytes(newPathDds, dds);
-                File.WriteAllBytes(newPathTex, tex);
+                File.WriteAllBytes(newPathTex, tex);*/
 
+                ConvertXBT(file);
                 FIN();
                 return;
             }
 
-            if (file.EndsWith(".dds"))
+            if (file.EndsWith(".dds") || file.EndsWith(".xbt.converted.xml") || file.EndsWith(".xbts.converted.xml"))
             {
-                string texPath = file.Replace(".dds", ".tex");
+                /*string texPath = file.Replace(".dds", ".tex");
                 string xbtsPath = file.Replace(".dds", ".texXbts");
                 string xbtPath = file.Replace(".dds", ".xbt");
                 bool isMips = file.Replace(".dds", "").EndsWith("_mips");
@@ -743,8 +745,9 @@ namespace FCBConverter
                     xbtPath = file.Replace(".dds", ".xbts");
                 }
 
-                File.WriteAllBytes(xbtPath, bts.ToArray());
+                File.WriteAllBytes(xbtPath, bts.ToArray());*/
 
+                ConvertDDS(file);
                 FIN();
                 return;
             }
@@ -4108,13 +4111,13 @@ namespace FCBConverter
             string[] lines = File.ReadAllLines(file);
             for (int i = 0; i < lines.Length; i++)
             {
-                if (File.Exists(onlyDir + "\\" + lines[i]))
+                if (lines[i].Contains("="))
                 {
-                    string ff = onlyDir + "\\" + lines[i];
+                    string[] lineSplit = lines[i].Split('=');
 
-                    string fileName = Path.GetFileNameWithoutExtension(ff);
-                    string ext = Path.GetExtension(ff);
-                    string newFileName = onlyDir + "\\" + fileName + "_new" + ext;
+                    string ff = onlyDir + "\\" + lineSplit[0];
+
+                    string newFileName = onlyDir + "\\" + lineSplit[1];
 
                     File.Copy(ff, newFileName, true);
                     bytes = File.ReadAllBytes(newFileName);
@@ -4134,7 +4137,7 @@ namespace FCBConverter
                     fileStream.Dispose();
                     fileStream.Close();
                 }
-                else
+                else if (lines[i] != "")
                 {
                     string[] lineSplit = lines[i].Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
 
@@ -4150,6 +4153,178 @@ namespace FCBConverter
                     }
                 }
             }
+        }
+
+        static void ConvertXBT(string file)
+        {
+            string newPathDds = file.Replace(".xbts", ".dds").Replace(".xbt", ".dds");
+
+            XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            xmlDoc.Add(new XComment(xmlheader));
+            XElement root = new XElement("XBTInfo");
+
+            FileStream XBTStream = new FileStream(file, FileMode.Open);
+
+            uint type = XBTStream.ReadValueU32();
+            if (type != 0x00584254)
+                return;
+
+            uint version = XBTStream.ReadValueU32();
+            uint hdrLen = XBTStream.ReadValueU32();
+            byte param1 = (byte)XBTStream.ReadByte();
+            byte param2 = (byte)XBTStream.ReadByte();
+            byte param3 = (byte)XBTStream.ReadByte();
+            byte param4 = (byte)XBTStream.ReadByte();
+            byte param5 = (byte)XBTStream.ReadByte();
+            byte mipsFileMipsCount = (byte)XBTStream.ReadByte();
+            byte param7 = (byte)XBTStream.ReadByte();
+            byte param8 = (byte)XBTStream.ReadByte();
+            uint unknownID1 = XBTStream.ReadValueU32();
+            uint unknownID2 = XBTStream.ReadValueU32();
+            uint unknownID3 = XBTStream.ReadValueU32();
+
+            string mipsFileName = "";
+            uint mipsFileCheck = XBTStream.ReadValueU32();
+            if (mipsFileCheck != 0)
+            {
+                XBTStream.Seek(XBTStream.Position - sizeof(uint), SeekOrigin.Begin);
+                byte[] mF = XBTStream.ReadBytes((int)(hdrLen - 32));
+                mipsFileName = Encoding.Default.GetString(mF);
+                mipsFileName = Regex.Replace(mipsFileName, @"\p{C}+", string.Empty);
+            }
+
+            root.Add(new XElement("Version", version));
+            root.Add(new XElement("Param1", param1));
+            root.Add(new XElement("Param2", param2));
+            root.Add(new XElement("Param3", param3));
+            root.Add(new XElement("Param4", param4));
+            root.Add(new XElement("Param5", param5));
+            root.Add(new XElement(version <= 112 ? "Param6" : "MipsFileMipsCount", mipsFileMipsCount));
+            root.Add(new XElement("Param7", param7));
+            root.Add(new XElement("Param8", param8));
+            root.Add(new XElement("UnknownID1", unknownID1));
+            root.Add(new XElement("UnknownID2", unknownID2));
+            root.Add(new XElement("UnknownID3", unknownID3));
+            root.Add(new XElement("MipsFileName", mipsFileName));
+
+            int toRead = (int)XBTStream.Length - (int)hdrLen;
+
+            if (file.EndsWith(".xbts"))
+            {
+                toRead -= 20;
+            }
+
+            byte[] dds = XBTStream.ReadBytes(toRead);
+
+            File.WriteAllBytes(newPathDds, dds);
+
+            if (file.EndsWith(".xbts"))
+            {
+                byte[] xbts = XBTStream.ReadBytes(20);
+                root.Add(new XElement("XBTSData", Helpers.ByteArrayToString(xbts)));
+            }
+
+            XBTStream.Close();
+
+            xmlDoc.Add(root);
+            xmlDoc.Save(file + ".converted.xml");
+        }
+
+        static void ConvertDDS(string file)
+        {
+            string newFileName = "";
+            string xmlName = "";
+            string ddsName = "";
+            string nonMipsXml = "";
+
+            if (file.EndsWith(".dds"))
+            {
+                newFileName = file.Replace(".dds", "_new.xbt");
+                xmlName = file.Replace(".dds", ".xbt.converted.xml");
+                ddsName = file;
+            }
+            if (file.EndsWith(".xbt.converted.xml") || file.EndsWith(".xbts.converted.xml"))
+            {
+                newFileName = file.Replace(".xbt.converted.xml", "_new.xbt").Replace(".xbts.converted.xml", "_new.xbt");
+                xmlName = file;
+                ddsName = file.Replace(".xbt.converted.xml", ".dds").Replace(".xbts.converted.xml", ".dds");
+            }
+            if (file.EndsWith("_mips.xbt.converted.xml") || file.EndsWith("_mips.dds"))
+            {
+                nonMipsXml = file.Replace("_mips.xbt.converted.xml", "").Replace("_mips.dds", "");
+                nonMipsXml += ".xbt.converted.xml";
+            }
+
+            XDocument xDoc = XDocument.Load(xmlName);
+            XElement xRoot = xDoc.Element("XBTInfo");
+
+            uint version = uint.Parse(xRoot.Element("Version").Value);
+            string mipsName = version <= 112 ? "Param6" : "MipsFileMipsCount";
+
+            MemoryStream memoryStream = new MemoryStream();
+            memoryStream.WriteValueU32(0x00584254);
+            memoryStream.WriteValueU32(version);
+            memoryStream.WriteValueU32(0);
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param1").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param2").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param3").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param4").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param5").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element(mipsName).Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param7").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param8").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID1").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID2").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID3").Value));
+
+            string mipsFile = xRoot.Element("MipsFileName").Value;
+            if (mipsFile != "")
+            {
+                memoryStream.WriteBytes(Encoding.Default.GetBytes(mipsFile));
+            }
+
+            memoryStream.WriteByte(0);
+
+            long pad = (memoryStream.Position + (4 - (memoryStream.Position % 4)) % 4) - 1;
+            memoryStream.Seek(pad, SeekOrigin.Begin);
+            memoryStream.WriteByte(0);
+
+            byte[] header = memoryStream.ToArray();
+
+            byte[] dds = File.ReadAllBytes(ddsName);
+
+            if (nonMipsXml != "" && version >= 116)
+            {
+                if (!File.Exists(nonMipsXml))
+                {
+                    Console.WriteLine("Can't convert the file, missing non mips XBTInfo file.");
+                    return;
+                }
+
+                XDocument oMiXD = XDocument.Load(nonMipsXml);
+                uint mipsCount = uint.Parse(oMiXD.Element("XBTInfo").Element("MipsFileMipsCount").Value);
+
+                MemoryStream memoryStream1 = new MemoryStream(dds);
+                memoryStream1.Seek(28, SeekOrigin.Begin);
+                memoryStream1.WriteValueU32(mipsCount);
+                dds = memoryStream1.ToArray();
+            }
+
+            FileStream XBTStream = File.Create(newFileName);
+            XBTStream.WriteBytes(header);
+            XBTStream.Seek(sizeof(uint) * 2, SeekOrigin.Begin);
+            XBTStream.WriteValueU32((uint)header.Length);
+            XBTStream.Seek(header.Length, SeekOrigin.Begin);
+            XBTStream.WriteBytes(dds);
+
+            XElement xbts = xRoot.Element("XBTSData");
+            if (xbts != null)
+            {
+                XBTStream.WriteBytes(Helpers.StringToByteArray(xbts.Value));
+            }
+
+            XBTStream.Dispose();
+            XBTStream.Close();
         }
     }
 }
