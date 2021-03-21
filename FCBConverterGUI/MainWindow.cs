@@ -139,7 +139,7 @@ namespace FCBConverterGUI
 
         private void button1_Click(object sender, EventArgs e)
         {
-            CallFCBConverter(textBox1.Text + " " + textBox2.Text);
+            CallFCBConverter("\"" + textBox1.Text + "\" \"" + textBox2.Text + "\"");
         }
 
         private void button11_Click(object sender, EventArgs e)
@@ -171,7 +171,7 @@ namespace FCBConverterGUI
 
             string outFile = textBox4.Text + ".fat";
 
-            CallFCBConverter(textBox4.Text + " " + outFile + " " + fatVer + " " + compress + " " + excludeCompress);
+            CallFCBConverter("\"" + textBox4.Text + "\" \"" + outFile + "\" " + fatVer + " " + compress + " " + excludeCompress);
         }
 
         private void button12_Click(object sender, EventArgs e)
@@ -194,7 +194,7 @@ namespace FCBConverterGUI
             if (checkBox1.Checked)
                 subf = "-subfolders";
 
-            CallFCBConverter(textBox5.Text + " " + textBox8.Text + " " + subf);
+            CallFCBConverter("\"" + textBox5.Text + "\" \"" + textBox8.Text + "\" " + subf);
         }
 
         private void button13_Click(object sender, EventArgs e)
@@ -212,7 +212,7 @@ namespace FCBConverterGUI
 
         private void button6_Click(object sender, EventArgs e)
         {
-            CallFCBConverter(textBox6.Text);
+            CallFCBConverter("\"" + textBox6.Text + "\"");
         }
     }
 }
