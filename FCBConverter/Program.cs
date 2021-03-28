@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210320-1815";
+        public static string version = "20210328-1130";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1882,7 +1882,7 @@ namespace FCBConverter
                 FrameNodeAttributeUnknown.Value = unknown.ToString(CultureInfo.InvariantCulture);
                 FrameNode.Attributes.Append(FrameNodeAttributeUnknown);
 
-                XmlAttribute FrameNodeAttributeFileNameHash = xmlDoc.CreateAttribute("AnimID");
+                XmlAttribute FrameNodeAttributeFileNameHash = xmlDoc.CreateAttribute("FrameCRC64");
                 FrameNodeAttributeFileNameHash.Value = probablyFileNameHash.ToString();
                 FrameNode.Attributes.Append(FrameNodeAttributeFileNameHash);
 
@@ -1913,9 +1913,8 @@ namespace FCBConverter
             foreach (XElement allFrame in allFrames)
             {
                 float unknown = float.Parse(allFrame.Attribute("length").Value, CultureInfo.InvariantCulture);
-                ulong FileNameHash = ulong.Parse(allFrame.Attribute("AnimID").Value);
 
-                string tmp = onlyDir + "\\" + FileNameHash.ToString();
+                string tmp = onlyDir + "\\" + allFrame.Attribute("FrameCRC64").Value.ToString();
                 XElement fcb = allFrame.Element("object");
                 fcb.Save(tmp);
 
@@ -1923,9 +1922,11 @@ namespace FCBConverter
 
                 byte[] fcbByte = File.ReadAllBytes(tmp + "c");
 
+                ulong crc = Gibbed.Dunia2.FileFormats.CRC64.Hash(fcbByte, 0, fcbByte.Length);
+
                 output.WriteValueF32(unknown, 0);
                 output.WriteValueU32((uint)fcbByte.Length);
-                output.WriteValueU64(FileNameHash);
+                output.WriteValueU64(crc);
                 output.WriteBytes(fcbByte);
 
                 File.Delete(tmp);
