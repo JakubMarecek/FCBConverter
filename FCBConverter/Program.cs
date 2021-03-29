@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210328-1130";
+        public static string version = "20210329-1845";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1878,7 +1878,7 @@ namespace FCBConverter
                 FrameNode.AppendChild(xmlDoc.ImportNode(doc.SelectSingleNode("object"), true));
                 groupNode.AppendChild(FrameNode);
 
-                XmlAttribute FrameNodeAttributeUnknown = xmlDoc.CreateAttribute("length");
+                XmlAttribute FrameNodeAttributeUnknown = xmlDoc.CreateAttribute("Time");
                 FrameNodeAttributeUnknown.Value = unknown.ToString(CultureInfo.InvariantCulture);
                 FrameNode.Attributes.Append(FrameNodeAttributeUnknown);
 
@@ -1909,12 +1909,13 @@ namespace FCBConverter
             output.WriteValueU16((ushort)root.Element("FrameGroup3").Elements().Count());
             output.WriteValueU16((ushort)root.Element("FrameGroup4").Elements().Count());
 
+            byte cnt = 0;
             IEnumerable<XElement> allFrames = root.Descendants("Frame");
             foreach (XElement allFrame in allFrames)
             {
-                float unknown = float.Parse(allFrame.Attribute("length").Value, CultureInfo.InvariantCulture);
+                float unknown = float.Parse(allFrame.Attribute("Time").Value, CultureInfo.InvariantCulture);
 
-                string tmp = onlyDir + "\\" + allFrame.Attribute("FrameCRC64").Value.ToString();
+                string tmp = file + "_" + cnt.ToString();
                 XElement fcb = allFrame.Element("object");
                 fcb.Save(tmp);
 
@@ -1931,6 +1932,7 @@ namespace FCBConverter
 
                 File.Delete(tmp);
                 File.Delete(tmp + "c");
+                cnt++;
             }
 
             output.Close();
@@ -1973,7 +1975,7 @@ namespace FCBConverter
                 XDocument doc = XDocument.Load(tmp + "c");
 
                 XElement xFrame = new XElement("Frame");
-                xFrame.Add(new XAttribute("AnimID", hash.ToString()));
+                xFrame.Add(new XAttribute("FrameCRC32", hash.ToString()));
                 xFrame.Add(new XAttribute("Time", time.ToString(CultureInfo.InvariantCulture)));
                 xFrame.Add(new XAttribute("Unknown", unknown.ToString()));
                 xFrame.Add(doc.Root);
