@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210329-1845";
+        public static string version = "20210402-0015";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -795,7 +795,7 @@ namespace FCBConverter
                 OasisstringsCompressedFile rez = new OasisstringsCompressedFile();
 
                 var input = File.OpenRead(file);
-                rez.Deserialize(input, Path.GetFileName(file).EndsWith("_nd.oasis.bin"));
+                rez.Deserialize(input, Path.GetFileName(file).EndsWith("_nd.oasis.bin") ? GameType.FarCryNewDawn : GameType.FarCry5);
 
                 var settings = new XmlWriterSettings
                 {
@@ -835,15 +835,10 @@ namespace FCBConverter
                 var doc = new XPathDocument(input);
                 var nav = doc.CreateNavigator();
 
-                if (nav.MoveToFirstChild() == false)
-                {
-                    throw new FormatException();
-                }
-
-                rez.Root = ReadOSNode(nav);
+                rez.Root = ReadOSNode(nav.SelectSingleNode("/stringtable"));
 
                 var output = File.Create(workingOriginalFile);
-                rez.Serialize(output, Path.GetFileName(file).EndsWith("_nd.oasis.bin.converted.xml"));
+                rez.Serialize(output, Path.GetFileName(file).EndsWith("_nd.oasis.bin.converted.xml") ? GameType.FarCryNewDawn : GameType.FarCry5);
 
                 FIN();
                 return;

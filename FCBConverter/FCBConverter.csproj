@@ -54,6 +54,7 @@
     <Compile Include="BNKNames.cs" />
     <Compile Include="Depload.cs" />
     <Compile Include="FatEntry.cs" />
+    <Compile Include="GameType.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\ConditionValueSource.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\ClassDefinition.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\Definitions\EnumDefinition.cs" />
@@ -140,8 +141,6 @@
     <Compile Include="Gibbed.IO\StreamHelpers\Strings\Supplied.cs" />
     <Compile Include="Gibbed.IO\StreamHelpers\Structure.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFileFC4.cs" />
-    <Compile Include="JGR.Dunia2.FileFormats\OasisstringsCompressedFile.cs" />
     <Compile Include="LZ4Sharp\ILZ4Compressor.cs" />
     <Compile Include="LZ4Sharp\ILZ4Decompressor.cs" />
     <Compile Include="LZ4Sharp\LZ4.cs" />
@@ -153,6 +152,7 @@
     <Compile Include="LZ4Sharp\LZ4DecompressorFactory.cs" />
     <Compile Include="LZ4Sharp\LZ4Util.cs" />
     <Compile Include="CombinedMoveFile.cs" />
+    <Compile Include="OasisstringsCompressedFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="packed_codebooks_aoTuV_603.bin">
