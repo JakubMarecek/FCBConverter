@@ -101,22 +101,25 @@ namespace FCBConverterGUI
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.button20 = new System.Windows.Forms.Button();
-            this.textBox11 = new System.Windows.Forms.TextBox();
-            this.label23 = new System.Windows.Forms.Label();
+            this.button22 = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButton7 = new System.Windows.Forms.RadioButton();
+            this.radioButton6 = new System.Windows.Forms.RadioButton();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
             this.button21 = new System.Windows.Forms.Button();
             this.textBox12 = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.label28 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.radioButton6 = new System.Windows.Forms.RadioButton();
-            this.radioButton7 = new System.Windows.Forms.RadioButton();
-            this.button22 = new System.Windows.Forms.Button();
+            this.button20 = new System.Windows.Forms.Button();
+            this.textBox11 = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.radioButton8 = new System.Windows.Forms.RadioButton();
+            this.radioButton9 = new System.Windows.Forms.RadioButton();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -128,6 +131,7 @@ namespace FCBConverterGUI
             this.tabPage4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabPage2
@@ -633,6 +637,7 @@ namespace FCBConverterGUI
             // tabPage3
             // 
             this.tabPage3.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage3.Controls.Add(this.groupBox4);
             this.tabPage3.Controls.Add(this.numericUpDown2);
             this.tabPage3.Controls.Add(this.label22);
             this.tabPage3.Controls.Add(this.button19);
@@ -664,7 +669,7 @@ namespace FCBConverterGUI
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(629, 68);
+            this.numericUpDown2.Location = new System.Drawing.Point(629, 107);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             20,
             0,
@@ -678,7 +683,7 @@ namespace FCBConverterGUI
             // 
             this.label22.AutoSize = true;
             this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label22.Location = new System.Drawing.Point(439, 70);
+            this.label22.Location = new System.Drawing.Point(439, 109);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(144, 13);
             this.label22.TabIndex = 67;
@@ -689,7 +694,7 @@ namespace FCBConverterGUI
             this.button19.Enabled = false;
             this.button19.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button19.Location = new System.Drawing.Point(808, 68);
+            this.button19.Location = new System.Drawing.Point(808, 107);
             this.button19.Name = "button19";
             this.button19.Size = new System.Drawing.Size(100, 20);
             this.button19.TabIndex = 66;
@@ -702,7 +707,7 @@ namespace FCBConverterGUI
             this.button17.Enabled = false;
             this.button17.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button17.Location = new System.Drawing.Point(808, 16);
+            this.button17.Location = new System.Drawing.Point(808, 55);
             this.button17.Name = "button17";
             this.button17.Size = new System.Drawing.Size(100, 20);
             this.button17.TabIndex = 64;
@@ -712,7 +717,7 @@ namespace FCBConverterGUI
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(216, 68);
+            this.numericUpDown1.Location = new System.Drawing.Point(216, 107);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             20,
             0,
@@ -726,7 +731,7 @@ namespace FCBConverterGUI
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label20.Location = new System.Drawing.Point(26, 70);
+            this.label20.Location = new System.Drawing.Point(26, 109);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(124, 13);
             this.label20.TabIndex = 62;
@@ -740,9 +745,9 @@ namespace FCBConverterGUI
             this.listView2.GridLines = true;
             this.listView2.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(6, 118);
+            this.listView2.Location = new System.Drawing.Point(6, 157);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(454, 211);
+            this.listView2.Size = new System.Drawing.Size(454, 177);
             this.listView2.TabIndex = 61;
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
@@ -755,7 +760,7 @@ namespace FCBConverterGUI
             // button15
             // 
             this.button15.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button15.Location = new System.Drawing.Point(768, 16);
+            this.button15.Location = new System.Drawing.Point(768, 55);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(25, 20);
             this.button15.TabIndex = 60;
@@ -765,18 +770,18 @@ namespace FCBConverterGUI
             // 
             // textBox10
             // 
-            this.textBox10.Location = new System.Drawing.Point(282, 16);
+            this.textBox10.Location = new System.Drawing.Point(282, 55);
             this.textBox10.Name = "textBox10";
-            this.textBox10.ReadOnly = true;
             this.textBox10.Size = new System.Drawing.Size(480, 20);
             this.textBox10.TabIndex = 59;
             this.textBox10.Text = "E:\\Path\\to\\file";
+            this.textBox10.TextChanged += new System.EventHandler(this.textBox10_TextChanged);
             // 
             // label19
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label19.Location = new System.Drawing.Point(26, 18);
+            this.label19.Location = new System.Drawing.Point(26, 57);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(90, 13);
             this.label19.TabIndex = 58;
@@ -792,9 +797,9 @@ namespace FCBConverterGUI
             this.listView1.GridLines = true;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(466, 118);
+            this.listView1.Location = new System.Drawing.Point(466, 157);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(454, 211);
+            this.listView1.Size = new System.Drawing.Size(454, 177);
             this.listView1.TabIndex = 57;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -819,7 +824,7 @@ namespace FCBConverterGUI
             // 
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label16.Location = new System.Drawing.Point(462, 102);
+            this.label16.Location = new System.Drawing.Point(462, 141);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(318, 13);
             this.label16.TabIndex = 56;
@@ -829,7 +834,7 @@ namespace FCBConverterGUI
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label10.Location = new System.Drawing.Point(3, 102);
+            this.label10.Location = new System.Drawing.Point(3, 141);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(183, 13);
             this.label10.TabIndex = 55;
@@ -839,9 +844,9 @@ namespace FCBConverterGUI
             // 
             this.button8.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button8.Location = new System.Drawing.Point(820, 335);
+            this.button8.Location = new System.Drawing.Point(820, 340);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(100, 30);
+            this.button8.Size = new System.Drawing.Size(100, 25);
             this.button8.TabIndex = 54;
             this.button8.Text = "Remove";
             this.button8.UseVisualStyleBackColor = true;
@@ -852,7 +857,7 @@ namespace FCBConverterGUI
             this.button16.Enabled = false;
             this.button16.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button16.Location = new System.Drawing.Point(808, 42);
+            this.button16.Location = new System.Drawing.Point(808, 81);
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(100, 20);
             this.button16.TabIndex = 54;
@@ -864,9 +869,9 @@ namespace FCBConverterGUI
             // 
             this.button7.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button7.Location = new System.Drawing.Point(360, 335);
+            this.button7.Location = new System.Drawing.Point(360, 340);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(100, 30);
+            this.button7.Size = new System.Drawing.Size(100, 25);
             this.button7.TabIndex = 54;
             this.button7.Text = "Remove";
             this.button7.UseVisualStyleBackColor = true;
@@ -877,9 +882,9 @@ namespace FCBConverterGUI
             this.button18.Enabled = false;
             this.button18.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button18.Location = new System.Drawing.Point(637, 335);
+            this.button18.Location = new System.Drawing.Point(637, 340);
             this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(100, 30);
+            this.button18.Size = new System.Drawing.Size(100, 25);
             this.button18.TabIndex = 54;
             this.button18.Text = "Auto calc";
             this.button18.UseVisualStyleBackColor = true;
@@ -889,9 +894,9 @@ namespace FCBConverterGUI
             // 
             this.button14.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button14.Location = new System.Drawing.Point(465, 335);
+            this.button14.Location = new System.Drawing.Point(465, 340);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(100, 30);
+            this.button14.Size = new System.Drawing.Size(100, 25);
             this.button14.TabIndex = 54;
             this.button14.Text = "Add";
             this.button14.UseVisualStyleBackColor = true;
@@ -901,9 +906,9 @@ namespace FCBConverterGUI
             // 
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button4.Location = new System.Drawing.Point(6, 335);
+            this.button4.Location = new System.Drawing.Point(6, 340);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(100, 30);
+            this.button4.Size = new System.Drawing.Size(100, 25);
             this.button4.TabIndex = 54;
             this.button4.Text = "Add";
             this.button4.UseVisualStyleBackColor = true;
@@ -912,7 +917,7 @@ namespace FCBConverterGUI
             // button3
             // 
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button3.Location = new System.Drawing.Point(768, 42);
+            this.button3.Location = new System.Drawing.Point(768, 81);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(25, 20);
             this.button3.TabIndex = 52;
@@ -922,18 +927,18 @@ namespace FCBConverterGUI
             // 
             // textBox9
             // 
-            this.textBox9.Location = new System.Drawing.Point(282, 42);
+            this.textBox9.Location = new System.Drawing.Point(282, 81);
             this.textBox9.Name = "textBox9";
-            this.textBox9.ReadOnly = true;
             this.textBox9.Size = new System.Drawing.Size(480, 20);
             this.textBox9.TabIndex = 51;
             this.textBox9.Text = "E:\\Path\\to\\file";
+            this.textBox9.TextChanged += new System.EventHandler(this.textBox9_TextChanged);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label7.Location = new System.Drawing.Point(26, 44);
+            this.label7.Location = new System.Drawing.Point(26, 83);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(197, 13);
             this.label7.TabIndex = 50;
@@ -962,34 +967,107 @@ namespace FCBConverterGUI
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Convert UE to XBG";
             // 
-            // button20
+            // button22
             // 
-            this.button20.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button20.Location = new System.Drawing.Point(884, 19);
-            this.button20.Name = "button20";
-            this.button20.Size = new System.Drawing.Size(25, 20);
-            this.button20.TabIndex = 63;
-            this.button20.Text = "...";
-            this.button20.UseVisualStyleBackColor = true;
-            this.button20.Click += new System.EventHandler(this.button20_Click);
+            this.button22.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.button22.Location = new System.Drawing.Point(809, 178);
+            this.button22.Name = "button22";
+            this.button22.Size = new System.Drawing.Size(100, 30);
+            this.button22.TabIndex = 69;
+            this.button22.Text = "Convert";
+            this.button22.UseVisualStyleBackColor = true;
+            this.button22.Click += new System.EventHandler(this.button22_Click);
             // 
-            // textBox11
+            // groupBox3
             // 
-            this.textBox11.Location = new System.Drawing.Point(277, 19);
-            this.textBox11.Name = "textBox11";
-            this.textBox11.Size = new System.Drawing.Size(601, 20);
-            this.textBox11.TabIndex = 62;
-            this.textBox11.Text = "E:\\Path\\to\\file";
+            this.groupBox3.Controls.Add(this.radioButton7);
+            this.groupBox3.Controls.Add(this.radioButton6);
+            this.groupBox3.Location = new System.Drawing.Point(563, 83);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(346, 78);
+            this.groupBox3.TabIndex = 68;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Type of model";
             // 
-            // label23
+            // radioButton7
             // 
-            this.label23.AutoSize = true;
-            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label23.Location = new System.Drawing.Point(21, 21);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(90, 13);
-            this.label23.TabIndex = 61;
-            this.label23.Text = "Select UAsset file";
+            this.radioButton7.AutoSize = true;
+            this.radioButton7.Checked = true;
+            this.radioButton7.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton7.Location = new System.Drawing.Point(22, 45);
+            this.radioButton7.Name = "radioButton7";
+            this.radioButton7.Size = new System.Drawing.Size(171, 18);
+            this.radioButton7.TabIndex = 0;
+            this.radioButton7.TabStop = true;
+            this.radioButton7.Text = "Cloth - top, bottom, hand, feet";
+            this.radioButton7.UseVisualStyleBackColor = true;
+            // 
+            // radioButton6
+            // 
+            this.radioButton6.AutoSize = true;
+            this.radioButton6.Enabled = false;
+            this.radioButton6.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton6.Location = new System.Drawing.Point(22, 22);
+            this.radioButton6.Name = "radioButton6";
+            this.radioButton6.Size = new System.Drawing.Size(50, 18);
+            this.radioButton6.TabIndex = 0;
+            this.radioButton6.Text = "Hair";
+            this.radioButton6.UseVisualStyleBackColor = true;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label28.Location = new System.Drawing.Point(43, 215);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(152, 13);
+            this.label28.TabIndex = 67;
+            this.label28.Text = "graymond-M-20180904151809";
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label26.Location = new System.Drawing.Point(43, 122);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(203, 39);
+            this.label26.TabIndex = 67;
+            this.label26.Text = "handw_avatar_mygloves_aver_mf.txt\r\nhandw_avatar_mygloves_aver_mf.uasset\r\nhandw_av" +
+    "atar_mygloves_aver_mf.uexp";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label29.Location = new System.Drawing.Point(21, 263);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(490, 26);
+            this.label29.TabIndex = 67;
+            this.label29.Text = "The reference XBG is required for some binary data for new XBG file.\r\nThe type of" +
+    " XBG must be same, so for example hand cloth must have same reference hand cloth" +
+    " XBG.";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label27.Location = new System.Drawing.Point(21, 187);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(389, 13);
+            this.label27.TabIndex = 67;
+            this.label27.Text = "The TXT must contains material name, each material on new line, so for example:";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label25.Location = new System.Drawing.Point(21, 97);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(443, 13);
+            this.label25.TabIndex = 67;
+            this.label25.Text = "The UAsset file should have also UExp file and TXT file with names of materials, " +
+    "for example:";
             // 
             // button21
             // 
@@ -1020,107 +1098,34 @@ namespace FCBConverterGUI
             this.label24.TabIndex = 64;
             this.label24.Text = "Select reference XBG file";
             // 
-            // label25
+            // button20
             // 
-            this.label25.AutoSize = true;
-            this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label25.Location = new System.Drawing.Point(21, 97);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(443, 13);
-            this.label25.TabIndex = 67;
-            this.label25.Text = "The UAsset file should have also UExp file and TXT file with names of materials, " +
-    "for example:";
+            this.button20.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button20.Location = new System.Drawing.Point(884, 19);
+            this.button20.Name = "button20";
+            this.button20.Size = new System.Drawing.Size(25, 20);
+            this.button20.TabIndex = 63;
+            this.button20.Text = "...";
+            this.button20.UseVisualStyleBackColor = true;
+            this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
-            // label26
+            // textBox11
             // 
-            this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label26.Location = new System.Drawing.Point(43, 122);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(203, 39);
-            this.label26.TabIndex = 67;
-            this.label26.Text = "handw_avatar_mygloves_aver_mf.txt\r\nhandw_avatar_mygloves_aver_mf.uasset\r\nhandw_av" +
-    "atar_mygloves_aver_mf.uexp";
+            this.textBox11.Location = new System.Drawing.Point(277, 19);
+            this.textBox11.Name = "textBox11";
+            this.textBox11.Size = new System.Drawing.Size(601, 20);
+            this.textBox11.TabIndex = 62;
+            this.textBox11.Text = "E:\\Path\\to\\file";
             // 
-            // label27
+            // label23
             // 
-            this.label27.AutoSize = true;
-            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label27.Location = new System.Drawing.Point(21, 187);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(389, 13);
-            this.label27.TabIndex = 67;
-            this.label27.Text = "The TXT must contains material name, each material on new line, so for example:";
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label28.Location = new System.Drawing.Point(43, 215);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(152, 13);
-            this.label28.TabIndex = 67;
-            this.label28.Text = "graymond-M-20180904151809";
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label29.Location = new System.Drawing.Point(21, 263);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(490, 26);
-            this.label29.TabIndex = 67;
-            this.label29.Text = "The reference XBG is required for some binary data for new XBG file.\r\nThe type of" +
-    " XBG must be same, so for example hand cloth must have same reference hand cloth" +
-    " XBG.";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.radioButton7);
-            this.groupBox3.Controls.Add(this.radioButton6);
-            this.groupBox3.Location = new System.Drawing.Point(563, 83);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(346, 78);
-            this.groupBox3.TabIndex = 68;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Type of model";
-            // 
-            // radioButton6
-            // 
-            this.radioButton6.AutoSize = true;
-            this.radioButton6.Enabled = false;
-            this.radioButton6.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton6.Location = new System.Drawing.Point(22, 22);
-            this.radioButton6.Name = "radioButton6";
-            this.radioButton6.Size = new System.Drawing.Size(50, 18);
-            this.radioButton6.TabIndex = 0;
-            this.radioButton6.Text = "Hair";
-            this.radioButton6.UseVisualStyleBackColor = true;
-            // 
-            // radioButton7
-            // 
-            this.radioButton7.AutoSize = true;
-            this.radioButton7.Checked = true;
-            this.radioButton7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton7.Location = new System.Drawing.Point(22, 45);
-            this.radioButton7.Name = "radioButton7";
-            this.radioButton7.Size = new System.Drawing.Size(171, 18);
-            this.radioButton7.TabIndex = 0;
-            this.radioButton7.TabStop = true;
-            this.radioButton7.Text = "Cloth - top, bottom, hand, feet";
-            this.radioButton7.UseVisualStyleBackColor = true;
-            // 
-            // button22
-            // 
-            this.button22.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.button22.Location = new System.Drawing.Point(809, 178);
-            this.button22.Name = "button22";
-            this.button22.Size = new System.Drawing.Size(100, 30);
-            this.button22.TabIndex = 69;
-            this.button22.Text = "Convert";
-            this.button22.UseVisualStyleBackColor = true;
-            this.button22.Click += new System.EventHandler(this.button22_Click);
+            this.label23.AutoSize = true;
+            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.label23.Location = new System.Drawing.Point(21, 21);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(90, 13);
+            this.label23.TabIndex = 61;
+            this.label23.Text = "Select UAsset file";
             // 
             // pictureBox1
             // 
@@ -1130,6 +1135,44 @@ namespace FCBConverterGUI
             this.pictureBox1.Size = new System.Drawing.Size(934, 129);
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.radioButton8);
+            this.groupBox4.Controls.Add(this.radioButton9);
+            this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.groupBox4.Location = new System.Drawing.Point(341, 6);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(207, 44);
+            this.groupBox4.TabIndex = 69;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Choose Far Cry Game";
+            // 
+            // radioButton8
+            // 
+            this.radioButton8.AutoSize = true;
+            this.radioButton8.Checked = true;
+            this.radioButton8.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.radioButton8.Location = new System.Drawing.Point(6, 19);
+            this.radioButton8.Name = "radioButton8";
+            this.radioButton8.Size = new System.Drawing.Size(73, 18);
+            this.radioButton8.TabIndex = 8;
+            this.radioButton8.TabStop = true;
+            this.radioButton8.Text = "Far Cry 5";
+            this.radioButton8.UseVisualStyleBackColor = true;
+            // 
+            // radioButton9
+            // 
+            this.radioButton9.AutoSize = true;
+            this.radioButton9.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.radioButton9.Location = new System.Drawing.Point(85, 19);
+            this.radioButton9.Name = "radioButton9";
+            this.radioButton9.Size = new System.Drawing.Size(120, 18);
+            this.radioButton9.TabIndex = 9;
+            this.radioButton9.Text = "Far Cry New Dawn";
+            this.radioButton9.UseVisualStyleBackColor = true;
             // 
             // MainWindow
             // 
@@ -1163,6 +1206,8 @@ namespace FCBConverterGUI
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1255,5 +1300,8 @@ namespace FCBConverterGUI
         private System.Windows.Forms.RadioButton radioButton7;
         private System.Windows.Forms.RadioButton radioButton6;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.RadioButton radioButton8;
+        private System.Windows.Forms.RadioButton radioButton9;
     }
 }

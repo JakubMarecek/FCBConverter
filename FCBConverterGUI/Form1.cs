@@ -6,6 +6,8 @@ namespace FCBConverterGUI
 {
     public partial class Form1 : Form
     {
+        public Dictionary<string, string> MeshParts { set; get; }
+
         public Form1()
         {
             InitializeComponent();
@@ -13,7 +15,7 @@ namespace FCBConverterGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            foreach (KeyValuePair<string, string> mesh in MeshParts.meshParts)
+            foreach (KeyValuePair<string, string> mesh in MeshParts)
             {
                 comboBox1.Items.Add(mesh.Value);
             }

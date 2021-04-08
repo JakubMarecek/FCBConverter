@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
@@ -170,8 +171,8 @@ namespace FCBConverterGUI
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                textBox10.Text = "";
                 textBox10.Text = openFileDialog.FileName;
-                LoadDataFromXBG(textBox10.Text, true);
             }
         }
 
@@ -185,7 +186,6 @@ namespace FCBConverterGUI
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 textBox9.Text = openFileDialog.FileName;
-                button16.Enabled = true;
             }
         }
 
@@ -197,7 +197,7 @@ namespace FCBConverterGUI
             LoadDataFromXBG(textBox9.Text, false);
         }
 
-        void LoadDataFromXBG(string file, bool selLodSubMesh)
+        private void LoadDataFromXBG(string file, bool selLodSubMesh)
         {
             Form3 form3 = new Form3();
             if (form3.ShowDialog() == DialogResult.OK)
@@ -231,7 +231,7 @@ namespace FCBConverterGUI
                             {
                                 foreach (string valsV in valsData)
                                 {
-                                    listView2.Items.Add(MeshParts.meshParts[valsV]);
+                                    listView2.Items.Add(GetMeshParts()[valsV]);
                                 }
                             }
 
@@ -244,7 +244,7 @@ namespace FCBConverterGUI
                                         string[] partsV = valsV.Split('-');
 
                                         ListViewItem listViewItem = new ListViewItem();
-                                        listViewItem.Text = MeshParts.meshParts[partsV[0]];
+                                        listViewItem.Text = GetMeshParts()[partsV[0]];
                                         listViewItem.SubItems.Add(partsV[1]);
                                         listViewItem.SubItems.Add(partsV[2]);
                                         listView1.Items.Add(listViewItem);
@@ -287,6 +287,7 @@ namespace FCBConverterGUI
         private void button4_Click(object sender, EventArgs e)
         {
             Form1 form1 = new Form1();
+            form1.MeshParts = GetMeshParts();
             if (form1.ShowDialog() == DialogResult.OK)
             {
                 listView2.Items.Add(form1.SelectedValue);
@@ -304,6 +305,7 @@ namespace FCBConverterGUI
         private void button14_Click(object sender, EventArgs e)
         {
             Form2 form2 = new Form2();
+            form2.MeshParts = GetMeshParts();
             if (form2.ShowDialog() == DialogResult.OK)
             {
                 ListViewItem listViewItem = new ListViewItem();
@@ -332,14 +334,14 @@ namespace FCBConverterGUI
             outParamVal += "FACEHIDEFP;";
             for (int i = 0; i < listView1.Items.Count; i++)
             {
-                string meshID = MeshParts.meshParts.FirstOrDefault(x => x.Value == listView1.Items[i].SubItems[0].Text).Key;
+                string meshID = GetMeshParts().FirstOrDefault(x => x.Value == listView1.Items[i].SubItems[0].Text).Key;
                 outParamVal += (i > 0 ? "," : "") + meshID + "-" + listView1.Items[i].SubItems[1].Text + "-" + listView1.Items[i].SubItems[2].Text;
             }
 
             outParamVal += "|MESHPARTHIDE;";
             for (int i = 0; i < listView2.Items.Count; i++)
             {
-                string meshID = MeshParts.meshParts.FirstOrDefault(x => x.Value == listView2.Items[i].Text).Key;
+                string meshID = GetMeshParts().FirstOrDefault(x => x.Value == listView2.Items[i].Text).Key;
                 outParamVal += (i > 0 ? "," : "") + meshID;
             }
 
@@ -355,6 +357,7 @@ namespace FCBConverterGUI
             if (clickedItem != null)
             {
                 Form2 form2 = new Form2();
+                form2.MeshParts = GetMeshParts();
                 form2.SelectedMeshName = listView1.Items[clickedItem.Index].SubItems[0].Text;
                 form2.FaceStartIndex = int.Parse(listView1.Items[clickedItem.Index].SubItems[1].Text);
                 form2.FaceCount = int.Parse(listView1.Items[clickedItem.Index].SubItems[2].Text);
@@ -448,6 +451,31 @@ namespace FCBConverterGUI
             {
                 textBox12.Text = openFileDialog.FileName;
             }
+        }
+
+        private void textBox10_TextChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(textBox10.Text))
+                LoadDataFromXBG(textBox10.Text, true);
+        }
+
+        private void textBox9_TextChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(textBox9.Text))
+                button16.Enabled = true;
+            else
+                button16.Enabled = false;
+        }
+
+        private Dictionary<string, string> GetMeshParts()
+        {
+            if (radioButton8.Checked)
+                return MeshParts.meshPartsFC5;
+
+            if (radioButton9.Checked)
+                return MeshParts.meshPartsNewDawn;
+
+            return null;
         }
     }
 }

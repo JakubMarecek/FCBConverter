@@ -4,7 +4,7 @@ namespace FCBConverterGUI
 {
     class MeshParts
     {
-        public static Dictionary<string, string> meshParts = new Dictionary<string, string>() {
+        public static Dictionary<string, string> meshPartsNewDawn = new Dictionary<string, string>() {
             {"138565625627156", "HeadSpecial2"},
             {"9145764880540812", "HeadNeck"},
             {"138566445880426", "HeadShoulders"},
@@ -57,6 +57,40 @@ namespace FCBConverterGUI
             {"1243132195915308500", "Z_LeftArmShoulderLow"},
             {"1252139395170056068", "LeftArmShoulderUp"},
             {"1261146594424812843", "RightArmShoulderUp"},
+        };
+
+        public static Dictionary<string, string> meshPartsFC5 = new Dictionary<string, string>() {
+            {"138565625627156", "TorsoUp"},
+            {"9145764880540812", "TorsoLow"},
+            {"138566445880426", "ArmsUp"},
+            {"9145765700627956", "ArmsMid"},
+            {"18152964955400296", "ArmsLow"},
+            {"27160164210147536", "Hands"},
+            {"36167363464899034", "HandsFingers"},
+            {"45174562719655328", "LegUp"},
+            {"54181761974408421", "LegLow"},
+            {"63188961229163900", "LegSocks"},
+            {"72196160484195583", "Feets"},
+            {"81203359738944989", "HeadTorso"},
+            {"90210558993698840", "HeadNeck"},
+            {"138572996482729", "HeadShoulders"},
+            {"9145772259652753", "HeadHat"},
+            {"531563342721793539", "ArmsShoulders"},
+            {"540570541977001749", "Vneck"},
+            {"2450096828033036591", "Z_RightForearm"},
+            {"2603219228086803146", "Z_LeftForearm"},
+            {"2612226427341616713", "Z_Legs"},
+            {"2621233626744776573", "Z_RightHandFingers"},
+            {"2630240825999550376", "Z_RightHand"},
+            {"2639248025254325027", "Z_RightArmLow"},
+            {"2648255224509106110", "Z_RightArmMid"},
+            {"2657262423763861326", "Z_RightArmUp"},
+            {"2666269623018611372", "Z_LeftHandFingers"},
+            {"2675276822273359449", "Z_LeftHand"},
+            {"2684284021528111291", "Z_LeftArmLow"},
+            {"2693291220782863810", "Z_LeftArmMid"},
+            {"2702298420037617806", "Z_LeftArmUp"},
+            {"2675276828030824899", "HeadSpecial"},
         };
     }
 }
