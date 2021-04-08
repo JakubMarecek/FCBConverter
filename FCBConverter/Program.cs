@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210402-0015";
+        public static string version = "20210408-1500";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -398,6 +398,7 @@ namespace FCBConverter
             string param2 = args.Length > 1 ? args[1] : "";
             string param3 = args.Length > 2 ? args[2] : "";
             string param4 = args.Length > 3 ? args[3] : "";
+            string param5 = args.Length > 4 ? args[4] : "";
 
             string enC = "-enablecompress";
             string disC = "-disablecompress";
@@ -471,6 +472,18 @@ namespace FCBConverter
 
                 ProcessSubFolders(file, param2, param3 == "-subfolders");
                 Console.WriteLine("Job done!");
+            }
+            else if (file == "-xbgFP")
+            {
+                FixXBGForFP(param2, int.Parse(param3.Replace("-lod=", "")), int.Parse(param4.Replace("-submesh=", "")), param5);
+            }
+            else if (file == "-xbgData")
+            {
+                GetDataFromXBG(param2, int.Parse(param3.Replace("-lod=", "")), int.Parse(param4.Replace("-submesh=", "")));
+            }
+            else if (file == "-ue")
+            {
+                ConvertUE2XBG(param2, param3);
             }
             else
             {
@@ -2957,11 +2970,13 @@ namespace FCBConverter
             }
 
             uint unknown1Count = TFATReader.ReadUInt32();
-            for (uint i = 0; i < unknown1Count; i++)
+            if (unknown1Count > 0)
+                throw new NotSupportedException();
+            /*for (uint i = 0; i < unknown1Count; i++)
             {
                 throw new NotSupportedException();
                 TFATReader.ReadBytes(16);
-            }
+            }*/
 
             if (dwVersion >= 7)
             {
@@ -4323,6 +4338,303 @@ namespace FCBConverter
 
             XBTStream.Dispose();
             XBTStream.Close();
+        }
+
+        static void FixXBGForFP(string editXbg, int lod, int submesh, string data)
+        {
+            string newF = Path.GetDirectoryName(editXbg) + "\\" + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
+            File.Copy(editXbg, newF, true);
+
+            FileStream XBGEditStream = new FileStream(newF, FileMode.Open, FileAccess.ReadWrite);
+
+            uint editHdr = XBGEditStream.ReadValueU32();
+            ushort majorVer = XBGEditStream.ReadValueU16();
+            ushort minorVer = XBGEditStream.ReadValueU16();
+
+            if (editHdr != 0x4D455348) // HSEM
+            {
+                Console.WriteLine(editXbg + " is not a valid XBG file.");
+                return;
+            }
+
+            if (majorVer != 0x47 || minorVer != 0x0D)
+            {
+                Console.WriteLine(editXbg + " is wrong version.");
+                return;
+            }
+
+            Dictionary<string, string[]> dataP = new Dictionary<string, string[]>();
+
+            string[] dataParse = data.Split('|');
+            foreach (string dP in dataParse)
+            {
+                string[] vals = dP.Split(';');
+                string[] valsData = vals[1].Split(',');
+                dataP.Add(vals[0], valsData);
+            }
+
+            uint DHRMResize = 0;
+
+            XBGEditStream.Seek(28, SeekOrigin.Begin);
+            uint editSectCount = XBGEditStream.ReadValueU32();
+            for (int i = 0; i < editSectCount; i++)
+            {
+                uint sectHdrK = XBGEditStream.ReadValueU32();
+                XBGEditStream.ReadValueU32(); // always one
+                uint sectionLen = XBGEditStream.ReadValueU32();
+                uint sectionLenShorted = XBGEditStream.ReadValueU32();
+                uint subCount = XBGEditStream.ReadValueU32();
+
+                if (subCount > 0)
+                {
+                    for (int j = 0; j < subCount; j++)
+                    {
+                        uint subSectHdrK = XBGEditStream.ReadValueU32();
+                        XBGEditStream.ReadValueU32(); // always one
+                        uint subSectionLen = XBGEditStream.ReadValueU32();
+                        uint subSectionLenShorted = XBGEditStream.ReadValueU32();
+                        XBGEditStream.ReadValueU32(); // hope zero
+
+                        long subPos = XBGEditStream.Position;
+
+                        if (subSectHdrK == 0x434C5553) // SULC
+                        {
+                            for (int k = 0; k <= lod; k++)
+                            {
+                                uint subMeshCount = XBGEditStream.ReadValueU32();
+
+                                if (k == lod)
+                                {
+                                    for (int l = 0; l < submesh; l++)
+                                    {
+                                        XBGEditStream.Seek(1048, SeekOrigin.Current);
+                                    }
+                                }
+                                else
+                                {
+                                    XBGEditStream.Seek(1048 * subMeshCount, SeekOrigin.Current);
+                                }
+                            }
+
+                            XBGEditStream.Seek(XBGEditStream.Position + 524, SeekOrigin.Begin);
+
+                            // write
+                            string[] dataToWrite = dataP["FACEHIDEFP"];
+                            foreach (string valToWrite in dataToWrite)
+                            {
+                                string[] valParsed = valToWrite.Split('-');
+                                XBGEditStream.WriteValueU32(0);
+                                XBGEditStream.WriteValueU64(ulong.Parse(valParsed[0]));
+                                XBGEditStream.WriteValueU16(ushort.Parse(valParsed[1]));
+                                XBGEditStream.WriteValueU16(ushort.Parse(valParsed[2]));
+                            }
+
+                            int wspace = 512 - (dataToWrite.Length * (sizeof(uint) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort)));
+                            for (int k = 0; k < wspace; k++)
+                                XBGEditStream.WriteByte(0);
+
+                            XBGEditStream.WriteValueU32(0);
+                            XBGEditStream.WriteValueU32((uint)dataToWrite.Length);
+                            XBGEditStream.WriteValueU32(0);
+                        }
+
+                        XBGEditStream.Seek(subPos + subSectionLenShorted, SeekOrigin.Begin);
+                    }
+                }
+
+                long pos = XBGEditStream.Position;
+
+                if (sectHdrK == 0x4D524844) // DHRM
+                {
+                    XBGEditStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
+                    int leftToEnd = (int)(XBGEditStream.Length - pos - sectionLenShorted);
+                    byte[] leftToEndBts = new byte[leftToEnd];
+                    XBGEditStream.Read(leftToEndBts, 0, leftToEndBts.Length);
+
+                    XBGEditStream.Seek(pos, SeekOrigin.Begin);
+                    XBGEditStream.SetLength(pos);
+
+                    string[] dataToWrite = dataP["MESHPARTHIDE"];
+                    DHRMResize = (uint)(dataToWrite.Length * sizeof(ulong) + sizeof(uint) + sizeof(byte) - sectionLenShorted);
+
+                    XBGEditStream.WriteByte(0);
+                    XBGEditStream.WriteValueU32((uint)dataToWrite.Length);
+                    foreach (string valToWrite in dataToWrite)
+                    {
+                        XBGEditStream.WriteValueU64(ulong.Parse(valToWrite));
+                    }
+                    XBGEditStream.Write(leftToEndBts, 0, leftToEndBts.Length);
+
+                    XBGEditStream.Seek(pos - sizeof(uint) * 3, SeekOrigin.Begin);
+                    XBGEditStream.WriteValueU32(sectionLen + DHRMResize);
+                    XBGEditStream.WriteValueU32(sectionLenShorted + DHRMResize);
+                    XBGEditStream.Flush();
+
+                    sectionLenShorted += DHRMResize;
+                }
+
+                XBGEditStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
+            }
+
+            XBGEditStream.Seek(-sizeof(ulong), SeekOrigin.End);
+            uint val = XBGEditStream.ReadValueU32();
+            XBGEditStream.Seek(-sizeof(ulong), SeekOrigin.End);
+            val += DHRMResize;
+            XBGEditStream.WriteValueU32(val);
+
+            XBGEditStream.Seek(20, SeekOrigin.Begin);
+            val = XBGEditStream.ReadValueU32();
+            XBGEditStream.Seek(20, SeekOrigin.Begin);
+            val += DHRMResize;
+            XBGEditStream.WriteValueU32(val);
+
+            XBGEditStream.Close();
+        }
+
+        static void GetDataFromXBG(string sourceXbg, int lod, int submesh)
+        {
+            FileStream XBGSourceStream = new FileStream(sourceXbg, FileMode.Open, FileAccess.ReadWrite);
+
+            uint editHdr = XBGSourceStream.ReadValueU32();
+            ushort majorVer = XBGSourceStream.ReadValueU16();
+            ushort minorVer = XBGSourceStream.ReadValueU16();
+
+            if (editHdr != 0x4D455348) // HSEM
+            {
+                Console.WriteLine(sourceXbg + " is not a valid XBG file.");
+                return;
+            }
+
+            if (majorVer != 0x47 || minorVer != 0x0D)
+            {
+                Console.WriteLine(sourceXbg + " is wrong version.");
+                return;
+            }
+
+            string dataP = "";
+            long sulcStartPos = 0;
+
+            XBGSourceStream.Seek(28, SeekOrigin.Begin);
+            uint editSectCount = XBGSourceStream.ReadValueU32();
+            for (int i = 0; i < editSectCount; i++)
+            {
+                uint sectHdrK = XBGSourceStream.ReadValueU32();
+                XBGSourceStream.ReadValueU32(); // always one
+                uint sectionLen = XBGSourceStream.ReadValueU32();
+                uint sectionLenShorted = XBGSourceStream.ReadValueU32();
+                uint subCount = XBGSourceStream.ReadValueU32();
+
+                if (subCount > 0)
+                {
+                    for (int j = 0; j < subCount; j++)
+                    {
+                        uint subSectHdrK = XBGSourceStream.ReadValueU32();
+                        XBGSourceStream.ReadValueU32(); // always one
+                        uint subSectionLen = XBGSourceStream.ReadValueU32();
+                        uint subSectionLenShorted = XBGSourceStream.ReadValueU32();
+                        XBGSourceStream.ReadValueU32(); // hope zero
+
+                        long subPos = XBGSourceStream.Position;
+
+                        if (subSectHdrK == 0x434C5553) // SULC
+                        {
+                            sulcStartPos = XBGSourceStream.Position;
+
+                            for (int k = 0; k <= lod; k++)
+                            {
+                                uint subMeshCount = XBGSourceStream.ReadValueU32();
+
+                                if (k == lod)
+                                {
+                                    for (int l = 0; l < submesh; l++)
+                                    {
+                                        XBGSourceStream.Seek(1048, SeekOrigin.Current);
+                                    }
+                                }
+                                else
+                                {
+                                    XBGSourceStream.Seek(1048 * subMeshCount, SeekOrigin.Current);
+                                }
+                            }
+
+                            long skippedLodPos = XBGSourceStream.Position;
+
+                            XBGSourceStream.Seek(skippedLodPos + 524 + 516, SeekOrigin.Begin);
+                            uint cnt = XBGSourceStream.ReadValueU32();
+
+                            XBGSourceStream.Seek(skippedLodPos + 524, SeekOrigin.Begin);
+
+                            string vals = "";
+                            for (int k = 0; k < cnt; k++)
+                            {
+                                XBGSourceStream.ReadValueU32();
+                                ulong id = XBGSourceStream.ReadValueU64();
+                                ushort idx = XBGSourceStream.ReadValueU16();
+                                ushort len = XBGSourceStream.ReadValueU16();
+                                vals += (vals == "" ? "" : ",") + id + "-" + idx + "-" + len;
+                            }
+                            dataP += (dataP == "" ? "" : "|") + "FACEHIDEFP;" + vals;
+                        }
+
+                        XBGSourceStream.Seek(subPos + subSectionLenShorted, SeekOrigin.Begin);
+                    }
+                }
+
+                long pos = XBGSourceStream.Position;
+
+                if (sectHdrK == 0x4D524844) // DHRM
+                {
+                    //read
+                    XBGSourceStream.ReadByte();
+                    XBGSourceStream.ReadValueU32();
+
+                    string vals = "";
+                    int cnt = (int)((sectionLenShorted - sizeof(uint) - sizeof(byte)) / sizeof(ulong));
+                    for (int j = 0; j < cnt; j++)
+                    {
+                        vals += (vals == "" ? "" : ",") + XBGSourceStream.ReadValueU64().ToString();
+                    }
+                    dataP += (dataP == "" ? "" : "|") + "MESHPARTHIDE;" + vals;
+                }
+
+                if (sectHdrK == 0x4C4F44) // DOL
+                {
+                    uint lods = XBGSourceStream.ReadValueU32();
+                    dataP += (dataP == "" ? "" : "|") + "LODS;" + lods;
+
+                    XBGSourceStream.Seek(sulcStartPos, SeekOrigin.Begin);
+                    string vals = "";
+                    string vals_faces = "";
+                    for (int k = 0; k < lods; k++)
+                    {
+                        uint subMeshCount = XBGSourceStream.ReadValueU32();
+
+                        for (int l = 0; l < subMeshCount; l++)
+                        {
+                            XBGSourceStream.ReadValueU16();
+                            ushort facesCount = XBGSourceStream.ReadValueU16();
+                            XBGSourceStream.Seek(1044, SeekOrigin.Current);
+                            vals_faces += (vals_faces == "" ? "" : ",") + facesCount.ToString();
+                        }
+
+                        vals += (vals == "" ? "" : ",") + subMeshCount.ToString();
+                    }
+                    dataP += (dataP == "" ? "" : "|") + "SUBMESHES;" + vals;
+                    dataP += (dataP == "" ? "" : "|") + "FACES;" + vals_faces.ToString();
+                }
+
+                XBGSourceStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
+            }
+
+            XBGSourceStream.Close();
+
+            //Console.Clear();
+            Console.WriteLine("data" + dataP);
+        }
+
+        static void ConvertUE2XBG(string uePath, string sourceXbg)
+        {
+            ue4.Convert(uePath, sourceXbg);
         }
     }
 }

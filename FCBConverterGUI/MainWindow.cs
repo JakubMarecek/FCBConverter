@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace FCBConverterGUI
@@ -31,12 +33,11 @@ namespace FCBConverterGUI
             "File allocation table (DAT header file)|*.fat|" +
             "Converted files|*.converted.xml";
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
+        string[] sourceXbgFaces;
+        int sourceXbgLods = 0;
+        string[] sourceXbgSubMeshesInfo;
 
-        private PrivateFontCollection fonts = new PrivateFontCollection();
-
-        private void CallFCBConverter(string launchParams)
+        private int CallFCBConverter(string launchParams)
         {
             Process process = new Process();
             process.StartInfo.FileName = "FCBConverter.exe";
@@ -44,67 +45,12 @@ namespace FCBConverterGUI
             process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
             process.Start();
             process.WaitForExit();
-        }
-
-        private FontFamily GetFont(byte[] fontData)
-        {
-            IntPtr fontPtr = System.Runtime.InteropServices.Marshal.AllocCoTaskMem(fontData.Length);
-            System.Runtime.InteropServices.Marshal.Copy(fontData, 0, fontPtr, fontData.Length);
-            uint dummy = 0;
-            fonts.AddMemoryFont(fontPtr, fontData.Length);
-            AddFontMemResourceEx(fontPtr, (uint)fontData.Length, IntPtr.Zero, ref dummy);
-            System.Runtime.InteropServices.Marshal.FreeCoTaskMem(fontPtr);
-            return fonts.Families[0];
+            return process.ExitCode;
         }
 
         public MainWindow()
         {
             InitializeComponent();
-
-            Font FCZTitle = new Font(GetFont(Properties.Resources.FCZTitle), 70);
-            Font DINNextW1G_Regular = new Font(GetFont(Properties.Resources.DINNextW1G_Regular), 12);
-            Font TradeGothicLT_Bold = new Font(GetFont(Properties.Resources.TradeGothicLT_Bold), 12);
-
-            label1.Font = FCZTitle;
-            label2.Font = TradeGothicLT_Bold;
-            label3.Font = TradeGothicLT_Bold;
-            label4.Font = TradeGothicLT_Bold;
-            label5.Font = TradeGothicLT_Bold;
-            label6.Font = TradeGothicLT_Bold;
-            label8.Font = TradeGothicLT_Bold;
-            label9.Font = TradeGothicLT_Bold;
-            label11.Font = TradeGothicLT_Bold;
-            label12.Font = TradeGothicLT_Bold;
-            label13.Font = TradeGothicLT_Bold;
-            label14.Font = TradeGothicLT_Bold;
-            label15.Font = TradeGothicLT_Bold;
-            label17.Font = TradeGothicLT_Bold;
-            label18.Font = TradeGothicLT_Bold;
-            label21.Font = TradeGothicLT_Bold;
-            tabControl1.Font = DINNextW1G_Regular;
-            button1.Font = TradeGothicLT_Bold;
-            button2.Font = TradeGothicLT_Bold;
-            button5.Font = TradeGothicLT_Bold;
-            button6.Font = TradeGothicLT_Bold;
-            button9.Font = TradeGothicLT_Bold;
-            button10.Font = TradeGothicLT_Bold;
-            button11.Font = TradeGothicLT_Bold;
-            button12.Font = TradeGothicLT_Bold;
-            button13.Font = TradeGothicLT_Bold;
-            textBox1.Font = TradeGothicLT_Bold;
-            textBox2.Font = TradeGothicLT_Bold;
-            textBox3.Font = TradeGothicLT_Bold;
-            textBox4.Font = TradeGothicLT_Bold;
-            textBox5.Font = TradeGothicLT_Bold;
-            textBox6.Font = TradeGothicLT_Bold;
-            textBox7.Font = TradeGothicLT_Bold;
-            textBox8.Font = TradeGothicLT_Bold;
-            radioButton1.Font = TradeGothicLT_Bold;
-            radioButton2.Font = TradeGothicLT_Bold;
-            radioButton3.Font = TradeGothicLT_Bold;
-            radioButton4.Font = TradeGothicLT_Bold;
-            radioButton5.Font = TradeGothicLT_Bold;
-            checkBox1.Font = TradeGothicLT_Bold;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -213,6 +159,295 @@ namespace FCBConverterGUI
         private void button6_Click(object sender, EventArgs e)
         {
             CallFCBConverter("\"" + textBox6.Text + "\"");
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Far Cry 5 / New Dawn Mesh File|*.xbg",
+                FileName = textBox10.Text
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox10.Text = openFileDialog.FileName;
+                LoadDataFromXBG(textBox10.Text, true);
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Far Cry 5 / New Dawn Mesh File|*.xbg",
+                FileName = textBox9.Text
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox9.Text = openFileDialog.FileName;
+                button16.Enabled = true;
+            }
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            if (!File.Exists(textBox9.Text))
+                return;
+
+            LoadDataFromXBG(textBox9.Text, false);
+        }
+
+        void LoadDataFromXBG(string file, bool selLodSubMesh)
+        {
+            Form3 form3 = new Form3();
+            if (form3.ShowDialog() == DialogResult.OK)
+            {
+                listView1.Items.Clear();
+                listView2.Items.Clear();
+
+                Process process = new Process();
+                process.StartInfo.FileName = "FCBConverter.exe";
+                process.StartInfo.Arguments = "-xbgData \"" + file + "\" -lod=" + form3.SelectedLOD.ToString() + " -submesh=" + form3.SelectedSubMesh.ToString();
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.Start();
+
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    string line = process.StandardOutput.ReadLine();
+
+                    if (line != null && line.StartsWith("data"))
+                    {
+                        string data = line.Replace("data", "");
+
+                        string[] dataParse = data.Split('|');
+                        foreach (string dP in dataParse)
+                        {
+                            string[] vals = dP.Split(';');
+                            string[] valsData = vals[1].Split(',');
+
+                            if (vals[0] == "MESHPARTHIDE")
+                            {
+                                foreach (string valsV in valsData)
+                                {
+                                    listView2.Items.Add(MeshParts.meshParts[valsV]);
+                                }
+                            }
+
+                            if (vals[0] == "FACEHIDEFP")
+                            {
+                                foreach (string valsV in valsData)
+                                {
+                                    if (valsV != "")
+                                    {
+                                        string[] partsV = valsV.Split('-');
+
+                                        ListViewItem listViewItem = new ListViewItem();
+                                        listViewItem.Text = MeshParts.meshParts[partsV[0]];
+                                        listViewItem.SubItems.Add(partsV[1]);
+                                        listViewItem.SubItems.Add(partsV[2]);
+                                        listView1.Items.Add(listViewItem);
+                                    }
+                                }
+                            }
+
+                            if (vals[0] == "FACES")
+                            {
+                                sourceXbgFaces = valsData;
+                            }
+
+                            if (vals[0] == "SUBMESHES")
+                            {
+                                sourceXbgSubMeshesInfo = valsData;
+                            }
+
+                            if (vals[0] == "LODS")
+                            {
+                                sourceXbgLods = int.Parse(vals[1]);
+                            }
+                        }
+                    }
+                }
+
+                process.WaitForExit();
+
+                button17.Enabled = true;
+                button18.Enabled = true;
+                button19.Enabled = true;
+
+                if (selLodSubMesh)
+                {
+                    numericUpDown1.Value = form3.SelectedLOD;
+                    numericUpDown2.Value = form3.SelectedSubMesh;
+                }
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form1 form1 = new Form1();
+            if (form1.ShowDialog() == DialogResult.OK)
+            {
+                listView2.Items.Add(form1.SelectedValue);
+            }
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem eachItem in listView2.SelectedItems)
+            {
+                listView2.Items.Remove(eachItem);
+            }
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            if (form2.ShowDialog() == DialogResult.OK)
+            {
+                ListViewItem listViewItem = new ListViewItem();
+                listViewItem.Text = form2.SelectedMeshName;
+                listViewItem.SubItems.Add(form2.FaceStartIndex.ToString());
+                listViewItem.SubItems.Add(form2.FaceCount.ToString());
+                listView1.Items.Add(listViewItem);
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem eachItem in listView1.SelectedItems)
+            {
+                listView1.Items.Remove(eachItem);
+            }
+        }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+            if (!File.Exists(textBox10.Text))
+                return;
+
+            string outParamVal = "";
+
+            outParamVal += "FACEHIDEFP;";
+            for (int i = 0; i < listView1.Items.Count; i++)
+            {
+                string meshID = MeshParts.meshParts.FirstOrDefault(x => x.Value == listView1.Items[i].SubItems[0].Text).Key;
+                outParamVal += (i > 0 ? "," : "") + meshID + "-" + listView1.Items[i].SubItems[1].Text + "-" + listView1.Items[i].SubItems[2].Text;
+            }
+
+            outParamVal += "|MESHPARTHIDE;";
+            for (int i = 0; i < listView2.Items.Count; i++)
+            {
+                string meshID = MeshParts.meshParts.FirstOrDefault(x => x.Value == listView2.Items[i].Text).Key;
+                outParamVal += (i > 0 ? "," : "") + meshID;
+            }
+
+            CallFCBConverter("-xbgFP \"" + textBox10.Text + "\" -lod=" + numericUpDown1.Value.ToString() + " -submesh=" + numericUpDown2.Value.ToString() + " \"" + outParamVal + "\"");
+
+            MessageBox.Show("XBG successfully edited.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var senderList = (ListView)sender;
+            var clickedItem = senderList.HitTest(e.Location).Item;
+            if (clickedItem != null)
+            {
+                Form2 form2 = new Form2();
+                form2.SelectedMeshName = listView1.Items[clickedItem.Index].SubItems[0].Text;
+                form2.FaceStartIndex = int.Parse(listView1.Items[clickedItem.Index].SubItems[1].Text);
+                form2.FaceCount = int.Parse(listView1.Items[clickedItem.Index].SubItems[2].Text);
+
+                if (form2.ShowDialog() == DialogResult.OK)
+                {
+                    clickedItem.SubItems[0].Text = form2.SelectedMeshName;
+                    clickedItem.SubItems[1].Text = form2.FaceStartIndex.ToString();
+                    clickedItem.SubItems[2].Text = form2.FaceCount.ToString();
+                }
+            }
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Autocalculate will add all faces from selected LOD and submesh. This is used for clothes of type feet, bottom and handwear. Top parts can produce bugs like missing body when you look down.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                int clc = (int)Math.Floor((double)GetFaceCount((int)numericUpDown1.Value, (int)numericUpDown2.Value) / listView1.Items.Count);
+
+                for (int i = 0; i < listView1.Items.Count; i++)
+                {
+                    listView1.Items[i].SubItems[1].Text = (clc * i * 3).ToString();
+                    listView1.Items[i].SubItems[2].Text = (clc * 3).ToString();
+                }
+            }
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            string info = "";
+
+            info += "Source XBG contains" + Environment.NewLine + Environment.NewLine;
+            info += "Number of LODS: " + sourceXbgLods + Environment.NewLine + Environment.NewLine;
+            info += "Count of sub meshes in each LOD:" + Environment.NewLine;
+
+            for (int i = 0; i < sourceXbgLods; i++)
+            {
+                info += "  -LOD " + i.ToString() + " contains " + sourceXbgSubMeshesInfo[i] + " sub meshes" + Environment.NewLine;
+                for (int j = 0; j < int.Parse(sourceXbgSubMeshesInfo[i]); j++)
+                {
+                    int faces = GetFaceCount(i, j);
+                    info += "    -submesh " + j.ToString() + " contains " + faces + " (" + (faces * 3) + ")" + " faces" + Environment.NewLine;
+                }
+            }
+
+            MessageBox.Show(info, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private int GetFaceCount(int lod, int submesh)
+        {
+            int fcAr = 0;
+
+            for (int i = 0; i <= lod; i++)
+            {
+                if (i == lod)
+                {
+                    return int.Parse(sourceXbgFaces[fcAr + submesh]);
+                }
+                fcAr += int.Parse(sourceXbgSubMeshesInfo[i]);
+            }
+
+            return -1;
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            CallFCBConverter("-ue \"" + textBox11.Text + "\" \"" + textBox12.Text + "\"");
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Unreal Engine UAsset file|*.uasset",
+                FileName = textBox11.Text
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox11.Text = openFileDialog.FileName;
+            }
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Far Cry 5 / New Dawn Mesh File|*.xbg",
+                FileName = textBox12.Text
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox12.Text = openFileDialog.FileName;
+            }
         }
     }
 }

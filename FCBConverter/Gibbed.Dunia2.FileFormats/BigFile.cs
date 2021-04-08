@@ -196,11 +196,13 @@ namespace Gibbed.Dunia2.FileFormats
             }
 
             uint unknown1Count = input.ReadValueU32(Endian.Little);
-            for (uint i = 0; i < unknown1Count; i++)
+            if (unknown1Count > 0)
+                throw new NotSupportedException();
+            /*for (uint i = 0; i < unknown1Count; i++)
             {
                 throw new NotSupportedException();
-                input.ReadBytes(16);
-            }
+                TFATReader.ReadBytes(16);
+            }*/
 
             if (version >= 7)
             {

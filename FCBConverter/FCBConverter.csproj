@@ -84,6 +84,15 @@
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\NamedDefinitionDictionary.cs" />
     <Compile Include="Gibbed.Dunia2.BinaryObjectInfo\XmlLoadException.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ExportException.cs" />
+    <Compile Include="UEClothes\APPLIB\C3D.cs" />
+    <Compile Include="UEClothes\APPLIB\Quaternion3D.cs" />
+    <Compile Include="UEClothes\APPLIB\Vector3D.cs" />
+    <Compile Include="UEClothes\System\Half.cs" />
+    <Compile Include="UEClothes\System\HalfHelper.cs" />
+    <Compile Include="UEClothes\UE4\actor.cs" />
+    <Compile Include="UEClothes\UE4\land.cs" />
+    <Compile Include="UEClothes\UE4\prop.cs" />
+    <Compile Include="UEClothes\UE4\ue4.cs" />
     <None Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs.bak" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\Exporting.cs" />
     <Compile Include="Gibbed.Dunia2.ConvertBinaryObject\ImportException.cs" />

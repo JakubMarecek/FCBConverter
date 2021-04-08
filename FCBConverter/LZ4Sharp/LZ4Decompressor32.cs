@@ -191,7 +191,7 @@ namespace LZ4Sharp
                 byte* cpy;
 
                 byte token;
-                int len, length;
+                int length;
 
 
                 // Main Loop
