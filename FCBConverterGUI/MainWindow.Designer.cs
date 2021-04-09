@@ -74,6 +74,9 @@ namespace FCBConverterGUI
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.radioButton8 = new System.Windows.Forms.RadioButton();
+            this.radioButton9 = new System.Windows.Forms.RadioButton();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.label22 = new System.Windows.Forms.Label();
             this.button19 = new System.Windows.Forms.Button();
@@ -117,21 +120,18 @@ namespace FCBConverterGUI
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.radioButton8 = new System.Windows.Forms.RadioButton();
-            this.radioButton9 = new System.Windows.Forms.RadioButton();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabPage2
@@ -667,6 +667,44 @@ namespace FCBConverterGUI
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Fix XBG for FP";
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.radioButton8);
+            this.groupBox4.Controls.Add(this.radioButton9);
+            this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.groupBox4.Location = new System.Drawing.Point(341, 6);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(207, 44);
+            this.groupBox4.TabIndex = 69;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Choose Far Cry Game";
+            // 
+            // radioButton8
+            // 
+            this.radioButton8.AutoSize = true;
+            this.radioButton8.Checked = true;
+            this.radioButton8.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.radioButton8.Location = new System.Drawing.Point(6, 19);
+            this.radioButton8.Name = "radioButton8";
+            this.radioButton8.Size = new System.Drawing.Size(73, 18);
+            this.radioButton8.TabIndex = 8;
+            this.radioButton8.TabStop = true;
+            this.radioButton8.Text = "Far Cry 5";
+            this.radioButton8.UseVisualStyleBackColor = true;
+            // 
+            // radioButton9
+            // 
+            this.radioButton9.AutoSize = true;
+            this.radioButton9.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.radioButton9.Location = new System.Drawing.Point(85, 19);
+            this.radioButton9.Name = "radioButton9";
+            this.radioButton9.Size = new System.Drawing.Size(120, 18);
+            this.radioButton9.TabIndex = 9;
+            this.radioButton9.Text = "Far Cry New Dawn";
+            this.radioButton9.UseVisualStyleBackColor = true;
+            // 
             // numericUpDown2
             // 
             this.numericUpDown2.Location = new System.Drawing.Point(629, 107);
@@ -733,9 +771,9 @@ namespace FCBConverterGUI
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.label20.Location = new System.Drawing.Point(26, 109);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(124, 13);
+            this.label20.Size = new System.Drawing.Size(138, 13);
             this.label20.TabIndex = 62;
-            this.label20.Text = "Select LOD to write edits";
+            this.label20.Text = "Select material to write edits";
             // 
             // listView2
             // 
@@ -1136,44 +1174,6 @@ namespace FCBConverterGUI
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
             // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.radioButton8);
-            this.groupBox4.Controls.Add(this.radioButton9);
-            this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.groupBox4.Location = new System.Drawing.Point(341, 6);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(207, 44);
-            this.groupBox4.TabIndex = 69;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Choose Far Cry Game";
-            // 
-            // radioButton8
-            // 
-            this.radioButton8.AutoSize = true;
-            this.radioButton8.Checked = true;
-            this.radioButton8.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.radioButton8.Location = new System.Drawing.Point(6, 19);
-            this.radioButton8.Name = "radioButton8";
-            this.radioButton8.Size = new System.Drawing.Size(73, 18);
-            this.radioButton8.TabIndex = 8;
-            this.radioButton8.TabStop = true;
-            this.radioButton8.Text = "Far Cry 5";
-            this.radioButton8.UseVisualStyleBackColor = true;
-            // 
-            // radioButton9
-            // 
-            this.radioButton9.AutoSize = true;
-            this.radioButton9.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.radioButton9.Location = new System.Drawing.Point(85, 19);
-            this.radioButton9.Name = "radioButton9";
-            this.radioButton9.Size = new System.Drawing.Size(120, 18);
-            this.radioButton9.TabIndex = 9;
-            this.radioButton9.Text = "Far Cry New Dawn";
-            this.radioButton9.UseVisualStyleBackColor = true;
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1199,6 +1199,8 @@ namespace FCBConverterGUI
             this.tabControl1.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.tabPage4.ResumeLayout(false);
@@ -1206,8 +1208,6 @@ namespace FCBConverterGUI
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }

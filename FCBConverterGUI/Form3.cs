@@ -15,7 +15,7 @@ namespace FCBConverterGUI
             DialogResult = DialogResult.OK;
         }
 
-        public int SelectedLOD
+        public int SelectedSkID
         {
             get
             {
@@ -23,7 +23,7 @@ namespace FCBConverterGUI
             }
         }
 
-        public int SelectedSubMesh
+        public int SelectedMatID
         {
             get
             {

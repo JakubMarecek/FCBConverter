@@ -34,9 +34,12 @@ namespace FCBConverterGUI
             "File allocation table (DAT header file)|*.fat|" +
             "Converted files|*.converted.xml";
 
-        string[] sourceXbgFaces;
-        int sourceXbgLods = 0;
-        string[] sourceXbgSubMeshesInfo;
+        int sourceXbgSkel = 0;
+        string[] sourceXbgSkelMats;
+        string[] sourceXbgSkelVerts;
+        string[] sourceXbgSkelFaces;
+        string[] sourceXbgMatNames;
+        string[] sourceXbgMatPaths;
 
         private int CallFCBConverter(string launchParams)
         {
@@ -199,88 +202,118 @@ namespace FCBConverterGUI
 
         private void LoadDataFromXBG(string file, bool selLodSubMesh)
         {
-            Form3 form3 = new Form3();
-            if (form3.ShowDialog() == DialogResult.OK)
+            try
             {
-                listView1.Items.Clear();
-                listView2.Items.Clear();
-
-                Process process = new Process();
-                process.StartInfo.FileName = "FCBConverter.exe";
-                process.StartInfo.Arguments = "-xbgData \"" + file + "\" -lod=" + form3.SelectedLOD.ToString() + " -submesh=" + form3.SelectedSubMesh.ToString();
-                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.Start();
-
-                while (!process.StandardOutput.EndOfStream)
+                Form3 form3 = new Form3();
+                if (form3.ShowDialog() == DialogResult.OK)
                 {
-                    string line = process.StandardOutput.ReadLine();
+                    listView1.Items.Clear();
+                    listView2.Items.Clear();
 
-                    if (line != null && line.StartsWith("data"))
+                    Process process = new Process();
+                    process.StartInfo.FileName = "FCBConverter.exe";
+                    process.StartInfo.Arguments = "-xbgData \"" + file + "\" -skid=" + form3.SelectedSkID.ToString() + " -matid=" + form3.SelectedMatID.ToString();
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.Start();
+
+                    while (!process.StandardOutput.EndOfStream)
                     {
-                        string data = line.Replace("data", "");
+                        string line = process.StandardOutput.ReadLine();
 
-                        string[] dataParse = data.Split('|');
-                        foreach (string dP in dataParse)
+                        if (line != null && line.StartsWith("data"))
                         {
-                            string[] vals = dP.Split(';');
-                            string[] valsData = vals[1].Split(',');
+                            string data = line.Replace("data", "");
 
-                            if (vals[0] == "MESHPARTHIDE")
+                            string[] dataParse = data.Split('|');
+                            foreach (string dP in dataParse)
                             {
-                                foreach (string valsV in valsData)
-                                {
-                                    listView2.Items.Add(GetMeshParts()[valsV]);
-                                }
-                            }
+                                string[] vals = dP.Split(';');
+                                string[] valsData = vals[1].Split(',');
 
-                            if (vals[0] == "FACEHIDEFP")
-                            {
-                                foreach (string valsV in valsData)
+                                if (vals[0] == "MESHPARTHIDE")
                                 {
-                                    if (valsV != "")
+                                    foreach (string valsV in valsData)
                                     {
-                                        string[] partsV = valsV.Split('-');
+                                        if (valsV != "")
+                                            listView2.Items.Add(GetMeshParts()[valsV]);
+                                    }
+                                }
 
-                                        ListViewItem listViewItem = new ListViewItem();
-                                        listViewItem.Text = GetMeshParts()[partsV[0]];
-                                        listViewItem.SubItems.Add(partsV[1]);
-                                        listViewItem.SubItems.Add(partsV[2]);
-                                        listView1.Items.Add(listViewItem);
+                                if (vals[0] == "FACEHIDEFP")
+                                {
+                                    foreach (string valsV in valsData)
+                                    {
+                                        if (valsV != "")
+                                        {
+                                            string[] partsV = valsV.Split('*');
+
+                                            ListViewItem listViewItem = new ListViewItem();
+                                            listViewItem.Text = GetMeshParts()[partsV[0]];
+                                            listViewItem.SubItems.Add(partsV[1]);
+                                            listViewItem.SubItems.Add(partsV[2]);
+                                            listView1.Items.Add(listViewItem);
+                                        }
+                                    }
+                                }
+
+                                if (selLodSubMesh)
+                                {
+                                    if (vals[0] == "SKELFACES")
+                                    {
+                                        sourceXbgSkelFaces = valsData;
+                                    }
+
+                                    if (vals[0] == "SKELVERTS")
+                                    {
+                                        sourceXbgSkelVerts = valsData;
+                                    }
+
+                                    if (vals[0] == "SKELMATS")
+                                    {
+                                        sourceXbgSkelMats = valsData;
+                                    }
+
+                                    if (vals[0] == "SKEL")
+                                    {
+                                        sourceXbgSkel = int.Parse(vals[1]);
+                                    }
+
+                                    if (vals[0] == "MATS")
+                                    {
+                                        List<string> matNames = new List<string>();
+                                        List<string> matPaths = new List<string>();
+                                        foreach (string valsV in valsData)
+                                        {
+                                            string[] partsV = valsV.Split('*');
+                                            matNames.Add(partsV[0]);
+                                            matPaths.Add(partsV[1]);
+                                        }
+                                        sourceXbgMatNames = matNames.ToArray();
+                                        sourceXbgMatPaths = matPaths.ToArray();
                                     }
                                 }
                             }
-
-                            if (vals[0] == "FACES")
-                            {
-                                sourceXbgFaces = valsData;
-                            }
-
-                            if (vals[0] == "SUBMESHES")
-                            {
-                                sourceXbgSubMeshesInfo = valsData;
-                            }
-
-                            if (vals[0] == "LODS")
-                            {
-                                sourceXbgLods = int.Parse(vals[1]);
-                            }
                         }
                     }
+
+                    process.WaitForExit();
+
+                    button17.Enabled = true;
+                    button18.Enabled = true;
+                    button19.Enabled = true;
+
+                    if (selLodSubMesh)
+                    {
+                        numericUpDown1.Value = form3.SelectedSkID;
+                        numericUpDown2.Value = form3.SelectedMatID;
+                    }
                 }
-
-                process.WaitForExit();
-
-                button17.Enabled = true;
-                button18.Enabled = true;
-                button19.Enabled = true;
-
-                if (selLodSubMesh)
-                {
-                    numericUpDown1.Value = form3.SelectedLOD;
-                    numericUpDown2.Value = form3.SelectedSubMesh;
-                }
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("Error occured during opening XBG. Did you select right game?", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -345,7 +378,7 @@ namespace FCBConverterGUI
                 outParamVal += (i > 0 ? "," : "") + meshID;
             }
 
-            CallFCBConverter("-xbgFP \"" + textBox10.Text + "\" -lod=" + numericUpDown1.Value.ToString() + " -submesh=" + numericUpDown2.Value.ToString() + " \"" + outParamVal + "\"");
+            CallFCBConverter("-xbgFP \"" + textBox10.Text + "\" -skid=" + numericUpDown1.Value.ToString() + " -matid=" + numericUpDown2.Value.ToString() + " \"" + outParamVal + "\"");
 
             MessageBox.Show("XBG successfully edited.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -373,9 +406,9 @@ namespace FCBConverterGUI
 
         private void button18_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Autocalculate will add all faces from selected LOD and submesh. This is used for clothes of type feet, bottom and handwear. Top parts can produce bugs like missing body when you look down.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Autocalculate will add all faces from selected material and submesh. This is used for clothes of type feet, bottom and handwear. Top parts can produce bugs like missing body when you look down.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                int clc = (int)Math.Floor((double)GetFaceCount((int)numericUpDown1.Value, (int)numericUpDown2.Value) / listView1.Items.Count);
+                int clc = (int)Math.Floor((double)GetMatDataCount(sourceXbgSkelFaces, (int)numericUpDown1.Value, (int)numericUpDown2.Value) / listView1.Items.Count);
 
                 for (int i = 0; i < listView1.Items.Count; i++)
                 {
@@ -390,33 +423,48 @@ namespace FCBConverterGUI
             string info = "";
 
             info += "Source XBG contains" + Environment.NewLine + Environment.NewLine;
-            info += "Number of LODS: " + sourceXbgLods + Environment.NewLine + Environment.NewLine;
-            info += "Count of sub meshes in each LOD:" + Environment.NewLine;
+            info += "Materials:" + Environment.NewLine;
 
-            for (int i = 0; i < sourceXbgLods; i++)
+            for (int i = 0; i < sourceXbgMatNames.Length; i++)
             {
-                info += "  -LOD " + i.ToString() + " contains " + sourceXbgSubMeshesInfo[i] + " sub meshes" + Environment.NewLine;
-                for (int j = 0; j < int.Parse(sourceXbgSubMeshesInfo[i]); j++)
+                info += "  Material ID " + i.ToString() + Environment.NewLine;
+                info += "    -Name: " + sourceXbgMatNames[i] + Environment.NewLine;
+                info += "    -Path: " + sourceXbgMatPaths[i] + Environment.NewLine;
+            }
+
+            info += Environment.NewLine;
+
+            info += "Number of skeleton IDs: " + sourceXbgSkel + Environment.NewLine + Environment.NewLine;
+
+            info += "Count of materials in each skeleton ID:" + Environment.NewLine;
+
+            for (int i = 0; i < sourceXbgSkel; i++)
+            {
+                info += "  -Skeleton " + i.ToString() + " contains " + sourceXbgSkelMats[i] + " materials" + Environment.NewLine;
+                for (int j = 0; j < int.Parse(sourceXbgSkelMats[i]); j++)
                 {
-                    int faces = GetFaceCount(i, j);
-                    info += "    -submesh " + j.ToString() + " contains " + faces + " (" + (faces * 3) + ")" + " faces" + Environment.NewLine;
+                    int faces = GetMatDataCount(sourceXbgSkelFaces, i, j);
+                    int verts = GetMatDataCount(sourceXbgSkelVerts, i, j);
+                    info += "    -material ID " + j.ToString() + " contains " + faces + " (" + (faces * 3) + ")" + " faces, " + verts + " verts" + Environment.NewLine;
                 }
             }
 
-            MessageBox.Show(info, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Form4 form4 = new Form4();
+            form4.Info = info;
+            form4.ShowDialog();
         }
 
-        private int GetFaceCount(int lod, int submesh)
+        private int GetMatDataCount(string[] data, int material, int submesh)
         {
             int fcAr = 0;
 
-            for (int i = 0; i <= lod; i++)
+            for (int i = 0; i <= material; i++)
             {
-                if (i == lod)
+                if (i == material)
                 {
-                    return int.Parse(sourceXbgFaces[fcAr + submesh]);
+                    return int.Parse(data[fcAr + submesh]);
                 }
-                fcAr += int.Parse(sourceXbgSubMeshesInfo[i]);
+                fcAr += int.Parse(sourceXbgSkelMats[i]);
             }
 
             return -1;

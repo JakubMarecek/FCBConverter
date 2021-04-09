@@ -44,9 +44,9 @@ namespace FCBConverterGUI
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 14);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 13);
+            this.label1.Size = new System.Drawing.Size(156, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Select LOD for load data";
+            this.label1.Text = "Select skeleton ID for load data";
             // 
             // numericUpDown1
             // 
@@ -88,20 +88,20 @@ namespace FCBConverterGUI
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(12, 40);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(144, 13);
+            this.label2.Size = new System.Drawing.Size(152, 13);
             this.label2.TabIndex = 4;
-            this.label2.Text = "Select submesh for load data";
+            this.label2.Text = "Select material ID for load data";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 73);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(292, 39);
+            this.label3.Size = new System.Drawing.Size(310, 52);
             this.label3.TabIndex = 6;
-            this.label3.Text = "If you don\'t know how many LODs and sub meshes the XBG\r\nhave, select zero and the" +
-    "n look to XBG info. Then you can\r\nload the XBG again and select desired LOD and " +
-    "sub mesh.";
+            this.label3.Text = "If you don\'t know how many skeleton IDs and material IDs the\r\nXBG have, select ze" +
+    "ro and then look to XBG info. Then you can\r\nload the XBG again and select desire" +
+    "d skeleton ID and\r\nmaterial ID.";
             // 
             // Form3
             // 
@@ -119,7 +119,7 @@ namespace FCBConverterGUI
             this.MinimizeBox = false;
             this.Name = "Form3";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Select LOD and submesh";
+            this.Text = "Select skeleton ID and material ID";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             this.ResumeLayout(false);

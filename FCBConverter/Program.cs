@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210408-2000";
+        public static string version = "20210409-1700";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -475,11 +475,11 @@ namespace FCBConverter
             }
             else if (file == "-xbgFP")
             {
-                FixXBGForFP(param2, int.Parse(param3.Replace("-lod=", "")), int.Parse(param4.Replace("-submesh=", "")), param5);
+                FixXBGForFP(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")), param5);
             }
             else if (file == "-xbgData")
             {
-                GetDataFromXBG(param2, int.Parse(param3.Replace("-lod=", "")), int.Parse(param4.Replace("-submesh=", "")));
+                GetDataFromXBG(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")));
             }
             else if (file == "-ue")
             {
@@ -4340,7 +4340,7 @@ namespace FCBConverter
             XBTStream.Close();
         }
 
-        static void FixXBGForFP(string editXbg, int lod, int submesh, string data)
+        static void FixXBGForFP(string editXbg, int skid, int material, string data)
         {
             string newF = Path.GetDirectoryName(editXbg) + "\\" + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
             File.Copy(editXbg, newF, true);
@@ -4399,13 +4399,13 @@ namespace FCBConverter
 
                         if (subSectHdrK == 0x434C5553) // SULC
                         {
-                            for (int k = 0; k <= lod; k++)
+                            for (int k = 0; k <= skid; k++)
                             {
                                 uint subMeshCount = XBGEditStream.ReadValueU32();
 
-                                if (k == lod)
+                                if (k == skid)
                                 {
-                                    for (int l = 0; l < submesh; l++)
+                                    for (int l = 0; l < material; l++)
                                     {
                                         XBGEditStream.Seek(1048, SeekOrigin.Current);
                                     }
@@ -4446,31 +4446,35 @@ namespace FCBConverter
 
                 if (sectHdrK == 0x4D524844) // DHRM
                 {
-                    XBGEditStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
-                    int leftToEnd = (int)(XBGEditStream.Length - pos - sectionLenShorted);
-                    byte[] leftToEndBts = new byte[leftToEnd];
-                    XBGEditStream.Read(leftToEndBts, 0, leftToEndBts.Length);
-
-                    XBGEditStream.Seek(pos, SeekOrigin.Begin);
-                    XBGEditStream.SetLength(pos);
-
                     string[] dataToWrite = dataP["MESHPARTHIDE"];
-                    DHRMResize = (uint)(dataToWrite.Length * sizeof(ulong) + sizeof(uint) + sizeof(byte) - sectionLenShorted);
 
-                    XBGEditStream.WriteByte(0);
-                    XBGEditStream.WriteValueU32((uint)dataToWrite.Length);
-                    foreach (string valToWrite in dataToWrite)
+                    if (dataToWrite.Length > 0 && dataToWrite[0] != "")
                     {
-                        XBGEditStream.WriteValueU64(ulong.Parse(valToWrite));
+                        XBGEditStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
+                        int leftToEnd = (int)(XBGEditStream.Length - pos - sectionLenShorted);
+                        byte[] leftToEndBts = new byte[leftToEnd];
+                        XBGEditStream.Read(leftToEndBts, 0, leftToEndBts.Length);
+
+                        XBGEditStream.Seek(pos, SeekOrigin.Begin);
+                        XBGEditStream.SetLength(pos);
+
+                        DHRMResize = (uint)(dataToWrite.Length * sizeof(ulong) + sizeof(uint) + sizeof(byte) - sectionLenShorted);
+
+                        XBGEditStream.WriteByte(0);
+                        XBGEditStream.WriteValueU32((uint)dataToWrite.Length);
+                        foreach (string valToWrite in dataToWrite)
+                        {
+                            XBGEditStream.WriteValueU64(ulong.Parse(valToWrite));
+                        }
+                        XBGEditStream.Write(leftToEndBts, 0, leftToEndBts.Length);
+
+                        XBGEditStream.Seek(pos - sizeof(uint) * 3, SeekOrigin.Begin);
+                        XBGEditStream.WriteValueU32(sectionLen + DHRMResize);
+                        XBGEditStream.WriteValueU32(sectionLenShorted + DHRMResize);
+                        XBGEditStream.Flush();
+
+                        sectionLenShorted += DHRMResize;
                     }
-                    XBGEditStream.Write(leftToEndBts, 0, leftToEndBts.Length);
-
-                    XBGEditStream.Seek(pos - sizeof(uint) * 3, SeekOrigin.Begin);
-                    XBGEditStream.WriteValueU32(sectionLen + DHRMResize);
-                    XBGEditStream.WriteValueU32(sectionLenShorted + DHRMResize);
-                    XBGEditStream.Flush();
-
-                    sectionLenShorted += DHRMResize;
                 }
 
                 XBGEditStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
@@ -4491,7 +4495,7 @@ namespace FCBConverter
             XBGEditStream.Close();
         }
 
-        static void GetDataFromXBG(string sourceXbg, int lod, int submesh)
+        static void GetDataFromXBG(string sourceXbg, int skid, int material)
         {
             FileStream XBGSourceStream = new FileStream(sourceXbg, FileMode.Open, FileAccess.ReadWrite);
 
@@ -4513,6 +4517,7 @@ namespace FCBConverter
 
             string dataP = "";
             long sulcStartPos = 0;
+            uint skeletonCount = 0;
 
             XBGSourceStream.Seek(28, SeekOrigin.Begin);
             uint editSectCount = XBGSourceStream.ReadValueU32();
@@ -4540,13 +4545,13 @@ namespace FCBConverter
                         {
                             sulcStartPos = XBGSourceStream.Position;
 
-                            for (int k = 0; k <= lod; k++)
+                            for (int k = 0; k <= skid; k++)
                             {
                                 uint subMeshCount = XBGSourceStream.ReadValueU32();
 
-                                if (k == lod)
+                                if (k == skid)
                                 {
-                                    for (int l = 0; l < submesh; l++)
+                                    for (int l = 0; l < material; l++)
                                     {
                                         XBGSourceStream.Seek(1048, SeekOrigin.Current);
                                     }
@@ -4571,9 +4576,36 @@ namespace FCBConverter
                                 ulong id = XBGSourceStream.ReadValueU64();
                                 ushort idx = XBGSourceStream.ReadValueU16();
                                 ushort len = XBGSourceStream.ReadValueU16();
-                                vals += (vals == "" ? "" : ",") + id + "-" + idx + "-" + len;
+                                vals += (vals == "" ? "" : ",") + id + "*" + idx + "*" + len;
                             }
                             dataP += (dataP == "" ? "" : "|") + "FACEHIDEFP;" + vals;
+
+
+                            XBGSourceStream.Seek(sulcStartPos, SeekOrigin.Begin);
+                            string vals_faces = "";
+                            string vals_verts = "";
+                            string vals_meshes = "";
+                            for (int k = 0; k < skeletonCount; k++)
+                            {
+                                uint meshCount = XBGSourceStream.ReadValueU32();
+
+                                for (int l = 0; l < meshCount; l++)
+                                {
+                                    XBGSourceStream.ReadValueU16();
+                                    ushort facesCount = XBGSourceStream.ReadValueU16();
+                                    XBGSourceStream.ReadValueU16();
+                                    XBGSourceStream.ReadValueU16();
+                                    ushort vertsCount = XBGSourceStream.ReadValueU16();
+                                    XBGSourceStream.Seek(1038, SeekOrigin.Current);
+                                    vals_faces += (vals_faces == "" ? "" : ",") + facesCount.ToString();
+                                    vals_verts += (vals_verts == "" ? "" : ",") + vertsCount.ToString();
+                                }
+
+                                vals_meshes += (vals_meshes == "" ? "" : ",") + meshCount.ToString();
+                            }
+                            dataP += (dataP == "" ? "" : "|") + "SKELFACES;" + vals_faces.ToString();
+                            dataP += (dataP == "" ? "" : "|") + "SKELVERTS;" + vals_verts.ToString();
+                            dataP += (dataP == "" ? "" : "|") + "SKELMATS;" + vals_meshes.ToString();
                         }
 
                         XBGSourceStream.Seek(subPos + subSectionLenShorted, SeekOrigin.Begin);
@@ -4597,7 +4629,7 @@ namespace FCBConverter
                     dataP += (dataP == "" ? "" : "|") + "MESHPARTHIDE;" + vals;
                 }
 
-                if (sectHdrK == 0x4C4F44) // DOL
+                /*if (sectHdrK == 0x4C4F44) // DOL
                 {
                     uint lods = XBGSourceStream.ReadValueU32();
                     dataP += (dataP == "" ? "" : "|") + "LODS;" + lods;
@@ -4621,6 +4653,37 @@ namespace FCBConverter
                     }
                     dataP += (dataP == "" ? "" : "|") + "SUBMESHES;" + vals;
                     dataP += (dataP == "" ? "" : "|") + "FACES;" + vals_faces.ToString();
+                }*/
+
+                if (sectHdrK == 0x534B4944) // DIKS
+                {
+                    skeletonCount = XBGSourceStream.ReadValueU32();
+                    dataP += (dataP == "" ? "" : "|") + "SKEL;" + skeletonCount;
+                }
+
+                if (sectHdrK == 0x524D544C) // LTMR
+                {
+                    string matsFiles = "";
+                    uint matCount = XBGSourceStream.ReadValueU32();
+
+                    for (int j = 0; j < matCount; j++)
+                    {
+                        uint pathStrLen = XBGSourceStream.ReadValueU32();
+                        byte[] path = new byte[pathStrLen];
+                        XBGSourceStream.Read(path, 0, (int)pathStrLen);
+
+                        XBGSourceStream.ReadByte();
+
+                        uint nameStrLen = XBGSourceStream.ReadValueU32();
+                        byte[] name = new byte[nameStrLen];
+                        XBGSourceStream.Read(name, 0, (int)nameStrLen);
+
+                        XBGSourceStream.ReadByte();
+
+                        matsFiles += (matsFiles == "" ? "" : ",") + Encoding.Default.GetString(name) + "*" + Encoding.Default.GetString(path);
+                    }
+
+                    dataP += (dataP == "" ? "" : "|") + "MATS;" + matsFiles;
                 }
 
                 XBGSourceStream.Seek(pos + sectionLenShorted, SeekOrigin.Begin);
