@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210410-0215";
+        public static string version = "20210411-0000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -3557,6 +3557,11 @@ namespace FCBConverter
                                     byte[] objData = BNKStream.ReadBytes(15);
                                     xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
                                 }
+                                if (actionType == 0x06 || actionType == 0x07) // Mute UnMute
+                                {
+                                    byte[] objData = BNKStream.ReadBytes(1);
+                                    xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+                                }
                                 if (actionType == 0x12) // SetState
                                 {
                                     byte[] objData = BNKStream.ReadBytes(7);
@@ -4420,6 +4425,9 @@ namespace FCBConverter
 
                             // write
                             string[] dataToWrite = dataP["FACEHIDEFP"];
+
+                            if (dataToWrite[0] == "") dataToWrite = new string[] { };
+
                             foreach (string valToWrite in dataToWrite)
                             {
                                 string[] valParsed = valToWrite.Split('-');
