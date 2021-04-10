@@ -723,9 +723,9 @@ namespace FCBConverterGUI
             this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.label22.Location = new System.Drawing.Point(439, 109);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(144, 13);
+            this.label22.Size = new System.Drawing.Size(152, 13);
             this.label22.TabIndex = 67;
-            this.label22.Text = "Select submesh to write edits";
+            this.label22.Text = "Select material ID to write edits";
             // 
             // button19
             // 
@@ -771,9 +771,9 @@ namespace FCBConverterGUI
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.label20.Location = new System.Drawing.Point(26, 109);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(138, 13);
+            this.label20.Size = new System.Drawing.Size(156, 13);
             this.label20.TabIndex = 62;
-            this.label20.Text = "Select material to write edits";
+            this.label20.Text = "Select skeleton ID to write edits";
             // 
             // listView2
             // 
