@@ -236,7 +236,7 @@ namespace FCBConverterGUI
                                 {
                                     foreach (string valsV in valsData)
                                     {
-                                        if (valsV != "")
+                                        if (valsV != "" && valsV != "0")
                                             listView2.Items.Add(GetMeshParts()[valsV]);
                                     }
                                 }
@@ -245,7 +245,7 @@ namespace FCBConverterGUI
                                 {
                                     foreach (string valsV in valsData)
                                     {
-                                        if (valsV != "")
+                                        if (valsV != "" && valsV != "0")
                                         {
                                             string[] partsV = valsV.Split('*');
 
