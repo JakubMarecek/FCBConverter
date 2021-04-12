@@ -128,8 +128,17 @@ internal class ue4
 		}
 	}
 
-	public static void Convert(string ueasset, string xbg)
+	public static void Convert(string ueasset, string xbg, int type)
 	{
+		if (type == 0)
+		{
+			xbguvs = 2;
+		}
+		if (type == 1)
+		{
+			xbguvs = 1;
+		}
+
 		string workDir = Path.GetDirectoryName(ueasset) + "\\";
 
 		Dictionary<string, int> dictionary = new Dictionary<string, int>();
@@ -630,8 +639,8 @@ internal class ue4
 								}
 								else
 								{
-									num45 = Half.ToHalf(binaryReader2.ReadUInt16());
-									num46 = Half.ToHalf(binaryReader2.ReadUInt16());
+									num45 = UEClothes.System.Half.ToHalf(binaryReader2.ReadUInt16());
+									num46 = UEClothes.System.Half.ToHalf(binaryReader2.ReadUInt16());
 								}
 								array19[n][j, num50] = num45;
 								array20[n][j, num50] = num46;
@@ -1003,8 +1012,8 @@ internal class ue4
 								}
 								else
 								{
-									array19[num63][j, num50] = Half.ToHalf(binaryReader2.ReadUInt16());
-									array20[num63][j, num50] = Half.ToHalf(binaryReader2.ReadUInt16());
+									array19[num63][j, num50] = UEClothes.System.Half.ToHalf(binaryReader2.ReadUInt16());
+									array20[num63][j, num50] = UEClothes.System.Half.ToHalf(binaryReader2.ReadUInt16());
 								}
 							}
 						}

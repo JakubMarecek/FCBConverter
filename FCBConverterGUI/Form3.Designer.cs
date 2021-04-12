@@ -42,30 +42,33 @@ namespace FCBConverterGUI
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 14);
+            this.label1.Location = new System.Drawing.Point(14, 16);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(156, 13);
+            this.label1.Size = new System.Drawing.Size(169, 15);
             this.label1.TabIndex = 0;
             this.label1.Text = "Select skeleton ID for load data";
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(192, 12);
+            this.numericUpDown1.Location = new System.Drawing.Point(224, 14);
+            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             20,
             0,
             0,
             0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(140, 23);
             this.numericUpDown1.TabIndex = 1;
             // 
             // button1
             // 
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button1.Location = new System.Drawing.Point(196, 128);
+            this.button1.Location = new System.Drawing.Point(229, 148);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(118, 29);
+            this.button1.Size = new System.Drawing.Size(138, 27);
             this.button1.TabIndex = 3;
             this.button1.Text = "Load";
             this.button1.UseVisualStyleBackColor = true;
@@ -73,31 +76,34 @@ namespace FCBConverterGUI
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(192, 38);
+            this.numericUpDown2.Location = new System.Drawing.Point(224, 44);
+            this.numericUpDown2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             20,
             0,
             0,
             0});
             this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown2.Size = new System.Drawing.Size(140, 23);
             this.numericUpDown2.TabIndex = 5;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 40);
+            this.label2.Location = new System.Drawing.Point(14, 46);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(152, 13);
+            this.label2.Size = new System.Drawing.Size(168, 15);
             this.label2.TabIndex = 4;
             this.label2.Text = "Select material ID for load data";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 73);
+            this.label3.Location = new System.Drawing.Point(14, 84);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(310, 52);
+            this.label3.Size = new System.Drawing.Size(334, 60);
             this.label3.TabIndex = 6;
             this.label3.Text = "If you don\'t know how many skeleton IDs and material IDs the\r\nXBG have, select ze" +
     "ro and then look to XBG info. Then you can\r\nload the XBG again and select desire" +
@@ -105,9 +111,9 @@ namespace FCBConverterGUI
             // 
             // Form3
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(326, 169);
+            this.ClientSize = new System.Drawing.Size(380, 188);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.numericUpDown2);
             this.Controls.Add(this.label2);
@@ -115,6 +121,7 @@ namespace FCBConverterGUI
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form3";

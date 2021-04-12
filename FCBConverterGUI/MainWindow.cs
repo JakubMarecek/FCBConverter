@@ -45,7 +45,7 @@ namespace FCBConverterGUI
         {
             Process process = new Process();
             process.StartInfo.FileName = "FCBConverter.exe";
-            process.StartInfo.Arguments = launchParams;
+            process.StartInfo.Arguments = launchParams + " -keep";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
             process.Start();
             process.WaitForExit();
@@ -472,7 +472,12 @@ namespace FCBConverterGUI
 
         private void button22_Click(object sender, EventArgs e)
         {
-            CallFCBConverter("-ue \"" + textBox11.Text + "\" \"" + textBox12.Text + "\"");
+            string type = "";
+
+            if (radioButton7.Checked) type = "0";
+            if (radioButton6.Checked) type = "1";
+
+            CallFCBConverter("-ue=" + type + " \"" + textBox11.Text + "\" \"" + textBox12.Text + "\"");
         }
 
         private void button20_Click(object sender, EventArgs e)

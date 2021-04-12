@@ -7,10 +7,11 @@
 // MVID: DF65A7A4-1036-462D-9045-BC0208CBF69F
 // Assembly location: D:\test\fc5mod_clothes.exe
 
+using System;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace System
+namespace UEClothes.System
 {
   [Serializable]
   public struct Half : IComparable, IFormattable, IConvertible, IComparable<Half>, IEquatable<Half>

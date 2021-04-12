@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210411-0000";
+        public static string version = "20210412-2300";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -390,6 +390,23 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<For Unreal Engine to XBG files>>>");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter -ue=<type> <uasset> <ref_xbg>");
+                Console.WriteLine("    type - type of model - 0 clothes, 1 hairs");
+                Console.WriteLine("    uasset - source file from Unreal Engine");
+                Console.WriteLine("    ref_xbg - reference XBG file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter -ue=0 handw_avatar_mygloves_aver_mf.uasset handw_avatar_samfisher01_aver_mf.xbg");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
                 Console.ResetColor();
                 return;
             }
@@ -399,6 +416,7 @@ namespace FCBConverter
             string param3 = args.Length > 2 ? args[2] : "";
             string param4 = args.Length > 3 ? args[3] : "";
             string param5 = args.Length > 4 ? args[4] : "";
+            string param6 = args.Length > 5 ? args[5] : "";
 
             string enC = "-enablecompress";
             string disC = "-disablecompress";
@@ -432,63 +450,78 @@ namespace FCBConverter
 
             Console.Title = "FCBConverter - " + file;
 
-            if (file.EndsWith("_replace.txt"))
+            try
             {
-                BinaryReplaceValues(file);
-                FIN();
-            }
-            else if (param2.EndsWith(".fat"))
-            {
-                int ver = 10;
+                if (file.EndsWith("_replace.txt"))
+                {
+                    BinaryReplaceValues(file);
+                    FIN();
+                }
+                else if (param2.EndsWith(".fat"))
+                {
+                    int ver = 10;
 
-                if (param3 == "-v9")
-                    ver = 9;
+                    if (param3 == "-v9")
+                        ver = 9;
 
-                if (param3 == "-v5")
-                    ver = 5;
+                    if (param3 == "-v5")
+                        ver = 5;
 
-                LoadFile();
-                PackBigFile(file, param2, ver);
-                FIN();
-            }
-            else if (file.EndsWith(".fat") && Directory.Exists(param2) && param3 != "") // excludeFromCompress is used as file name
-            {
-                UnpackBigFile(file, param2, param3);
-                FIN();
-            }
-            else if (file.EndsWith(".fat"))
-            {
-                UnpackBigFile(file, param2);
-                FIN();
-            }
-            else if (File.Exists(file))
-            {
-                Proccessing(file, param2);
-            }
-            else if (Directory.Exists(file) || file == @"\")
-            {
-                if (file == @"\")
-                    file = Directory.GetCurrentDirectory();
+                    LoadFile();
+                    PackBigFile(file, param2, ver);
+                    FIN();
+                }
+                else if (file.EndsWith(".fat") && Directory.Exists(param2) && param3 != "") // excludeFromCompress is used as file name
+                {
+                    UnpackBigFile(file, param2, param3);
+                    FIN();
+                }
+                else if (file.EndsWith(".fat"))
+                {
+                    UnpackBigFile(file, param2);
+                    FIN();
+                }
+                else if (File.Exists(file))
+                {
+                    Proccessing(file, param2);
+                }
+                else if (Directory.Exists(file) || file == @"\")
+                {
+                    if (file == @"\")
+                        file = Directory.GetCurrentDirectory();
 
-                ProcessSubFolders(file, param2, param3 == "-subfolders");
-                Console.WriteLine("Job done!");
+                    ProcessSubFolders(file, param2, param3 == "-subfolders");
+                    Console.WriteLine("Job done!");
+                }
+                else if (file == "-xbgFP")
+                {
+                    FixXBGForFP(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")), param5);
+                }
+                else if (file == "-xbgData")
+                {
+                    GetDataFromXBG(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")));
+                }
+                else if (file.StartsWith("-ue="))
+                {
+                    ConvertUE2XBG(param2, param3, int.Parse(file.Replace("-ue=", "")));
+                }
+                else
+                {
+                    Console.WriteLine("Input file / directory doesn't exist!");
+                }
             }
-            else if (file == "-xbgFP")
+            catch(Exception ex)
             {
-                FixXBGForFP(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")), param5);
+                Console.WriteLine(ex.ToString());
             }
-            else if (file == "-xbgData")
+
+            string keep = "-keep";
+            if (file == keep || param2 == keep || param3 == keep || param4 == keep || param5 == keep || param6 == keep)
             {
-                GetDataFromXBG(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")));
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
             }
-            else if (file == "-ue")
-            {
-                ConvertUE2XBG(param2, param3);
-            }
-            else
-            {
-                Console.WriteLine("Input file / directory doesn't exist!");
-            }
+
             return;
         }
 
@@ -3073,12 +3106,12 @@ namespace FCBConverter
             string fileName = Path.GetFileNameWithoutExtension(file);
             string fileNameXml = file + ".converted.xml";
 
-            XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            XDocument xmlDoc = new(new XDeclaration("1.0", "utf-8", "yes"));
             xmlDoc.Add(new XComment(xmlheader));
             xmlDoc.Add(new XComment(xmlheaderbnk));
-            XElement rootXml = new XElement("SoundBank");
+            XElement rootXml = new("SoundBank");
 
-            FileStream BNKStream = new FileStream(file, FileMode.Open);
+            FileStream BNKStream = new(file, FileMode.Open);
 
             uint bnkVersion = 0;
 
@@ -3088,7 +3121,7 @@ namespace FCBConverter
                 uint sectionLength = BNKStream.ReadValueU32();
                 long pos = BNKStream.Position;
 
-                XElement xSec = new XElement(BNKGetKnownName(sectionName, BNKNames.sectionsNames, "Section"));
+                XElement xSec = new(BNKGetKnownName(sectionName, BNKNames.sectionsNames, "Section"));
 
                 if (sectionName == 0x44484B42) // BKHD
                 {
@@ -3116,7 +3149,7 @@ namespace FCBConverter
                         wemOffsets.Add(wemOffset);
                         wemLengths.Add(wemLength);
 
-                        XElement objFile = new XElement("WEMFile");
+                        XElement objFile = new("WEMFile");
                         objFile.Add(new XAttribute("ID", wemID.ToString()));
                         objFile.Add(new XAttribute("Offset", wemOffset.ToString()));
                         objFile.Add(new XAttribute("Length", wemLength.ToString()));
@@ -3141,7 +3174,7 @@ namespace FCBConverter
 
                         WEMToOGG(wemFileName, wavFileName);
 
-                        XElement objFile = new XElement("WEMFile");
+                        XElement objFile = new("WEMFile");
                         objFile.Add(new XAttribute("ID", wemIDs[i]));
                         objFile.Add(new XAttribute("FileName", wemFN));
                         xSec.Add(objFile);
@@ -3157,7 +3190,7 @@ namespace FCBConverter
                         uint objectLength = BNKStream.ReadValueU32() - 4;
                         uint objectID = BNKStream.ReadValueU32();
 
-                        XElement xObj = new XElement(BNKGetKnownName(type, BNKNames.hircObjects, "Object"));
+                        XElement xObj = new(BNKGetKnownName(type, BNKNames.hircObjects, "Object"));
                         xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
 
                         if (type == 0x01) // 1 Settings
@@ -3175,7 +3208,7 @@ namespace FCBConverter
                             {
                                 float settingVal = BNKStream.ReadValueF32();
 
-                                XElement xSett = new XElement(BNKGetKnownName(settings[j], BNKNames.eventActionSettings, "Setting"), settingVal.ToString(CultureInfo.InvariantCulture));
+                                XElement xSett = new(BNKGetKnownName(settings[j], BNKNames.eventActionSettings, "Setting"), settingVal.ToString(CultureInfo.InvariantCulture));
                                 xObj.Add(xSett);
                             }
                         }
@@ -3211,7 +3244,7 @@ namespace FCBConverter
                             xObj.Add(new XAttribute("WemSize", wemSize));
                             xObj.Add(new XAttribute("SoundType", BNKGetKnownName(soundType, BNKNames.eventActionSoundType, "SoundType")));
 
-                            XElement xEffects = new XElement("Effects");
+                            XElement xEffects = new("Effects");
 
                             xEffects.Add(new XAttribute("OverrideParentEffects", overrideParentEffects.ToString()));
                             if (effectsCount > 0)
@@ -3227,7 +3260,7 @@ namespace FCBConverter
                                 byte unkEff1 = (byte)BNKStream.ReadByte();
                                 byte unkEff2 = (byte)BNKStream.ReadByte();
 
-                                XElement xEffect = new XElement("Effect");
+                                XElement xEffect = new("Effect");
                                 xEffect.Add(new XAttribute("EffectIndex", effectIdx.ToString()));
                                 xEffect.Add(new XAttribute("EffectObjectID", effectObjID.ToString()));
                                 xEffect.Add(new XAttribute("Unknown1", unkEff1.ToString()));
@@ -3248,8 +3281,8 @@ namespace FCBConverter
                             xObj.Add(new XAttribute("ParentObjID", parentObjID.ToString()));
                             xObj.Add(new XAttribute("OverrideParentPlaybackPriority", overrideParentPlaybackPriority.ToString()));
 
-                            XElement xAddParams = new XElement("AdditionalParameters");
-                            List<byte> addParams = new List<byte>();
+                            XElement xAddParams = new("AdditionalParameters");
+                            List<byte> addParams = new();
                             for (int j = 0; j < additionalParams; j++)
                             {
                                 byte addParamType = (byte)BNKStream.ReadByte();
@@ -3277,8 +3310,8 @@ namespace FCBConverter
                             //BNKStream.ReadByte(); // always zero
                             byte unknownParams = (byte)BNKStream.ReadByte();
 
-                            XElement xUnkParams = new XElement("UnknownRangeParameters");
-                            List<byte> aunkParams = new List<byte>();
+                            XElement xUnkParams = new("UnknownRangeParameters");
+                            List<byte> aunkParams = new();
                             for (int j = 0; j < unknownParams; j++)
                             {
                                 byte unkParamType = (byte)BNKStream.ReadByte();
@@ -3297,7 +3330,7 @@ namespace FCBConverter
                             }
                             xObj.Add(xUnkParams);
 
-                            XElement xPositioning = new XElement("Positioning");
+                            XElement xPositioning = new("Positioning");
 
                             byte positioningType = (byte)BNKStream.ReadByte();
                             xPositioning.Add(new XAttribute("Type", positioningType.ToString()));
@@ -3314,7 +3347,7 @@ namespace FCBConverter
 
                             xObj.Add(xPositioning);
 
-                            XElement xAuxiliary = new XElement("Auxiliary");
+                            XElement xAuxiliary = new("Auxiliary");
 
                             byte auxSettings = (byte)BNKStream.ReadByte();
                             xAuxiliary.Add(new XAttribute("Settings", auxSettings.ToString()));
@@ -3326,7 +3359,7 @@ namespace FCBConverter
                                 uint auxBus3 = BNKStream.ReadValueU32();
                                 uint auxBus4 = BNKStream.ReadValueU32();
 
-                                XElement usrDfnAuxSnds = new XElement("UserDefinedAuxiliarySends");
+                                XElement usrDfnAuxSnds = new("UserDefinedAuxiliarySends");
                                 usrDfnAuxSnds.Add(new XElement("AuxiliaryBus1", auxBus1.ToString()));
                                 usrDfnAuxSnds.Add(new XElement("AuxiliaryBus2", auxBus2.ToString()));
                                 usrDfnAuxSnds.Add(new XElement("AuxiliaryBus3", auxBus3.ToString()));
@@ -3395,14 +3428,14 @@ namespace FCBConverter
 
                             byte statesPropsCnt = (byte)BNKStream.ReadByte();
 
-                            XElement statesProps = new XElement("StatesProperties");
+                            XElement statesProps = new("StatesProperties");
                             for (int j = 0; j < statesPropsCnt; j++)
                             {
                                 byte propSettName = (byte)BNKStream.ReadByte();
                                 byte propUnk1 = (byte)BNKStream.ReadByte();
                                 byte propUnk2 = (byte)BNKStream.ReadByte();
 
-                                XElement stPrp = new XElement("Property");
+                                XElement stPrp = new("Property");
                                 stPrp.Add(new XAttribute("SettingName", BNKGetKnownName(propSettName, BNKNames.eventActionSettings, "Setting")));
                                 stPrp.Add(new XAttribute("Unknown1", propUnk1.ToString()));
                                 stPrp.Add(new XAttribute("Unknown2", propUnk2.ToString()));
@@ -3412,25 +3445,25 @@ namespace FCBConverter
 
                             byte stateGroupsCnt = (byte)BNKStream.ReadByte();
 
-                            XElement statesGrps = new XElement("StateGroups");
+                            XElement statesGrps = new("StateGroups");
                             for (int j = 0; j < stateGroupsCnt; j++)
                             {
                                 uint stateGroupID = BNKStream.ReadValueU32();
                                 byte changeOccursAt = (byte)BNKStream.ReadByte();
 
-                                XElement stGrp = new XElement("StateGroup");
+                                XElement stGrp = new("StateGroup");
                                 stGrp.Add(new XAttribute("ID", stateGroupID.ToString()));
                                 stGrp.Add(new XAttribute("ChangeOccursAt", changeOccursAt.ToString()));
 
                                 byte settsDiffCnt = (byte)BNKStream.ReadByte();
 
-                                XElement settDiffs = new XElement("SettingsDiffs");
+                                XElement settDiffs = new("SettingsDiffs");
                                 for (int k = 0; k < settsDiffCnt; k++)
                                 {
                                     uint stateObjID = BNKStream.ReadValueU32();
                                     uint settingsID = BNKStream.ReadValueU32();
 
-                                    XElement stGrpS = new XElement("Diff");
+                                    XElement stGrpS = new("Diff");
                                     stGrpS.Add(new XAttribute("StateObjID", stateObjID.ToString()));
                                     stGrpS.Add(new XAttribute("SettingsID", settingsID.ToString()));
                                     settDiffs.Add(stGrpS);
@@ -3443,7 +3476,7 @@ namespace FCBConverter
 
                             ushort rtcpCnt = BNKStream.ReadValueU16();
 
-                            XElement rtpcs = new XElement("RTPCs");
+                            XElement rtpcs = new("RTPCs");
                             for (int j = 0; j < rtcpCnt; j++)
                             {
                                 uint gameParamID = BNKStream.ReadValueU32();
@@ -3455,7 +3488,7 @@ namespace FCBConverter
                                 byte pointsCnt = (byte)BNKStream.ReadByte();
                                 byte rtcpUnk4 = (byte)BNKStream.ReadByte();
 
-                                XElement rtpc = new XElement("RTPC");
+                                XElement rtpc = new("RTPC");
                                 rtpc.Add(new XAttribute("GameParamID", gameParamID.ToString()));
                                 rtpc.Add(new XAttribute("AxisType", BNKGetKnownName(axisType, BNKNames.eventActionSettings, "Type")));
                                 rtpc.Add(new XAttribute("Unknown1", rtcpUnk1.ToString()));
@@ -3464,14 +3497,14 @@ namespace FCBConverter
                                 rtpc.Add(new XAttribute("Unknown3", rtcpUnk3.ToString()));
                                 rtpc.Add(new XAttribute("Unknown4", rtcpUnk4.ToString()));
 
-                                XElement rtpcPoints = new XElement("Points");
+                                XElement rtpcPoints = new("Points");
                                 for (int k = 0; k < pointsCnt; k++)
                                 {
                                     float posX = BNKStream.ReadValueF32();
                                     float posY = BNKStream.ReadValueF32();
                                     uint shapeCurve = BNKStream.ReadValueU32();
 
-                                    XElement rtpcPoint = new XElement("Point");
+                                    XElement rtpcPoint = new("Point");
                                     rtpcPoint.Add(new XAttribute("PosX", posX.ToString(CultureInfo.InvariantCulture)));
                                     rtpcPoint.Add(new XAttribute("PosY", posY.ToString(CultureInfo.InvariantCulture)));
                                     rtpcPoint.Add(new XAttribute("Shape", BNKGetKnownName(shapeCurve, BNKNames.rtpcShape, "Shape")));
@@ -3501,9 +3534,9 @@ namespace FCBConverter
                             xObj.Add(new XAttribute("ActionType", BNKGetKnownName(actionType, BNKNames.eventActionTypes, "ActionType")));
                             xObj.Add(new XAttribute("ReferenceID", refGameObjID.ToString()));
 
-                            XElement xParams = new XElement("Params");
+                            XElement xParams = new("Params");
 
-                            List<byte> paramTypes = new List<byte>();
+                            List<byte> paramTypes = new();
                             for (int j = 0; j < additionalParamsLen; j++)
                             {
                                 byte paramType = (byte)BNKStream.ReadByte();
@@ -3523,8 +3556,8 @@ namespace FCBConverter
 
                             byte nextParams = (byte)BNKStream.ReadByte(); // should be always zero
 
-                            XElement xNextParams = new XElement("NextParams");
-                            paramTypes = new List<byte>();
+                            XElement xNextParams = new("NextParams");
+                            paramTypes = new();
                             for (int j = 0; j < nextParams; j++)
                             {
                                 byte paramType = (byte)BNKStream.ReadByte();
@@ -3534,7 +3567,7 @@ namespace FCBConverter
                             {
                                 int paramVal1 = BNKStream.ReadValueS32();
                                 uint paramVal2 = BNKStream.ReadValueU32();
-                                XElement xNPVal = new XElement(BNKGetKnownName(paramTypes[j], BNKNames.eventActionParams, "Param"));
+                                XElement xNPVal = new(BNKGetKnownName(paramTypes[j], BNKNames.eventActionParams, "Param"));
                                 xNPVal.Add(new XAttribute("Value1", paramVal1.ToString()));
                                 xNPVal.Add(new XAttribute("Value2", paramVal2.ToString()));
                                 xNextParams.Add(xNPVal);
@@ -3645,8 +3678,8 @@ namespace FCBConverter
             string newName = file.Replace(".bnk.converted.xml", "_new.bnk");
             string onlyDir = Path.GetDirectoryName(file);
 
-            Dictionary<uint, uint> wemLens = new Dictionary<uint, uint>();
-            List<long> wemPos = new List<long>();
+            Dictionary<uint, uint> wemLens = new();
+            List<long> wemPos = new();
 
             FileStream BNKStream = File.Create(newName);
 
@@ -4010,7 +4043,7 @@ namespace FCBConverter
                                 {
                                     BNKStream.WriteValueU32(uint.Parse(obj.Element("SoundBankID").Value));
                                 }
-                                if (actionType == 0x0B || actionType == 0x12 || actionType == 0x1E || actionType == 0x02 || actionType == 0x0A || actionType == 0x13 || actionType == 0x14) // SetGameParameter ResetGameParameter ResetVoiceVolume SetState Seek Pause SetVoiceVolume
+                                if (actionType == 0x06 || actionType == 0x07 || actionType == 0x0B || actionType == 0x12 || actionType == 0x1E || actionType == 0x02 || actionType == 0x0A || actionType == 0x13 || actionType == 0x14) // SetGameParameter ResetGameParameter ResetVoiceVolume SetState Seek Pause SetVoiceVolume
                                 {
                                     byte[] objData = Helpers.StringToByteArray(obj.Element("Binary").Value);
                                     BNKStream.WriteBytes(objData);
@@ -4092,14 +4125,14 @@ namespace FCBConverter
                 //WEMSharp.WEMFile wemFile = new WEMSharp.WEMFile(file, WEMSharp.WEMForcePacketFormat.ForceModPackets);
                 //wemFile.GenerateOGG(output, m_Path + "\\packed_codebooks_aoTuV_603.bin", false, false);
 
-                Process process1 = new Process();
+                Process process1 = new();
                 process1.StartInfo.FileName = m_Path + "\\ww2ogg.exe";
                 process1.StartInfo.Arguments = "\"" + file + "\" --pcb \"" + m_Path + "\\packed_codebooks_aoTuV_603.bin\"  -o \"" + output + "\"";
                 process1.StartInfo.UseShellExecute = false;
                 process1.Start();
                 process1.WaitForExit();
 
-                Process process = new Process();
+                Process process = new();
                 process.StartInfo.FileName = m_Path + "\\revorb.exe";
                 process.StartInfo.Arguments = "\"" + output + "\"";
                 process.StartInfo.UseShellExecute = false;
@@ -4177,11 +4210,11 @@ namespace FCBConverter
         {
             string newPathDds = file.Replace(".xbts", ".dds").Replace(".xbt", ".dds");
 
-            XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            XDocument xmlDoc = new(new XDeclaration("1.0", "utf-8", "yes"));
             xmlDoc.Add(new XComment(xmlheader));
-            XElement root = new XElement("XBTInfo");
+            XElement root = new("XBTInfo");
 
-            FileStream XBTStream = new FileStream(file, FileMode.Open);
+            FileStream XBTStream = new(file, FileMode.Open);
 
             uint type = XBTStream.ReadValueU32();
             if (type != 0x00584254)
@@ -4279,7 +4312,7 @@ namespace FCBConverter
             uint version = uint.Parse(xRoot.Element("Version").Value);
             string mipsName = version <= 112 ? "Param6" : "MipsFileMipsCount";
 
-            MemoryStream memoryStream = new MemoryStream();
+            MemoryStream memoryStream = new();
             memoryStream.WriteValueU32(0x00584254);
             memoryStream.WriteValueU32(version);
             memoryStream.WriteValueU32(0);
@@ -4322,7 +4355,7 @@ namespace FCBConverter
                 XDocument oMiXD = XDocument.Load(nonMipsXml);
                 uint mipsCount = uint.Parse(oMiXD.Element("XBTInfo").Element("MipsFileMipsCount").Value);
 
-                MemoryStream memoryStream1 = new MemoryStream(dds);
+                MemoryStream memoryStream1 = new(dds);
                 memoryStream1.Seek(28, SeekOrigin.Begin);
                 memoryStream1.WriteValueU32(mipsCount);
                 dds = memoryStream1.ToArray();
@@ -4350,7 +4383,7 @@ namespace FCBConverter
             string newF = Path.GetDirectoryName(editXbg) + "\\" + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
             File.Copy(editXbg, newF, true);
 
-            FileStream XBGEditStream = new FileStream(newF, FileMode.Open, FileAccess.ReadWrite);
+            FileStream XBGEditStream = new(newF, FileMode.Open, FileAccess.ReadWrite);
 
             uint editHdr = XBGEditStream.ReadValueU32();
             ushort majorVer = XBGEditStream.ReadValueU16();
@@ -4368,7 +4401,7 @@ namespace FCBConverter
                 return;
             }
 
-            Dictionary<string, string[]> dataP = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> dataP = new();
 
             string[] dataParse = data.Split('|');
             foreach (string dP in dataParse)
@@ -4426,7 +4459,7 @@ namespace FCBConverter
                             // write
                             string[] dataToWrite = dataP["FACEHIDEFP"];
 
-                            if (dataToWrite[0] == "") dataToWrite = new string[] { };
+                            if (dataToWrite[0] == "") dataToWrite = Array.Empty<string>();
 
                             foreach (string valToWrite in dataToWrite)
                             {
@@ -4505,7 +4538,7 @@ namespace FCBConverter
 
         static void GetDataFromXBG(string sourceXbg, int skid, int material)
         {
-            FileStream XBGSourceStream = new FileStream(sourceXbg, FileMode.Open, FileAccess.ReadWrite);
+            FileStream XBGSourceStream = new(sourceXbg, FileMode.Open, FileAccess.ReadWrite);
 
             uint editHdr = XBGSourceStream.ReadValueU32();
             ushort majorVer = XBGSourceStream.ReadValueU16();
@@ -4524,7 +4557,7 @@ namespace FCBConverter
             }
 
             string dataP = "";
-            long sulcStartPos = 0;
+            long sulcStartPos;
             uint skeletonCount = 0;
 
             XBGSourceStream.Seek(28, SeekOrigin.Begin);
@@ -4703,9 +4736,9 @@ namespace FCBConverter
             Console.WriteLine("data" + dataP);
         }
 
-        static void ConvertUE2XBG(string uePath, string sourceXbg)
+        static void ConvertUE2XBG(string uePath, string sourceXbg, int type)
         {
-            ue4.Convert(uePath, sourceXbg);
+            ue4.Convert(uePath, sourceXbg, type);
         }
     }
 }
