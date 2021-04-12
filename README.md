@@ -2,23 +2,8 @@
 
 For converting most binary files in Far Cry 5 and New Dawn. Based on Gibbed's Dunia Tools.
 
-FCBConverter can compress FCB files. Big files took longer time to convert with enabled compression. If you want to disable compression, remove or rename file **FCBConverterNoCompress.txt**
 
-### Supported binary files
-* fcb, ndb
-* oasis.bin
-* depload.dat
-* soundinfo.bin
-* lua (only to luac)
-* xbt, xbts
-* material.bin
-* markup.bin
-* move.bin
-* combinedmovefile.bin
-* cseq
-* feu
-* bdl
-* fat
+For usage and more info see [here](https://www.nexusmods.com/farcry5/mods/97).
 
 
 ## Usage
@@ -33,6 +18,7 @@ Some extensions require more specific params, please see FCBConverter output for
 ## Authors
 
 * Gibbed - original author of FCB conversion tools, Dunia Tools
+* id-daemon - author of Unreal Engine to XBG conversion tool ([link](https://zenhax.com/viewtopic.php?f=5&t=12842))
 
 
 ## License
