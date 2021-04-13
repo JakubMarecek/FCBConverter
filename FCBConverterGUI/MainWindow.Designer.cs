@@ -255,10 +255,10 @@ namespace FCBConverterGUI
             // 
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button6.Location = new System.Drawing.Point(937, 263);
+            this.button6.Location = new System.Drawing.Point(802, 200);
             this.button6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(117, 23);
+            this.button6.Size = new System.Drawing.Size(108, 20);
             this.button6.TabIndex = 6;
             this.button6.Text = "Convert";
             this.button6.UseVisualStyleBackColor = true;
@@ -312,10 +312,10 @@ namespace FCBConverterGUI
             // 
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button5.Location = new System.Drawing.Point(937, 51);
+            this.button5.Location = new System.Drawing.Point(802, 46);
             this.button5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(117, 23);
+            this.button5.Size = new System.Drawing.Size(108, 20);
             this.button5.TabIndex = 0;
             this.button5.Text = "Convert";
             this.button5.UseVisualStyleBackColor = true;
@@ -362,7 +362,7 @@ namespace FCBConverterGUI
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox2.Size = new System.Drawing.Size(583, 45);
+            this.groupBox2.Size = new System.Drawing.Size(583, 42);
             this.groupBox2.TabIndex = 25;
             this.groupBox2.TabStop = false;
             // 
@@ -372,7 +372,7 @@ namespace FCBConverterGUI
             this.radioButton1.Checked = true;
             this.radioButton1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioButton1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioButton1.Location = new System.Drawing.Point(8, 14);
+            this.radioButton1.Location = new System.Drawing.Point(20, 14);
             this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(65, 18);
@@ -733,7 +733,7 @@ namespace FCBConverterGUI
             this.radioButton8.Checked = true;
             this.radioButton8.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioButton8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioButton8.Location = new System.Drawing.Point(7, 22);
+            this.radioButton8.Location = new System.Drawing.Point(20, 22);
             this.radioButton8.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.radioButton8.Name = "radioButton8";
             this.radioButton8.Size = new System.Drawing.Size(73, 18);
@@ -747,7 +747,7 @@ namespace FCBConverterGUI
             this.radioButton9.AutoSize = true;
             this.radioButton9.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioButton9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioButton9.Location = new System.Drawing.Point(99, 22);
+            this.radioButton9.Location = new System.Drawing.Point(110, 22);
             this.radioButton9.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.radioButton9.Name = "radioButton9";
             this.radioButton9.Size = new System.Drawing.Size(120, 18);

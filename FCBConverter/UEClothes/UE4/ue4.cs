@@ -1205,8 +1205,8 @@ internal class ue4
 		}
 		string path = workDir + Path.GetFileNameWithoutExtension(ueasset) + ".txt";
 		//string path_name = Path.GetFileNameWithoutExtension(args[0]) + "_name.txt";
-		//string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(args[0]);
-		//string str2 = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(fileNameWithoutExtension);
+		string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(ueasset);
+		string str2 = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(fileNameWithoutExtension);
 		//string text0 = str2 + "_LOD0";
 		float num84 = 6.10351563E-05f;
 		float num85 = 3.05175781E-05f;
@@ -1308,8 +1308,8 @@ internal class ue4
 			{
 				binaryWriter.Write(array2[num50]);
 				binaryWriter.Write(1);
-				string text5 = "mesh_LOD0";
-				// string text5 = str2 + "_LOD0";
+				//string text5 = "moddedmesh_LOD0";
+				string text5 = str2 + "_LOD0";
 				int num88 = text5.Length + 61;
 				int num89 = 1048 * num28 + 4;
 				binaryWriter.Write(num89 + num88 + 40);
@@ -1403,7 +1403,7 @@ internal class ue4
 				}
 				binaryWriter.Write(num25 * num82);
 				int num92 = 0;
-				long num93 = ((fileStream5.Position + 15) & 4294967280u) - fileStream5.Position;
+				long num93 = ((fileStream5.Position + 15) & 0xFFFFFFF0) - fileStream5.Position;
 				for (int i = 0; i < num93; i++)
 				{
 					fileStream5.WriteByte((byte)(num93 - i));
@@ -1452,12 +1452,14 @@ internal class ue4
 					num94 += (uint)((array17[num92][i].X + 1f) * 512f);
 					if (array18[num92][i].real < 0f)
 					{
-						num94 += 3221225472u;
+						//num94 += 3221225472u; //
 					}
+					else
+						num94 += 0xC0000000u;
 					binaryWriter.Write(num94);
 				}
 				binaryWriter.Write(num27);
-				num93 = ((fileStream5.Position + 15) & 4294967280u) - fileStream5.Position;
+				num93 = ((fileStream5.Position + 15) & 0xFFFFFFF0) - fileStream5.Position; //(fileStream5.Position + 15L & (long)((ulong)-16)) - fileStream5.Position;
 				for (int i = 0; i < num93; i++)
 				{
 					fileStream5.WriteByte((byte)(num93 - i));
@@ -1503,7 +1505,7 @@ internal class ue4
 		int value2 = (int)fileStream5.Position - 12;
 		if (num8 != 0)
 		{
-			long num96 = ((fileStream5.Position + 3) & 4294967292u) - fileStream5.Position;
+			long num96 = ((fileStream5.Position + 3) & 0xFFFFFFFC) - fileStream5.Position; //(fileStream5.Position + 3L & (long)((ulong)-4)) - fileStream5.Position;
 			for (int i = 0; i < num96; i++)
 			{
 				fileStream5.WriteByte(127);

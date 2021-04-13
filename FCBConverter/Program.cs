@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210413-0015";
+        public static string version = "20210413-1730";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -4380,6 +4380,12 @@ namespace FCBConverter
 
         static void FixXBGForFP(string editXbg, int skid, int material, string data)
         {
+            if (!File.Exists(editXbg))
+            {
+                Console.WriteLine("File " + editXbg + " doesn't exist!");
+                return;
+            }
+
             string newF = Path.GetDirectoryName(editXbg) + "\\" + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
             File.Copy(editXbg, newF, true);
 
@@ -4538,6 +4544,12 @@ namespace FCBConverter
 
         static void GetDataFromXBG(string sourceXbg, int skid, int material)
         {
+            if (!File.Exists(sourceXbg))
+            {
+                Console.WriteLine("File " + sourceXbg + " doesn't exist!");
+                return;
+            }
+
             FileStream XBGSourceStream = new(sourceXbg, FileMode.Open, FileAccess.ReadWrite);
 
             uint editHdr = XBGSourceStream.ReadValueU32();
@@ -4738,6 +4750,34 @@ namespace FCBConverter
 
         static void ConvertUE2XBG(string uePath, string sourceXbg, int type)
         {
+            if (!File.Exists(uePath))
+            {
+                Console.WriteLine("File " + uePath + " doesn't exist!");
+                return;
+            }
+
+            if (!File.Exists(sourceXbg))
+            {
+                Console.WriteLine("File " + sourceXbg + " doesn't exist!");
+                return;
+            }
+
+            string workDir = Path.GetDirectoryName(uePath) + "\\";
+
+            string uexp = workDir + Path.GetFileNameWithoutExtension(uePath) + ".uexp";
+            if (!File.Exists(uexp))
+            {
+                Console.WriteLine("File " + uexp + " doesn't exist!");
+                return;
+            }
+
+            string txt = workDir + Path.GetFileNameWithoutExtension(uePath) + ".txt";
+            if (!File.Exists(txt))
+            {
+                Console.WriteLine("File " + txt + " doesn't exist!");
+                return;
+            }
+
             ue4.Convert(uePath, sourceXbg, type);
         }
     }
