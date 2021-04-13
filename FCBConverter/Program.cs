@@ -53,19 +53,12 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210413-1730";
+        public static string version = "20210413-1815";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
         public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Gibbed, xBaebsae";
-        public static string xmlheaderfcb2 = Environment.NewLine +
-            "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this." + Environment.NewLine +
-            "To change a value, set \"type\" attribute to a string which is after value-**here**. Example:" + Environment.NewLine +
-            "Changing" + Environment.NewLine +
-            "  <field hash=\"ABDC41FE\" name=\"fMaxHealth\" value-Float32=\"1000\" type=\"BinHex\">00007A44</field>" + Environment.NewLine +
-            "to" + Environment.NewLine +
-            "  <field hash=\"ABDC41FE\" name=\"fMaxHealth\" type=\"Float32\">1000</field>" + Environment.NewLine +
-            "";
+        public static string xmlheaderfcb2 = "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.";
         public static string xmlheaderdepload = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
@@ -85,7 +78,8 @@ namespace FCBConverter
             Console.WriteLine("**** FCBConverter v" + version);
             Console.WriteLine("****   Author: ArmanIII");
             Console.WriteLine("****   Based on: Gibbed's Dunia Tools");
-            Console.WriteLine("****   Special thanks to: Fireboyd78 (FCBastard), xBaebsae, Ekey (FC5 Unpacker), Gibbed");
+            Console.WriteLine("****   Special thanks to: Fireboyd78 (FCBastard), xBaebsae, Ekey (FC5 Unpacker), Gibbed,");
+            Console.WriteLine("****      id-daemon");
             Console.WriteLine("*******************************************************************************************");
             Console.ResetColor();
             Console.WriteLine("");
