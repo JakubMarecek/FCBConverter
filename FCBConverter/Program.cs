@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210413-1815";
+        public static string version = "20210415-1815";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -414,6 +414,7 @@ namespace FCBConverter
 
             string enC = "-enablecompress";
             string disC = "-disablecompress";
+            string keep = "-keep";
 
             if (File.Exists(m_Path + nocompressFile) && param2 != enC && param3 != enC && param4 != enC)
             {
@@ -477,6 +478,9 @@ namespace FCBConverter
                 }
                 else if (File.Exists(file))
                 {
+                    if (param2 == keep)
+                        param2 = "";
+
                     Proccessing(file, param2);
                 }
                 else if (Directory.Exists(file) || file == @"\")
@@ -509,7 +513,6 @@ namespace FCBConverter
                 Console.WriteLine(ex.ToString());
             }
 
-            string keep = "-keep";
             if (file == keep || param2 == keep || param3 == keep || param4 == keep || param5 == keep || param6 == keep)
             {
                 Console.WriteLine("Press any key to exit...");
