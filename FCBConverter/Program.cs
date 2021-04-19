@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210419-1800";
+        public static string version = "20210419-1900";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -415,6 +415,7 @@ namespace FCBConverter
             string enC = "-enablecompress";
             string disC = "-disablecompress";
             string keep = "-keep";
+            bool bKeep = false;
 
             if (File.Exists(m_Path + nocompressFile) && param2 != enC && param3 != enC && param4 != enC)
             {
@@ -441,6 +442,37 @@ namespace FCBConverter
                     Console.WriteLine("");
                     isCompressEnabled = false;
                 }
+            }
+
+            if (file == keep)
+            {
+                file = "";
+                bKeep = true;
+            }
+            if (param2 == keep)
+            {
+                param2 = "";
+                bKeep = true;
+            }
+            if (param3 == keep)
+            {
+                param3 = "";
+                bKeep = true;
+            }
+            if (param4 == keep)
+            {
+                param4 = "";
+                bKeep = true;
+            }
+            if (param5 == keep)
+            {
+                param5 = "";
+                bKeep = true;
+            }
+            if (param6 == keep)
+            {
+                param6 = "";
+                bKeep = true;
             }
 
             Console.Title = "FCBConverter - " + file;
@@ -478,9 +510,6 @@ namespace FCBConverter
                 }
                 else if (File.Exists(file))
                 {
-                    if (param2 == keep)
-                        param2 = "";
-
                     Proccessing(file, param2);
                 }
                 else if (Directory.Exists(file) || file == @"\")
@@ -513,7 +542,7 @@ namespace FCBConverter
                 Console.WriteLine(ex.ToString());
             }
 
-            if (file == keep || param2 == keep || param3 == keep || param4 == keep || param5 == keep || param6 == keep)
+            if (bKeep)
             {
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
