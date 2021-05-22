@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210419-1900";
+        public static string version = "20210522-1100";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -522,11 +522,11 @@ namespace FCBConverter
                 }
                 else if (file == "-xbgFP")
                 {
-                    FixXBGForFP(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")), param5);
+                    FixXBGForFP(param2, param3);
                 }
                 else if (file == "-xbgData")
                 {
-                    GetDataFromXBG(param2, int.Parse(param3.Replace("-skid=", "")), int.Parse(param4.Replace("-matid=", "")));
+                    GetDataFromXBG(param2);
                 }
                 else if (file.StartsWith("-ue="))
                 {
@@ -4404,7 +4404,7 @@ namespace FCBConverter
             XBTStream.Close();
         }
 
-        static void FixXBGForFP(string editXbg, int skid, int material, string data)
+        static void FixXBGForFP(string editXbg, string data)
         {
             if (!File.Exists(editXbg))
             {
@@ -4443,6 +4443,44 @@ namespace FCBConverter
                 dataP.Add(vals[0], valsData);
             }
 
+            Dictionary<int, Dictionary<int, Dictionary<int, Helpers.HideFacesStruct>>> sourceXbgSkelHideFacesFP = new();
+            if (dataP.ContainsKey("SKELHIDEFACESFP"))
+            {
+                string[] dataToWrite = dataP["SKELHIDEFACESFP"];
+                for (int i = 0; i < dataToWrite.Length; i++)
+                {
+                    string[] matChilds = dataToWrite[i].Split('+');
+                    Dictionary<int, Dictionary<int, Helpers.HideFacesStruct>> matsArr = new();
+
+                    for (int j = 0; j < matChilds.Length; j++)
+                    {
+                        Dictionary<int, Helpers.HideFacesStruct> hfSA = new();
+
+                        if (matChilds[j] != "" && matChilds[j] != "0")
+                        {
+                            string[] matParts = matChilds[j].Split('-');
+
+                            for (int k = 0; k < matParts.Length; k++)
+                            {
+                                string[] partData = matParts[k].Split('*');
+
+                                hfSA.Add(k, new()
+                                {
+                                    id = ulong.Parse(partData[0]),
+                                    start = ushort.Parse(partData[1]),
+                                    count = ushort.Parse(partData[2])
+                                });
+                            }
+                        }
+
+                        matsArr.Add(j, hfSA);
+                    }
+
+                    sourceXbgSkelHideFacesFP.Add(i, matsArr);
+                }
+            }
+
+
             uint DHRMResize = 0;
 
             XBGEditStream.Seek(28, SeekOrigin.Begin);
@@ -4469,46 +4507,37 @@ namespace FCBConverter
 
                         if (subSectHdrK == 0x434C5553) // SULC
                         {
-                            for (int k = 0; k <= skid; k++)
+                            if (sourceXbgSkelHideFacesFP.Any())
                             {
-                                uint subMeshCount = XBGEditStream.ReadValueU32();
-
-                                if (k == skid)
+                                for (int k = 0; k < sourceXbgSkelHideFacesFP.Count; k++)
                                 {
-                                    for (int l = 0; l < material; l++)
+                                    uint subMeshCount = XBGEditStream.ReadValueU32();
+
+                                    for (int l = 0; l < sourceXbgSkelHideFacesFP[k].Count; l++)
                                     {
-                                        XBGEditStream.Seek(1048, SeekOrigin.Current);
+                                        XBGEditStream.Seek(XBGEditStream.Position + 524, SeekOrigin.Begin);
+
+                                        int amnt = 0;
+                                        for (int m = 0; m < sourceXbgSkelHideFacesFP[k][l].Count; m++)
+                                        {
+                                            var pars = sourceXbgSkelHideFacesFP[k][l][m];
+                                            XBGEditStream.WriteValueU32(0);
+                                            XBGEditStream.WriteValueU64(pars.id);
+                                            XBGEditStream.WriteValueU16(pars.start);
+                                            XBGEditStream.WriteValueU16(pars.count);
+                                            amnt++;
+                                        }
+
+                                        int wspace = 512 - (amnt * (sizeof(uint) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort)));
+                                        for (int n = 0; n < wspace; n++)
+                                            XBGEditStream.WriteByte(0);
+
+                                        XBGEditStream.WriteValueU32(0);
+                                        XBGEditStream.WriteValueS32(amnt);
+                                        XBGEditStream.WriteValueU32(0);
                                     }
                                 }
-                                else
-                                {
-                                    XBGEditStream.Seek(1048 * subMeshCount, SeekOrigin.Current);
-                                }
                             }
-
-                            XBGEditStream.Seek(XBGEditStream.Position + 524, SeekOrigin.Begin);
-
-                            // write
-                            string[] dataToWrite = dataP["FACEHIDEFP"];
-
-                            if (dataToWrite[0] == "") dataToWrite = Array.Empty<string>();
-
-                            foreach (string valToWrite in dataToWrite)
-                            {
-                                string[] valParsed = valToWrite.Split('-');
-                                XBGEditStream.WriteValueU32(0);
-                                XBGEditStream.WriteValueU64(ulong.Parse(valParsed[0]));
-                                XBGEditStream.WriteValueU16(ushort.Parse(valParsed[1]));
-                                XBGEditStream.WriteValueU16(ushort.Parse(valParsed[2]));
-                            }
-
-                            int wspace = 512 - (dataToWrite.Length * (sizeof(uint) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort)));
-                            for (int k = 0; k < wspace; k++)
-                                XBGEditStream.WriteByte(0);
-
-                            XBGEditStream.WriteValueU32(0);
-                            XBGEditStream.WriteValueU32((uint)dataToWrite.Length);
-                            XBGEditStream.WriteValueU32(0);
                         }
 
                         XBGEditStream.Seek(subPos + subSectionLenShorted, SeekOrigin.Begin);
@@ -4568,7 +4597,7 @@ namespace FCBConverter
             XBGEditStream.Close();
         }
 
-        static void GetDataFromXBG(string sourceXbg, int skid, int material)
+        static void GetDataFromXBG(string sourceXbg)
         {
             if (!File.Exists(sourceXbg))
             {
@@ -4595,7 +4624,6 @@ namespace FCBConverter
             }
 
             string dataP = "";
-            long sulcStartPos;
             uint skeletonCount = 0;
 
             XBGSourceStream.Seek(28, SeekOrigin.Begin);
@@ -4622,50 +4650,16 @@ namespace FCBConverter
 
                         if (subSectHdrK == 0x434C5553) // SULC
                         {
-                            sulcStartPos = XBGSourceStream.Position;
-
-                            for (int k = 0; k <= skid; k++)
-                            {
-                                uint subMeshCount = XBGSourceStream.ReadValueU32();
-
-                                if (k == skid)
-                                {
-                                    for (int l = 0; l < material; l++)
-                                    {
-                                        XBGSourceStream.Seek(1048, SeekOrigin.Current);
-                                    }
-                                }
-                                else
-                                {
-                                    XBGSourceStream.Seek(1048 * subMeshCount, SeekOrigin.Current);
-                                }
-                            }
-
-                            long skippedLodPos = XBGSourceStream.Position;
-
-                            XBGSourceStream.Seek(skippedLodPos + 524 + 516, SeekOrigin.Begin);
-                            uint cnt = XBGSourceStream.ReadValueU32();
-
-                            XBGSourceStream.Seek(skippedLodPos + 524, SeekOrigin.Begin);
-
-                            string vals = "";
-                            for (int k = 0; k < cnt; k++)
-                            {
-                                XBGSourceStream.ReadValueU32();
-                                ulong id = XBGSourceStream.ReadValueU64();
-                                ushort idx = XBGSourceStream.ReadValueU16();
-                                ushort len = XBGSourceStream.ReadValueU16();
-                                vals += (vals == "" ? "" : ",") + id + "*" + idx + "*" + len;
-                            }
-                            dataP += (dataP == "" ? "" : "|") + "FACEHIDEFP;" + vals;
-
-
-                            XBGSourceStream.Seek(sulcStartPos, SeekOrigin.Begin);
                             string vals_faces = "";
                             string vals_verts = "";
                             string vals_meshes = "";
+                            string vals_fphide = "";
                             for (int k = 0; k < skeletonCount; k++)
                             {
+                                string vals_faces_child = "";
+                                string vals_verts_child = "";
+                                string vals_fphide_child = "";
+
                                 uint meshCount = XBGSourceStream.ReadValueU32();
 
                                 for (int l = 0; l < meshCount; l++)
@@ -4675,16 +4669,41 @@ namespace FCBConverter
                                     XBGSourceStream.ReadValueU16();
                                     XBGSourceStream.ReadValueU16();
                                     ushort vertsCount = XBGSourceStream.ReadValueU16();
-                                    XBGSourceStream.Seek(1038, SeekOrigin.Current);
-                                    vals_faces += (vals_faces == "" ? "" : ",") + facesCount.ToString();
-                                    vals_verts += (vals_verts == "" ? "" : ",") + vertsCount.ToString();
+
+                                    XBGSourceStream.Seek(514, SeekOrigin.Current);
+                                    long smidd = XBGSourceStream.Position;
+                                    XBGSourceStream.Seek(516, SeekOrigin.Current);
+                                    uint cnt = XBGSourceStream.ReadValueU32();
+                                    long send = XBGSourceStream.Position + 4;
+
+                                    XBGSourceStream.Seek(smidd, SeekOrigin.Begin);
+
+                                    string tmp = "";
+                                    for (int m = 0; m < cnt; m++)
+                                    {
+                                        XBGSourceStream.ReadValueU32();
+                                        ulong id = XBGSourceStream.ReadValueU64();
+                                        ushort idx = XBGSourceStream.ReadValueU16();
+                                        ushort len = XBGSourceStream.ReadValueU16();
+                                        tmp += (m > 0 ? "-" : "") + id + "*" + idx + "*" + len;
+                                    }
+                                    vals_fphide_child += (l > 0 ? "+" : "") + tmp;
+
+                                    XBGSourceStream.Seek(send, SeekOrigin.Begin);
+
+                                    vals_faces_child += (l > 0 ? "+" : "") + facesCount.ToString();
+                                    vals_verts_child += (l > 0 ? "+" : "") + vertsCount.ToString();
                                 }
 
-                                vals_meshes += (vals_meshes == "" ? "" : ",") + meshCount.ToString();
+                                vals_faces += (k > 0 ? "," : "") + vals_faces_child.ToString();
+                                vals_verts += (k > 0 ? "," : "") + vals_verts_child.ToString();
+                                vals_meshes += (k > 0 ? "," : "") + meshCount.ToString();
+                                vals_fphide += (k > 0 ? "," : "") + vals_fphide_child;
                             }
                             dataP += (dataP == "" ? "" : "|") + "SKELFACES;" + vals_faces.ToString();
                             dataP += (dataP == "" ? "" : "|") + "SKELVERTS;" + vals_verts.ToString();
                             dataP += (dataP == "" ? "" : "|") + "SKELMATS;" + vals_meshes.ToString();
+                            dataP += (dataP == "" ? "" : "|") + "SKELHIDEFACESFP;" + vals_fphide;
                         }
 
                         XBGSourceStream.Seek(subPos + subSectionLenShorted, SeekOrigin.Begin);

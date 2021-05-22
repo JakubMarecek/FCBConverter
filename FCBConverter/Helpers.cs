@@ -140,5 +140,12 @@ namespace FCBConverter
 
             return results.ToArray();
         }
+
+        public struct HideFacesStruct
+        {
+            public ulong id;
+            public ushort start;
+            public ushort count;
+        }
     }
 }

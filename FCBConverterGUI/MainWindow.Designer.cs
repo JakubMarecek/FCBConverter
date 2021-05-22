@@ -95,14 +95,10 @@ namespace FCBConverterGUI
             this.label16 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.button8 = new System.Windows.Forms.Button();
-            this.button16 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.button18 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.textBox9 = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.button22 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -697,14 +693,10 @@ namespace FCBConverterGUI
             this.tabPage3.Controls.Add(this.label16);
             this.tabPage3.Controls.Add(this.label10);
             this.tabPage3.Controls.Add(this.button8);
-            this.tabPage3.Controls.Add(this.button16);
             this.tabPage3.Controls.Add(this.button7);
             this.tabPage3.Controls.Add(this.button18);
             this.tabPage3.Controls.Add(this.button14);
             this.tabPage3.Controls.Add(this.button4);
-            this.tabPage3.Controls.Add(this.button3);
-            this.tabPage3.Controls.Add(this.textBox9);
-            this.tabPage3.Controls.Add(this.label7);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage3.Name = "tabPage3";
@@ -757,7 +749,7 @@ namespace FCBConverterGUI
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(608, 115);
+            this.numericUpDown2.Location = new System.Drawing.Point(608, 89);
             this.numericUpDown2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             20,
@@ -767,12 +759,13 @@ namespace FCBConverterGUI
             this.numericUpDown2.Name = "numericUpDown2";
             this.numericUpDown2.Size = new System.Drawing.Size(155, 20);
             this.numericUpDown2.TabIndex = 68;
+            this.numericUpDown2.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
             // 
             // label22
             // 
             this.label22.AutoSize = true;
             this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label22.Location = new System.Drawing.Point(418, 117);
+            this.label22.Location = new System.Drawing.Point(418, 91);
             this.label22.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(152, 13);
@@ -784,7 +777,7 @@ namespace FCBConverterGUI
             this.button19.Enabled = false;
             this.button19.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button19.Location = new System.Drawing.Point(808, 115);
+            this.button19.Location = new System.Drawing.Point(808, 89);
             this.button19.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button19.Name = "button19";
             this.button19.Size = new System.Drawing.Size(117, 20);
@@ -809,7 +802,7 @@ namespace FCBConverterGUI
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(214, 115);
+            this.numericUpDown1.Location = new System.Drawing.Point(214, 89);
             this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             20,
@@ -819,12 +812,13 @@ namespace FCBConverterGUI
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(155, 20);
             this.numericUpDown1.TabIndex = 63;
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // label20
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label20.Location = new System.Drawing.Point(9, 117);
+            this.label20.Location = new System.Drawing.Point(9, 91);
             this.label20.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(156, 13);
@@ -839,10 +833,10 @@ namespace FCBConverterGUI
             this.listView2.GridLines = true;
             this.listView2.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(4, 158);
+            this.listView2.Location = new System.Drawing.Point(4, 132);
             this.listView2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(438, 173);
+            this.listView2.Size = new System.Drawing.Size(438, 199);
             this.listView2.TabIndex = 61;
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
@@ -895,10 +889,10 @@ namespace FCBConverterGUI
             this.listView1.GridLines = true;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(450, 158);
+            this.listView1.Location = new System.Drawing.Point(450, 132);
             this.listView1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(475, 173);
+            this.listView1.Size = new System.Drawing.Size(475, 199);
             this.listView1.TabIndex = 57;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -923,7 +917,7 @@ namespace FCBConverterGUI
             // 
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label16.Location = new System.Drawing.Point(450, 142);
+            this.label16.Location = new System.Drawing.Point(450, 116);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(318, 13);
@@ -934,7 +928,7 @@ namespace FCBConverterGUI
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label10.Location = new System.Drawing.Point(9, 142);
+            this.label10.Location = new System.Drawing.Point(9, 116);
             this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(183, 13);
@@ -953,20 +947,6 @@ namespace FCBConverterGUI
             this.button8.Text = "Remove";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
-            // button16
-            // 
-            this.button16.Enabled = false;
-            this.button16.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button16.Location = new System.Drawing.Point(808, 89);
-            this.button16.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(117, 20);
-            this.button16.TabIndex = 54;
-            this.button16.Text = "Load";
-            this.button16.UseVisualStyleBackColor = true;
-            this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
             // button7
             // 
@@ -1020,39 +1000,6 @@ namespace FCBConverterGUI
             this.button4.Text = "Add";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // button3
-            // 
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button3.Location = new System.Drawing.Point(771, 89);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(29, 20);
-            this.button3.TabIndex = 52;
-            this.button3.Text = "...";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // textBox9
-            // 
-            this.textBox9.Location = new System.Drawing.Point(214, 89);
-            this.textBox9.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox9.Name = "textBox9";
-            this.textBox9.Size = new System.Drawing.Size(549, 20);
-            this.textBox9.TabIndex = 51;
-            this.textBox9.Text = "E:\\Path\\to\\file";
-            this.textBox9.TextChanged += new System.EventHandler(this.textBox9_TextChanged);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(9, 92);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(197, 13);
-            this.label7.TabIndex = 50;
-            this.label7.Text = "Load data from reference XBG (optional)";
             // 
             // tabPage4
             // 
@@ -1347,9 +1294,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.TextBox textBox9;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Button button4;
@@ -1365,7 +1309,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.Button button15;
         private System.Windows.Forms.TextBox textBox10;
         private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.Button button16;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label20;

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FCBConverter": {
+      "commandName": "Project",
+      "commandLineArgs": "-xbgData d:\\Desktop\\a\\top_uni105_sweaterbodytop_slim_f.xbg -keep"
+    }
+  }
+}
