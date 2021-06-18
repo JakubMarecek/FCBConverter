@@ -1310,6 +1310,13 @@ internal class ue4
 				binaryWriter.Write(1);
 				//string text5 = "moddedmesh_LOD0";
 				string text5 = str2 + "_LOD0";
+
+				if (type == 2)
+					text5 = "FRAME_LOD0"; // weapons
+
+				if (type == 3)
+					text5 = "CHASSIS_LOD0"; // vehicles
+
 				int num88 = text5.Length + 61;
 				int num89 = 1048 * num28 + 4;
 				binaryWriter.Write(num89 + num88 + 40);

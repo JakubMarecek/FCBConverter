@@ -530,6 +530,8 @@ namespace FCBConverterGUI
 
             if (radioButton7.Checked) type = "0";
             if (radioButton6.Checked) type = "1";
+            if (radioButton10.Checked) type = "2";
+            if (radioButton11.Checked) type = "3";
 
             CallFCBConverter("-ue=" + type + " \"" + textBox11.Text + "\" \"" + textBox12.Text + "\"");
         }

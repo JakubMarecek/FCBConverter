@@ -116,6 +116,8 @@ namespace FCBConverterGUI
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.radioButton10 = new System.Windows.Forms.RadioButton();
+            this.radioButton11 = new System.Windows.Forms.RadioButton();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -1029,7 +1031,7 @@ namespace FCBConverterGUI
             // 
             this.button22.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button22.Location = new System.Drawing.Point(806, 194);
+            this.button22.Location = new System.Drawing.Point(806, 248);
             this.button22.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button22.Name = "button22";
             this.button22.Size = new System.Drawing.Size(117, 35);
@@ -1040,13 +1042,15 @@ namespace FCBConverterGUI
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.radioButton11);
+            this.groupBox3.Controls.Add(this.radioButton10);
             this.groupBox3.Controls.Add(this.radioButton7);
             this.groupBox3.Controls.Add(this.radioButton6);
             this.groupBox3.Location = new System.Drawing.Point(569, 78);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox3.Size = new System.Drawing.Size(354, 90);
+            this.groupBox3.Size = new System.Drawing.Size(354, 139);
             this.groupBox3.TabIndex = 68;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Type of model";
@@ -1056,12 +1060,11 @@ namespace FCBConverterGUI
             this.radioButton7.AutoSize = true;
             this.radioButton7.Checked = true;
             this.radioButton7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton7.Location = new System.Drawing.Point(26, 52);
+            this.radioButton7.Location = new System.Drawing.Point(26, 49);
             this.radioButton7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.radioButton7.Name = "radioButton7";
             this.radioButton7.Size = new System.Drawing.Size(171, 18);
             this.radioButton7.TabIndex = 0;
-            this.radioButton7.TabStop = true;
             this.radioButton7.Text = "Cloth - top, bottom, hand, feet";
             this.radioButton7.UseVisualStyleBackColor = true;
             // 
@@ -1210,6 +1213,30 @@ namespace FCBConverterGUI
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
             // 
+            // radioButton10
+            // 
+            this.radioButton10.AutoSize = true;
+            this.radioButton10.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton10.Location = new System.Drawing.Point(26, 73);
+            this.radioButton10.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton10.Name = "radioButton10";
+            this.radioButton10.Size = new System.Drawing.Size(77, 18);
+            this.radioButton10.TabIndex = 1;
+            this.radioButton10.Text = "Weapons";
+            this.radioButton10.UseVisualStyleBackColor = true;
+            // 
+            // radioButton11
+            // 
+            this.radioButton11.AutoSize = true;
+            this.radioButton11.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton11.Location = new System.Drawing.Point(26, 97);
+            this.radioButton11.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton11.Name = "radioButton11";
+            this.radioButton11.Size = new System.Drawing.Size(71, 18);
+            this.radioButton11.TabIndex = 2;
+            this.radioButton11.Text = "Vehicles";
+            this.radioButton11.UseVisualStyleBackColor = true;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1336,5 +1363,7 @@ namespace FCBConverterGUI
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.RadioButton radioButton8;
         private System.Windows.Forms.RadioButton radioButton9;
+        private System.Windows.Forms.RadioButton radioButton11;
+        private System.Windows.Forms.RadioButton radioButton10;
     }
 }
