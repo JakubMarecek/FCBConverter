@@ -54,7 +54,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210624-0000";
+        public static string version = "20210624-0045";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1020,6 +1020,12 @@ namespace FCBConverter
             else if (file.EndsWith(".mab"))
             {
                 FC4MarkupExtr(file);
+                FIN();
+                return;
+            }
+            else if (file.EndsWith(".mab.converted.xml"))
+            {
+                FC4MarkupPack(file);
                 FIN();
                 return;
             }
@@ -2059,27 +2065,31 @@ namespace FCBConverter
                 File.Delete(tmp + "c");
             }
 
+            byte[] lastBytes = MabStream.ReadBytes((int)(MabStream.Length - MabStream.Position));
+            File.WriteAllBytes(file + ".converted.bin", lastBytes);
+
             MabStream.Dispose();
 
             xmlDoc.Add(root);
             xmlDoc.Save(file + ".converted.xml");
         }
-        /*
+        
         static void FC4MarkupPack(string file)
         {
-            string onlyDir = Path.GetDirectoryName(file);
             string originalMab = file.Replace(".converted.xml", "");
+            string lastBinaryFile = file.Replace(".converted.xml", ".converted.bin");
             string newMab = originalMab.Replace(".mab", "_new.mab");
 
             XDocument doc = XDocument.Load(file);
-            IEnumerable<XElement> frames = doc.Element("CMoveResource").Elements("Frame");
+            IEnumerable<XElement> frames = doc.Element("CMarkupResource").Elements("Frame");
+
+            var output = new MemoryStream();
 
             int cnt = 0;
             foreach (XElement frame in frames)
             {
-
-
-                float unknown = float.Parse(frame.Attribute("Time").Value, CultureInfo.InvariantCulture);
+                float time = float.Parse(frame.Attribute("Time").Value, CultureInfo.InvariantCulture);
+                int unknown = int.Parse(frame.Attribute("Unknown").Value);
 
                 string tmp = file + "_" + cnt.ToString();
                 XElement fcb = frame.Element("object");
@@ -2089,46 +2099,47 @@ namespace FCBConverter
 
                 byte[] fcbByte = File.ReadAllBytes(tmp + "c");
 
-                ulong crc = Gibbed.Dunia2.FileFormats.CRC64.Hash(fcbByte, 0, fcbByte.Length);
+                uint crc = Gibbed.Dunia2.FileFormats.CRC32.Hash(fcbByte, 0, fcbByte.Length);
 
-                output.WriteValueF32(unknown, 0);
-                output.WriteValueU32((uint)fcbByte.Length);
-                output.WriteValueU64(crc);
+                output.WriteValueU32(crc);
+                output.WriteValueF32(time, 0);
+                output.WriteValueS32(unknown);
+                output.WriteValueU16((ushort)fcbByte.Length);
+                output.WriteValueU16(0);
                 output.WriteBytes(fcbByte);
 
                 File.Delete(tmp);
                 File.Delete(tmp + "c");
                 cnt++;
-
-
             }
 
+            output.Flush();
+            output.Seek(0, SeekOrigin.Begin);
 
+            File.Copy(originalMab, newMab, true);
 
+            FileStream MabStream = new(newMab, FileMode.Open);
 
-            ConvertXML(file, file + "c");
-
-            byte[] markup = File.ReadAllBytes(file + "c");
-
-            File.Delete(file + "c");
-
-
-            File.Copy(onlyDir + originalMab, newMab, true);
-
-            FileStream MabStream = new FileStream(newMab, FileMode.Open);
-
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = new();
             MabStream.CopyTo(ms);
 
             byte[] byteSequence = new byte[] { 0x6E, 0x62, 0x43, 0x46 }; // nbCF
             int[] poses = Helpers.SearchBytesMultiple(ms.ToArray(), byteSequence);
 
-            MabStream.SetLength(poses[0] - 16);
-            MabStream.WriteBytes(markup);
+            int startMarkupPos = poses[0] - 16;
+
+            MabStream.SetLength(startMarkupPos);
+
+            MabStream.WriteBytes(output.ToArray());
+
+            byte[] lastBytes = File.ReadAllBytes(lastBinaryFile);
+
+            MabStream.WriteBytes(lastBytes);
+
             MabStream.Flush();
             MabStream.Close();
         }
-        */
+        
         static void MoveConvertBin(string file)
         {
             string onlyDir = Path.GetDirectoryName(file);
