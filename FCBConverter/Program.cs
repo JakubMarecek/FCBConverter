@@ -38,6 +38,7 @@ namespace FCBConverter
         public static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         static readonly string m_File = @"\FCBConverterFileNames.list";
+        static readonly string m_File_5 = @"\FCBConverterFileNames_5.list";
         public static Dictionary<ulong, string> m_HashList = new Dictionary<ulong, string>();
 
         static readonly string stringsFile = @"\FCBConverterStrings.list";
@@ -53,7 +54,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210618-1900";
+        public static string version = "20210624-0000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1311,7 +1312,13 @@ namespace FCBConverter
                 return;
             }
 
-            string[] ss = File.ReadAllLines(m_Path + m_File);
+            string[] ss;
+
+            if (dwVersion == 5) 
+                ss = File.ReadAllLines(m_Path + m_File_5);
+            else
+                ss = File.ReadAllLines(m_Path + m_File);
+
             for (int i = 0; i < ss.Length; i++)
             {
                 ulong a = dwVersion == 5 ? Gibbed.Dunia2.FileFormats.CRC32.Hash(ss[i]) : Gibbed.Dunia2.FileFormats.CRC64.Hash(ss[i]);
@@ -2057,7 +2064,71 @@ namespace FCBConverter
             xmlDoc.Add(root);
             xmlDoc.Save(file + ".converted.xml");
         }
+        /*
+        static void FC4MarkupPack(string file)
+        {
+            string onlyDir = Path.GetDirectoryName(file);
+            string originalMab = file.Replace(".converted.xml", "");
+            string newMab = originalMab.Replace(".mab", "_new.mab");
 
+            XDocument doc = XDocument.Load(file);
+            IEnumerable<XElement> frames = doc.Element("CMoveResource").Elements("Frame");
+
+            int cnt = 0;
+            foreach (XElement frame in frames)
+            {
+
+
+                float unknown = float.Parse(frame.Attribute("Time").Value, CultureInfo.InvariantCulture);
+
+                string tmp = file + "_" + cnt.ToString();
+                XElement fcb = frame.Element("object");
+                fcb.Save(tmp);
+
+                ConvertXML(tmp, tmp + "c");
+
+                byte[] fcbByte = File.ReadAllBytes(tmp + "c");
+
+                ulong crc = Gibbed.Dunia2.FileFormats.CRC64.Hash(fcbByte, 0, fcbByte.Length);
+
+                output.WriteValueF32(unknown, 0);
+                output.WriteValueU32((uint)fcbByte.Length);
+                output.WriteValueU64(crc);
+                output.WriteBytes(fcbByte);
+
+                File.Delete(tmp);
+                File.Delete(tmp + "c");
+                cnt++;
+
+
+            }
+
+
+
+
+            ConvertXML(file, file + "c");
+
+            byte[] markup = File.ReadAllBytes(file + "c");
+
+            File.Delete(file + "c");
+
+
+            File.Copy(onlyDir + originalMab, newMab, true);
+
+            FileStream MabStream = new FileStream(newMab, FileMode.Open);
+
+            MemoryStream ms = new MemoryStream();
+            MabStream.CopyTo(ms);
+
+            byte[] byteSequence = new byte[] { 0x6E, 0x62, 0x43, 0x46 }; // nbCF
+            int[] poses = Helpers.SearchBytesMultiple(ms.ToArray(), byteSequence);
+
+            MabStream.SetLength(poses[0] - 16);
+            MabStream.WriteBytes(markup);
+            MabStream.Flush();
+            MabStream.Close();
+        }
+        */
         static void MoveConvertBin(string file)
         {
             string onlyDir = Path.GetDirectoryName(file);
