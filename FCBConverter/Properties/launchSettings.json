@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "d:\\Desktop\\1stge_fulb_loot_animal_large000fw.mab.converted.xml"
+      "commandLineArgs": "d:\\Desktop\\abrown-m-20140505093457.material.bin"
     }
   }
 }

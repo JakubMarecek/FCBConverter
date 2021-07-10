@@ -54,7 +54,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210624-0045";
+        public static string version = "20210710-1430";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -541,6 +541,10 @@ namespace FCBConverter
             catch(Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Console.WriteLine("");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                Environment.Exit(1);
             }
 
             if (bKeep)
