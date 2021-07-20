@@ -3,24 +3,44 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCBConverter", "FCBConverter\FCBConverter.csproj", "{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FCBConverter", "FCBConverter\FCBConverter.csproj", "{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCBConverterGUI", "FCBConverterGUI\FCBConverterGUI.csproj", "{C03B24C7-4D48-473B-A19B-6960B944FC95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FCBConverterGUI", "FCBConverterGUI\FCBConverterGUI.csproj", "{C03B24C7-4D48-473B-A19B-6960B944FC95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM32 = Debug|ARM32
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|ARM32 = Release|ARM32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|ARM32.ActiveCfg = Debug|ARM32
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|ARM32.Build.0 = Debug|ARM32
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|x64.ActiveCfg = Debug|x64
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Debug|x64.Build.0 = Debug|x64
 		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|ARM32.ActiveCfg = Release|ARM32
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|ARM32.Build.0 = Release|ARM32
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|x64.ActiveCfg = Release|x64
+		{188C6AFA-3A0E-464B-88F0-65B7D04B2A38}.Release|x64.Build.0 = Release|x64
 		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|ARM32.ActiveCfg = Debug|ARM32
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|ARM32.Build.0 = Debug|ARM32
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|x64.ActiveCfg = Debug|x64
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Debug|x64.Build.0 = Debug|x64
 		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|ARM32.ActiveCfg = Release|ARM32
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|ARM32.Build.0 = Release|ARM32
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|x64.ActiveCfg = Release|x64
+		{C03B24C7-4D48-473B-A19B-6960B944FC95}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

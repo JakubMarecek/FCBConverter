@@ -13,14 +13,15 @@
     <PackageId>FCBConverter</PackageId>
     <Authors>ArmanIII</Authors>
     <Description>FCBConverter</Description>
+    <Platforms>AnyCPU;x64;ARM32</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>..\bin_debug\</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>..\bin\</OutputPath>
     <DebugType>None</DebugType>
@@ -29,7 +30,7 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM32'">
 		<PlatformTarget>arm</PlatformTarget>
 		<RuntimeIdentifier>linux-arm</RuntimeIdentifier>
 
@@ -49,10 +50,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="FCBNoCompress.txt" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="lzo_64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -64,6 +61,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="revorb.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="FCBConverterSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -358,7 +358,14 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             var resIds = fields.Current.Select(nodeName);
             while (resIds.MoveNext() == true)
             {
-                resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""), Program.isFC2 ? 5 : 10)));
+                if (Program.isFC2)
+                {
+                    resIdsBytes.Add(BitConverter.GetBytes((uint)Program.GetFileHash(resIds.Current.GetAttribute("ID", ""), 5)));
+                }
+                else
+                {
+                    resIdsBytes.Add(BitConverter.GetBytes(Program.GetFileHash(resIds.Current.GetAttribute("ID", ""), 10)));
+                }
             }
 
             resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
@@ -373,8 +380,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             var resIds = fields.Current.Select(nodeName);
             while (resIds.MoveNext() == true)
             {
-                var value = Program.listStringsDict.Values.Where(a => a == resIds.Current.GetAttribute("ID", ""));
-                resIdsBytes.Add(BitConverter.GetBytes());
+                var value = Program.listStringsDict.FirstOrDefault(a => a.Value == resIds.Current.GetAttribute("ID", "")).Key;
+                resIdsBytes.Add(BitConverter.GetBytes(value));
             }
 
             resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
