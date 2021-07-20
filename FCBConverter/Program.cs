@@ -35,26 +35,25 @@ namespace FCBConverter
 {
     class Program
     {
-        public static string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static string m_Path = "";
 
-        static readonly string m_File = @"\FCBConverterFileNames.list";
-        static readonly string m_File_5 = @"\FCBConverterFileNames_5.list";
-        public static Dictionary<ulong, string> m_HashList = new Dictionary<ulong, string>();
+        static readonly string listFiles = @"\FCBConverterFileNames.list";
+        static readonly string listFiles_5 = @"\FCBConverterFileNames_5.list";
+        public static Dictionary<ulong, string> listFilesDict = new Dictionary<ulong, string>();
 
-        static readonly string stringsFile = @"\FCBConverterStrings.list";
-        public static Dictionary<uint, string> strings = new Dictionary<uint, string>();
+        static readonly string listStrings = @"\FCBConverterStrings.list";
+        public static Dictionary<uint, string> listStringsDict = new Dictionary<uint, string>();
 
-        static readonly string nocompressFile = @"\FCBConverterNoCompress.txt";
-
-        static readonly string excludeFile = @"\FCBConverterCompressExclude.txt";
+        static readonly string settingsFile = @"\FCBConverterSettings.xml";
 
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
+        public static bool isFC2 = false;
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210710-1430";
+        public static string version = "20210720-1430";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -72,6 +71,9 @@ namespace FCBConverter
 
         static void Main(string[] args)
         {
+            using var processModule = Process.GetCurrentProcess().MainModule;
+            m_Path = Path.GetDirectoryName(processModule?.FileName);
+
             Console.Title = "FCBConverter";
 
             Console.ForegroundColor = ConsoleColor.Green;
@@ -164,8 +166,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - fcb or xml file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - fcb or xml file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -182,8 +184,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - oasis file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - oasis file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples FC5]");
@@ -208,8 +210,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *_depload.dat file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *_depload.dat file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -226,8 +228,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - soundinfo.bin file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - soundinfo.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -245,8 +247,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.lua file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.lua file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -262,8 +264,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.xbt file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.xbt file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -280,8 +282,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.material.bin file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.material.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -296,8 +298,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.move.bin file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.move.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -312,8 +314,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - combinedmovefile.bin file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - combinedmovefile.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -328,8 +330,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.cseq file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.cseq file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -344,8 +346,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.feu or *.swf file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.feu or *.swf file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -360,8 +362,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.bdl file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.bdl file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -375,8 +377,8 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <m_File>");
-                Console.WriteLine("    m_File - *.bnk or *.wem file");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.bnk or *.wem file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -418,7 +420,7 @@ namespace FCBConverter
             string keep = "-keep";
             bool bKeep = false;
 
-            if (File.Exists(m_Path + nocompressFile) && param2 != enC && param3 != enC && param4 != enC)
+            if (LoadSetting("CompressFile") == "false" && param2 != enC && param3 != enC && param4 != enC)
             {
                 Console.WriteLine("Compression disabled.");
                 Console.WriteLine("");
@@ -474,6 +476,17 @@ namespace FCBConverter
             {
                 param6 = "";
                 bKeep = true;
+            }
+
+            if (param2 == "-fc2")
+            {
+                param2 = "";
+                isFC2 = true;
+            }
+            if (param3 == "-fc2")
+            {
+                param3 = "";
+                isFC2 = true;
             }
 
             Console.Title = "FCBConverter - " + file;
@@ -1069,7 +1082,7 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
-            LoadFile();
+            LoadFile(isFC2 ? 5 : 10);
 
             // ********************************************************************************************************************************************
 
@@ -1288,6 +1301,14 @@ namespace FCBConverter
             //Environment.Exit(0);
         }
 
+        static string LoadSetting(string settingName)
+        {
+            XDocument settingsXML = XDocument.Load(m_Path + settingsFile);
+            XElement root = settingsXML.Element("FCBConverter");
+            string selSettVal = root.Element(settingName).Value;
+            return selSettVal;
+        }
+
         public static int IndexOf(byte[] arrayToSearchThrough, byte[] patternToFind)
         {
             if (patternToFind.Length > arrayToSearchThrough.Length)
@@ -1313,52 +1334,52 @@ namespace FCBConverter
 
         static void LoadFile(int dwVersion = 10)
         {
-            if (m_HashList.Count() > 0)
+            if (listFilesDict.Count() > 0)
                 return;
 
-            if (!File.Exists(m_Path + m_File))
+            if (!File.Exists(m_Path + listFiles))
             {
-                Console.WriteLine(m_Path + m_File + " doesn't exist!");
+                Console.WriteLine(m_Path + listFiles + " doesn't exist!");
                 return;
             }
 
             string[] ss;
 
             if (dwVersion == 5) 
-                ss = File.ReadAllLines(m_Path + m_File_5);
+                ss = File.ReadAllLines(m_Path + listFiles_5);
             else
-                ss = File.ReadAllLines(m_Path + m_File);
+                ss = File.ReadAllLines(m_Path + listFiles);
 
             for (int i = 0; i < ss.Length; i++)
             {
                 ulong a = dwVersion == 5 ? Gibbed.Dunia2.FileFormats.CRC32.Hash(ss[i]) : Gibbed.Dunia2.FileFormats.CRC64.Hash(ss[i]);
-                if (!m_HashList.ContainsKey(a))
-                    m_HashList.Add(a, ss[i]);
+                if (!listFilesDict.ContainsKey(a))
+                    listFilesDict.Add(a, ss[i]);
             }
 
-            Console.WriteLine("Files loaded: " + m_HashList.Count);
+            Console.WriteLine("Files loaded: " + listFilesDict.Count);
         }
 
         static void LoadString()
         {
-            if (strings.Count() > 0)
+            if (listStringsDict.Count() > 0)
                 return;
 
-            if (!File.Exists(m_Path + stringsFile))
+            if (!File.Exists(m_Path + listStrings))
             {
-                Console.WriteLine(m_Path + stringsFile + " doesn't exist!");
+                Console.WriteLine(m_Path + listStrings + " doesn't exist!");
                 return;
             }
 
-            string[] ss = File.ReadAllLines(m_Path + stringsFile);
+            string[] ss = File.ReadAllLines(m_Path + listStrings);
             for (int i = 0; i < ss.Length; i++)
             {
                 uint a = Gibbed.Dunia2.FileFormats.CRC32.Hash(ss[i]);
-                if (!strings.ContainsKey(a))
-                    strings.Add(a, ss[i]);
+                if (!listStringsDict.ContainsKey(a))
+                    listStringsDict.Add(a, ss[i]);
             }
 
-            Console.WriteLine("Strings loaded: " + strings.Count);
+            Console.WriteLine("Strings loaded: " + listStringsDict.Count);
         }
 
         public static void ConvertFCB(string inputPath, string outputPath)
@@ -1390,28 +1411,6 @@ namespace FCBConverter
             output.Close();
         }
        
-        /*
-        static string[] ReadAllResourceLines(string resourceName)
-        {
-            using (Stream stream = Assembly.GetEntryAssembly()
-                .GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return EnumerateLines(reader).ToArray();
-            }
-        }
-        
-        static IEnumerable<string> EnumerateLines(TextReader reader)
-        {
-            string line;
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                yield return line;
-            }
-        }
-        */
-        
         public static void WriteOSNode(XmlWriter writer, OasisstringsCompressedFile.Node node)
         {
             writer.WriteStartElement(node.Name);
@@ -1555,7 +1554,7 @@ namespace FCBConverter
             for (int i = 0; i < TypesCount; i++)
             {
                 uint typeHash = DeploadReader.ReadUInt32();
-                Types.Add(strings.ContainsKey(typeHash) ? strings[typeHash] : typeHash.ToString("X8"));
+                Types.Add(listStringsDict.ContainsKey(typeHash) ? listStringsDict[typeHash] : typeHash.ToString("X8"));
             }
 
             DeploadReader.Dispose();
@@ -1570,7 +1569,7 @@ namespace FCBConverter
             for (int i = 0; i < DependentFiles.Count; i++)
             {
                 Depload.DependencyLoaderItem dependencyLoaderItem = new Depload.DependencyLoaderItem();
-                dependencyLoaderItem.fileName = m_HashList.ContainsKey(DependentFiles[i].FileHash) ? m_HashList[DependentFiles[i].FileHash] : "__Unknown\\" + DependentFiles[i].FileHash.ToString("X16");
+                dependencyLoaderItem.fileName = listFilesDict.ContainsKey(DependentFiles[i].FileHash) ? listFilesDict[DependentFiles[i].FileHash] : "__Unknown\\" + DependentFiles[i].FileHash.ToString("X16");
 
                 dependencyLoaderItem.depFiles = new List<string>();
                 dependencyLoaderItem.depTypes = new List<int>();
@@ -1578,7 +1577,7 @@ namespace FCBConverter
                 for (int j = 0; j < DependentFiles[i].CountOfDependencyFiles; j++)
                 {
                     ulong dependencyFile = DependencyFiles[DependentFiles[i].DependencyFilesStartIndex + j];
-                    dependencyLoaderItem.depFiles.Add(m_HashList.ContainsKey(dependencyFile) ? m_HashList[dependencyFile] : "__Unknown\\" + dependencyFile.ToString("X16"));
+                    dependencyLoaderItem.depFiles.Add(listFilesDict.ContainsKey(dependencyFile) ? listFilesDict[dependencyFile] : "__Unknown\\" + dependencyFile.ToString("X16"));
                 }
 
                 for (int k = 0; k < DependentFiles[i].CountOfDependencyFiles; k++)
@@ -1706,7 +1705,7 @@ namespace FCBConverter
             {
                 uint type = 0;
 
-                if (strings.ContainsValue(Types[i]))
+                if (listStringsDict.ContainsValue(Types[i]))
                     type = Gibbed.Dunia2.FileFormats.CRC32.Hash(Types[i]);
                 else
                     type = uint.Parse(Types[i], NumberStyles.AllowHexSpecifier);
@@ -2433,7 +2432,7 @@ namespace FCBConverter
                 type = type.Remove(type.Length - 1);
 
                 writer.WriteStartElement("File");
-                //writer.WriteAttributeString("PathHash", m_HashList.ContainsKey(pathHash) ? m_HashList[pathHash] : "__Unknown\\" + pathHash.ToString("X16"));
+                //writer.WriteAttributeString("PathHash", listFilesDict.ContainsKey(pathHash) ? listFilesDict[pathHash] : "__Unknown\\" + pathHash.ToString("X16"));
                 //writer.WriteAttributeString("TypeHash", strings[typeHash]);
                 writer.WriteAttributeString("Unknown1", unk1.ToString());
                 writer.WriteAttributeString("Unknown2", unk2.ToString());
@@ -2640,24 +2639,24 @@ namespace FCBConverter
                 }
 
                 string m_Hash = fatEntry.NameHash.ToString(dwVersion >= 9 ? "X16" : "X8");
-                string m_FileName;
-                if (m_HashList.ContainsKey(fatEntry.NameHash))
+                string fileName;
+                if (listFilesDict.ContainsKey(fatEntry.NameHash))
                 {
-                    m_HashList.TryGetValue(fatEntry.NameHash, out m_FileName);
+                    listFilesDict.TryGetValue(fatEntry.NameHash, out fileName);
                 }
                 else
                 {
-                    m_FileName = @"__Unknown\" + m_Hash;
+                    fileName = @"__Unknown\" + m_Hash;
                 }
 
                 if (oneFileFound)
                 {
-                    m_FileName = Path.GetFileName(m_FileName);
+                    fileName = Path.GetFileName(fileName);
                 }
 
-                string m_FullPath = m_DstFolder + @"\" + m_FileName;
+                string m_FullPath = m_DstFolder + @"\" + fileName;
 
-                Console.WriteLine("[Unpacking]: {0}", m_FileName);
+                Console.WriteLine("[Unpacking]: {0}", fileName);
 
                 byte[] pDstBuffer = new byte[] { };
 
@@ -2756,126 +2755,126 @@ namespace FCBConverter
         static string UnpackBigFileFileType(string m_UnknownFileName, uint dwID)
         {
             string m_Directory = Path.GetDirectoryName(m_UnknownFileName);
-            string m_FileName = Path.GetFileName(m_UnknownFileName);
+            string fileName = Path.GetFileName(m_UnknownFileName);
 
             if (dwID == 0x004D4154) //TAM
             {
-                m_UnknownFileName = m_Directory + @"\MAT\" + m_FileName + ".material.bin";
+                m_UnknownFileName = m_Directory + @"\MAT\" + fileName + ".material.bin";
             }
             else
             if (dwID == 0x474E5089) //PNG
             {
-                m_UnknownFileName = m_Directory + @"\PNG\" + m_FileName + ".png";
+                m_UnknownFileName = m_Directory + @"\PNG\" + fileName + ".png";
             }
             else
             if (dwID == 0x42444947) //GIDB
             {
-                m_UnknownFileName = m_Directory + @"\GIDB\" + m_FileName + ".bin";
+                m_UnknownFileName = m_Directory + @"\GIDB\" + fileName + ".bin";
             }
             else
             if (dwID == 0x4D4F4D41) //MOMA
             {
-                m_UnknownFileName = m_Directory + @"\ANIM\" + m_FileName + ".bin";
+                m_UnknownFileName = m_Directory + @"\ANIM\" + fileName + ".bin";
             }
             else
             if (dwID == 0x4D760040) //MOVE
             {
-                m_UnknownFileName = m_Directory + @"\MOVE\" + m_FileName + ".move.bin";
+                m_UnknownFileName = m_Directory + @"\MOVE\" + fileName + ".move.bin";
             }
             else
             if (dwID == 0x00534B4C) //SKL
             {
-                m_UnknownFileName = m_Directory + @"\SKEL\" + m_FileName + ".skeleton";
+                m_UnknownFileName = m_Directory + @"\SKEL\" + fileName + ".skeleton";
             }
             else
             if (dwID == 0x01194170 || dwID == 0x00194170) //pA
             {
-                m_UnknownFileName = m_Directory + @"\DPAX\" + m_FileName + ".dpax";
+                m_UnknownFileName = m_Directory + @"\DPAX\" + fileName + ".dpax";
             }
             else
             if (dwID == 0x44484B42) //BKHD
             {
-                m_UnknownFileName = m_Directory + @"\BNK\" + m_FileName + ".bnk";
+                m_UnknownFileName = m_Directory + @"\BNK\" + fileName + ".bnk";
             }
             else
             if (dwID == 0x8464555) //UEF
             {
-                m_UnknownFileName = m_Directory + @"\FEU\" + m_FileName + ".feu";
+                m_UnknownFileName = m_Directory + @"\FEU\" + fileName + ".feu";
             }
             else
             if (dwID == 0x46464952) //RIFF
             {
-                m_UnknownFileName = m_Directory + @"\WEM\" + m_FileName + ".wem";
+                m_UnknownFileName = m_Directory + @"\WEM\" + fileName + ".wem";
             }
             else
             if (dwID == 0x4D455348) //HSEM
             {
-                m_UnknownFileName = m_Directory + @"\XBG\" + m_FileName + ".xbg";
+                m_UnknownFileName = m_Directory + @"\XBG\" + fileName + ".xbg";
             }
             else
             if (dwID == 0x00584254) //XBT
             {
-                m_UnknownFileName = m_Directory + @"\XBT\" + m_FileName + ".xbt";
+                m_UnknownFileName = m_Directory + @"\XBT\" + fileName + ".xbt";
             }
             else
             if (dwID == 0x4643626E || dwID == 0x00000004 || dwID == 0x00000023) //nbCF
             {
-                m_UnknownFileName = m_Directory + @"\FCB\" + m_FileName + ".fcb";
+                m_UnknownFileName = m_Directory + @"\FCB\" + fileName + ".fcb";
             }
             else
             if (dwID == 0x78647064) //dpdx
             {
-                m_UnknownFileName = m_Directory + @"\DPDX\" + m_FileName + ".dpdx";
+                m_UnknownFileName = m_Directory + @"\DPDX\" + fileName + ".dpdx";
             }
             else
             if (dwID == 0x4341554C) //LUAC
             {
-                m_UnknownFileName = m_Directory + @"\LUA\" + m_FileName + ".lua";
+                m_UnknownFileName = m_Directory + @"\LUA\" + fileName + ".lua";
             }
             else
             if (dwID == 0x5161754C) //LuaQ
             {
-                m_UnknownFileName = m_Directory + @"\LUA\" + m_FileName + ".lua";
+                m_UnknownFileName = m_Directory + @"\LUA\" + fileName + ".lua";
             }
             else
             if (dwID == 0x3CBFBBEF || dwID == 0x6D783F3C || dwID == 0x003CFEFF || dwID == 0x6172673C) //XML, //<graphics
             {
-                m_UnknownFileName = m_Directory + @"\XML\" + m_FileName + ".xml";
+                m_UnknownFileName = m_Directory + @"\XML\" + fileName + ".xml";
             }
             else
             if (dwID == 0x6E69423C) //<binary
             {
-                m_UnknownFileName = m_Directory + @"\BINXML\" + m_FileName + ".xml";
+                m_UnknownFileName = m_Directory + @"\BINXML\" + fileName + ".xml";
             }
             else
             if (dwID == 0x54425043) //CPBT
             {
-                m_UnknownFileName = m_Directory + @"\CPBT\" + m_FileName + ".cpubt";
+                m_UnknownFileName = m_Directory + @"\CPBT\" + fileName + ".cpubt";
             }
             else
             if (dwID == 0xE9001052) //SDAT
             {
-                m_UnknownFileName = m_Directory + @"\SDAT\" + m_FileName + ".sdat";
+                m_UnknownFileName = m_Directory + @"\SDAT\" + fileName + ".sdat";
             }
             else
             if (dwID == 0x000000B0 || dwID == 0x000000B6) //MAB
             {
-                m_UnknownFileName = m_Directory + @"\MAB\" + m_FileName + ".mab";
+                m_UnknownFileName = m_Directory + @"\MAB\" + fileName + ".mab";
             }
             else
             if (dwID == 0x01) //WSECBDL
             {
-                m_UnknownFileName = m_Directory + @"\WSECBDL\" + m_FileName + ".wsecbdl";
+                m_UnknownFileName = m_Directory + @"\WSECBDL\" + fileName + ".wsecbdl";
             }
             else
             if (dwID == 0x694B4942 || dwID == 0x6732424B) //BIKi //KB2g
             {
-                m_UnknownFileName = m_Directory + @"\BIK\" + m_FileName + ".bik";
+                m_UnknownFileName = m_Directory + @"\BIK\" + fileName + ".bik";
             }
             else
             if (dwID == 0x00000032 || dwID == 0x00000036) //hkx
             {
-                m_UnknownFileName = m_Directory + @"\HKX\" + m_FileName + ".hkx";
+                m_UnknownFileName = m_Directory + @"\HKX\" + fileName + ".hkx";
             }
 
             if (!Directory.Exists(Path.GetDirectoryName(m_UnknownFileName)))
@@ -2905,20 +2904,14 @@ namespace FCBConverter
                 Console.WriteLine("Compression is not available for older FATs.");
             }
 
-            List<string> notCompress = new List<string>();
+            List<string> notCompress = new();
 
-            string m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (File.Exists(m_Path + excludeFile) && excludeFilesFromCompress == "")
-            {
-                notCompress.AddRange(File.ReadAllLines(m_Path + excludeFile));
-                notCompress.RemoveAt(0);
-            }
+            string excludeFiles = LoadSetting("CompressExcludeFiles");
+            if (excludeFiles != "" && excludeFilesFromCompress == "")
+                notCompress.AddRange(excludeFiles.Split(','));
 
             if (excludeFilesFromCompress != "")
-            {
-                string[] exts = excludeFilesFromCompress.Split(',');
-                notCompress.AddRange(exts);
-            }
+                notCompress.AddRange(excludeFilesFromCompress.Split(','));
 
             notCompress = notCompress.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
 

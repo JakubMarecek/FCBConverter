@@ -29,6 +29,21 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<PlatformTarget>arm</PlatformTarget>
+		<RuntimeIdentifier>linux-arm</RuntimeIdentifier>
+
+		<PublishSingleFile>false</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		
+		<OutputPath>..\bin_arm\</OutputPath>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	</PropertyGroup>
+
   <ItemGroup>
     <None Include="packed_codebooks_aoTuV_603.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

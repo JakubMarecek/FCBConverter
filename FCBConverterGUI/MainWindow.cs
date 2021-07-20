@@ -29,6 +29,7 @@ namespace FCBConverterGUI
             "Sequence file|*.cseq|" +
             "Flash UI file|*.feu|" +
             "Bundle file|*.bdl|" +
+            "Binary WolfSkin file|*.bwsk|" +
             "Wwise SoundBank file|*.bnk|" +
             "Wwise Encoded Media|*.wem|" +
             "File allocation table (DAT header file)|*.fat|" +

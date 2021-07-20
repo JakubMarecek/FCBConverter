@@ -76,9 +76,9 @@ namespace FCBConverter.CombinedMoveFile
                 }
                 Array.Reverse(hashesArrayRev);
                 ulong aaa = ulong.Parse(ByteArrayToString(hashesArrayRev), NumberStyles.HexNumber);
-                if (FCBConverter.Program.m_HashList.ContainsKey(aaa))
+                if (FCBConverter.Program.listFilesDict.ContainsKey(aaa))
                 {
-                    string name = FCBConverter.Program.m_HashList[aaa];
+                    string name = FCBConverter.Program.listFilesDict[aaa];
                     writer.WriteAttributeString("hash", name);
                 }
                 else
@@ -168,9 +168,9 @@ namespace FCBConverter.CombinedMoveFile
                 }
                 Array.Reverse(resourcePathIdsRev);
                 ulong aaa = ulong.Parse(ByteArrayToString(resourcePathIdsRev), NumberStyles.HexNumber);
-                if (FCBConverter.Program.m_HashList.ContainsKey(aaa))
+                if (FCBConverter.Program.listFilesDict.ContainsKey(aaa))
                 {
-                    string name = FCBConverter.Program.m_HashList[aaa];
+                    string name = FCBConverter.Program.listFilesDict[aaa];
                     writer.WriteAttributeString("resourcePathId", name);
                 }
                 else

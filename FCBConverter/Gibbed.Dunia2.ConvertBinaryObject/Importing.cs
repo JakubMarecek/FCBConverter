@@ -101,6 +101,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     WriteListFiles(fields, node, fieldNameHash, "ResId");
                 }
+                else if (fieldName == "TypeIds")
+                {
+                    WriteListHashes(fields, node, fieldNameHash, "TypeId");
+                }
                 else if (fieldName == "ArchetypeResDepList")
                 {
                     WriteListFiles(fields, node, fieldNameHash, "Resource");
@@ -354,7 +358,23 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             var resIds = fields.Current.Select(nodeName);
             while (resIds.MoveNext() == true)
             {
-                resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""))));
+                resIdsBytes.Add(BitConverter.GetBytes(FCBConverter.Program.GetFileHash(resIds.Current.GetAttribute("ID", ""), Program.isFC2 ? 5 : 10)));
+            }
+
+            resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
+
+            node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
+        }
+
+        private static void WriteListHashes(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash, string nodeName)
+        {
+            List<byte[]> resIdsBytes = new List<byte[]>();
+
+            var resIds = fields.Current.Select(nodeName);
+            while (resIds.MoveNext() == true)
+            {
+                var value = Program.listStringsDict.Values.Where(a => a == resIds.Current.GetAttribute("ID", ""));
+                resIdsBytes.Add(BitConverter.GetBytes());
             }
 
             resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
