@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -153,7 +151,10 @@ namespace FCBConverterGUI
             string subf = "";
 
             if (checkBox1.Checked)
-                subf = "-subfolders";
+                subf = "-subfolders ";
+
+            if (checkBox2.Checked)
+                subf = "-fc2";
 
             CallFCBConverter("\"" + textBox5.Text + "\" \"" + textBox8.Text + "\" " + subf);
         }
@@ -173,7 +174,12 @@ namespace FCBConverterGUI
 
         private void button6_Click(object sender, EventArgs e)
         {
-            CallFCBConverter("\"" + textBox6.Text + "\"");
+            string addParam = "";
+
+            if (checkBox3.Checked)
+                addParam = "-fc2";
+
+            CallFCBConverter("\"" + textBox6.Text + "\" " + addParam);
         }
 
         private void button15_Click(object sender, EventArgs e)

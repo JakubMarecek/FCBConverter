@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210720-2245";
+        public static string version = "20210721-2100";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -488,6 +488,11 @@ namespace FCBConverter
                 param3 = "";
                 isFC2 = true;
             }
+            if (param4 == "-fc2")
+            {
+                param4 = "";
+                isFC2 = true;
+            }
 
             Console.Title = "FCBConverter - " + file;
 
@@ -687,14 +692,14 @@ namespace FCBConverter
             ushort fmt = tmpformat.ReadValueU8();
             tmpformat.Close();
 
-            if (file.EndsWith(".cseq") || file.EndsWith(".gosm.xml") || file.EndsWith(".rml") || (file.EndsWith(".ndb") && fmt == 0))
+            if ((file.EndsWith(".cseq") && fmt == 0) || file.EndsWith(".gosm.xml") || file.EndsWith(".rml") || (file.EndsWith(".ndb") && fmt == 0))
             {
                 string workingOriginalFile;
 
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + (file.EndsWith(".ndb") ? ".rml" : "") + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + (file.EndsWith(".ndb") || file.EndsWith(".cseq") ? ".rml" : "") + ".converted.xml";
 
                 var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
                 using (var input = File.OpenRead(file))
@@ -720,7 +725,7 @@ namespace FCBConverter
                 return;
             }
 
-            if (file.EndsWith(".cseq.converted.xml") || file.EndsWith(".gosm.xml.converted.xml") || file.EndsWith(".rml.converted.xml"))
+            if (file.EndsWith(".gosm.xml.converted.xml") || file.EndsWith(".rml.converted.xml"))
             {
                 string workingOriginalFile;
 
@@ -728,7 +733,7 @@ namespace FCBConverter
                     workingOriginalFile = outputFile;
                 else
                 {
-                    workingOriginalFile = file.EndsWith(".ndb.rml.converted.xml") ? file.Replace(".rml.converted.xml", "") : file.Replace(".converted.xml", "");
+                    workingOriginalFile = file.EndsWith(".ndb.rml.converted.xml") || file.EndsWith(".cseq.rml.converted.xml") ? file.Replace(".rml.converted.xml", "") : file.Replace(".converted.xml", "");
                     string extension = Path.GetExtension(workingOriginalFile);
                     workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
                 }
@@ -1202,7 +1207,7 @@ namespace FCBConverter
                 FIN();
                 return;
             }
-            else if (file.EndsWith(".fcb") || file.EndsWith(".ndb") || file.EndsWith(".bin") || file.EndsWith(".bwsk") || file.EndsWith(".part") || file.EndsWith(".dsc") || file.EndsWith(".skeleton"))
+            else if (file.EndsWith(".cseq") || file.EndsWith(".fcb") || file.EndsWith(".ndb") || file.EndsWith(".bin") || file.EndsWith(".bwsk") || file.EndsWith(".part") || file.EndsWith(".dsc") || file.EndsWith(".skeleton"))
             {
                 string workingOriginalFile;
 

@@ -102,6 +102,8 @@ namespace FCBConverterGUI
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.button22 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButton11 = new System.Windows.Forms.RadioButton();
+            this.radioButton10 = new System.Windows.Forms.RadioButton();
             this.radioButton7 = new System.Windows.Forms.RadioButton();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.label28 = new System.Windows.Forms.Label();
@@ -116,8 +118,8 @@ namespace FCBConverterGUI
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.radioButton10 = new System.Windows.Forms.RadioButton();
-            this.radioButton11 = new System.Windows.Forms.RadioButton();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -135,6 +137,8 @@ namespace FCBConverterGUI
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage2.Controls.Add(this.checkBox3);
+            this.tabPage2.Controls.Add(this.checkBox2);
             this.tabPage2.Controls.Add(this.checkBox1);
             this.tabPage2.Controls.Add(this.button13);
             this.tabPage2.Controls.Add(this.label9);
@@ -1055,6 +1059,30 @@ namespace FCBConverterGUI
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Type of model";
             // 
+            // radioButton11
+            // 
+            this.radioButton11.AutoSize = true;
+            this.radioButton11.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton11.Location = new System.Drawing.Point(26, 97);
+            this.radioButton11.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton11.Name = "radioButton11";
+            this.radioButton11.Size = new System.Drawing.Size(71, 18);
+            this.radioButton11.TabIndex = 2;
+            this.radioButton11.Text = "Vehicles";
+            this.radioButton11.UseVisualStyleBackColor = true;
+            // 
+            // radioButton10
+            // 
+            this.radioButton10.AutoSize = true;
+            this.radioButton10.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton10.Location = new System.Drawing.Point(26, 73);
+            this.radioButton10.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton10.Name = "radioButton10";
+            this.radioButton10.Size = new System.Drawing.Size(77, 18);
+            this.radioButton10.TabIndex = 1;
+            this.radioButton10.Text = "Weapons";
+            this.radioButton10.UseVisualStyleBackColor = true;
+            // 
             // radioButton7
             // 
             this.radioButton7.AutoSize = true;
@@ -1065,6 +1093,7 @@ namespace FCBConverterGUI
             this.radioButton7.Name = "radioButton7";
             this.radioButton7.Size = new System.Drawing.Size(171, 18);
             this.radioButton7.TabIndex = 0;
+            this.radioButton7.TabStop = true;
             this.radioButton7.Text = "Cloth - top, bottom, hand, feet";
             this.radioButton7.UseVisualStyleBackColor = true;
             // 
@@ -1213,29 +1242,33 @@ namespace FCBConverterGUI
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
             // 
-            // radioButton10
+            // checkBox2
             // 
-            this.radioButton10.AutoSize = true;
-            this.radioButton10.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton10.Location = new System.Drawing.Point(26, 73);
-            this.radioButton10.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.radioButton10.Name = "radioButton10";
-            this.radioButton10.Size = new System.Drawing.Size(77, 18);
-            this.radioButton10.TabIndex = 1;
-            this.radioButton10.Text = "Weapons";
-            this.radioButton10.UseVisualStyleBackColor = true;
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.checkBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.checkBox2.Location = new System.Drawing.Point(357, 107);
+            this.checkBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.checkBox2.Size = new System.Drawing.Size(104, 18);
+            this.checkBox2.TabIndex = 54;
+            this.checkBox2.Text = "FC2 converting";
+            this.checkBox2.UseVisualStyleBackColor = true;
             // 
-            // radioButton11
+            // checkBox3
             // 
-            this.radioButton11.AutoSize = true;
-            this.radioButton11.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton11.Location = new System.Drawing.Point(26, 97);
-            this.radioButton11.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.radioButton11.Name = "radioButton11";
-            this.radioButton11.Size = new System.Drawing.Size(71, 18);
-            this.radioButton11.TabIndex = 2;
-            this.radioButton11.Text = "Vehicles";
-            this.radioButton11.UseVisualStyleBackColor = true;
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.checkBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.checkBox3.Location = new System.Drawing.Point(174, 237);
+            this.checkBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.checkBox3.Size = new System.Drawing.Size(104, 18);
+            this.checkBox3.TabIndex = 55;
+            this.checkBox3.Text = "FC2 converting";
+            this.checkBox3.UseVisualStyleBackColor = true;
             // 
             // MainWindow
             // 
@@ -1365,5 +1398,7 @@ namespace FCBConverterGUI
         private System.Windows.Forms.RadioButton radioButton9;
         private System.Windows.Forms.RadioButton radioButton11;
         private System.Windows.Forms.RadioButton radioButton10;
+        private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.CheckBox checkBox2;
     }
 }
