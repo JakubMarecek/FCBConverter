@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace FCBConverter
@@ -120,6 +119,74 @@ namespace FCBConverter
 
             output.Flush();
             output.Close();
+        }
+
+        public static void OasisDeserialize(string inputFile, string outputFile)
+        {
+            var input = File.OpenRead(inputFile);
+            input.ReadValueU32();
+            input.ReadValueU32();
+            uint sectionsCount = input.ReadValueU32();
+
+            XDocument xmlDoc = new(new XDeclaration("1.0", "utf-8", "yes"));
+            XElement xmlStringtable = new("stringtable");
+
+            for (int i = 0; i < sectionsCount; i++)
+            {
+                uint sectionNameCRC = input.ReadValueU32();
+                uint stringsCount = input.ReadValueU32();
+
+                XElement xmlSection = new("section", new XAttribute("name", string.Format("0x{0,8:X8}", sectionNameCRC)));
+
+                for (int j = 0; j < stringsCount; j++)
+                {
+                    uint stringID = input.ReadValueU32();
+                    input.ReadValueU32();
+                    uint stringEnum = input.ReadValueU32();
+                    uint stringMain = input.ReadValueU32();
+
+                    XElement xmlString = new("string");
+                    xmlString.Add(new XAttribute("enum", string.Format("0x{0,8:X8}", stringEnum)));
+                    xmlString.Add(new XAttribute("main", string.Format("0x{0,8:X8}", stringMain)));
+                    xmlString.Add(new XAttribute("id", stringID));
+
+
+
+
+
+                }
+
+                input.ReadValueU32();
+                input.ReadValueU32();
+
+                for (int j = 0; j < stringsCount; j++)
+                {
+                    input.ReadValueU32();
+                }
+
+                for (int j = 0; j < stringsCount; j++)
+                {
+                    input.ReadValueU32();
+                }
+
+                for (int j = 0; j < stringsCount; j++)
+                {
+                    input.ReadValueU32();
+
+                }
+
+
+
+
+
+
+
+
+
+                xmlStringtable.Add(xmlSection);
+            }
+
+            xmlDoc.Save(outputFile);
         }
     }
 

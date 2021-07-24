@@ -949,26 +949,7 @@ namespace FCBConverter
                 else
                     workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
-                OasisstringsCompressedFileFC4 rez = new OasisstringsCompressedFileFC4();
-
-                var input = File.OpenRead(file);
-                rez.Deserialize(input);
-
-                var settings = new XmlWriterSettings
-                {
-                    Encoding = Encoding.UTF8,
-                    Indent = true,
-                    OmitXmlDeclaration = true
-                };
-
-                using (var writer = XmlWriter.Create(workingOriginalFile, settings))
-                {
-                    writer.WriteStartDocument();
-                    writer.WriteComment(xmlheader);
-                    writer.WriteComment(xmlheaderoasis);
-                    WriteOSNode(writer, rez.Root);
-                    writer.WriteEndDocument();
-                }
+                OasisNew.OasisDeserialize(file, workingOriginalFile);
 
                 FIN();
                 return;
