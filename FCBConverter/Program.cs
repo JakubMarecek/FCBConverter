@@ -987,17 +987,7 @@ namespace FCBConverter
                     workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
                 }
 
-                var rez = new OasisstringsCompressedFileFC4();
-
-                var input = File.OpenRead(file);
-                var doc = new XPathDocument(input);
-                var nav = doc.CreateNavigator();
-
-                rez.Root = ReadOSNode(nav.SelectSingleNode("/stringtable"));
-
-                var output = File.Create(workingOriginalFile);
-                rez.Serialize(output);
-                output.Close();
+                OasisNew.OasisSerialize(file, workingOriginalFile);
 
                 FIN();
                 return;
