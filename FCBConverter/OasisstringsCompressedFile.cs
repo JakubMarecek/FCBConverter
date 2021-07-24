@@ -614,7 +614,7 @@ namespace FCBConverter
         }
 
         // Token: 0x06000007 RID: 7 RVA: 0x000020B8 File Offset: 0x000002B8
-        public OasisstringsCompressedFileFC4(string dictionaryfile)
+        public OasisstringsCompressedFileFC4(string language, string dictionaryfile)
         {
             this.hashDictionary = new OasisStringsDictionary(dictionaryfile);
         }
@@ -874,9 +874,9 @@ namespace FCBConverter
                     }
                     this.MainCRC = StreamHelpers.ReadValueU32(input, endian);
                     /*if (this.MainCRC != 3207122276U && MainCRC != 521822810U)
-                    {
-                        throw new FormatException("encountered oasisstring with MainCRC different from CRC(\"Main\").");
-                    }*/
+					{
+						throw new FormatException("encountered oasisstring with MainCRC different from CRC(\"Main\").");
+					}*/
                 }
 
                 // Token: 0x06000013 RID: 19 RVA: 0x000028B2 File Offset: 0x00000AB2

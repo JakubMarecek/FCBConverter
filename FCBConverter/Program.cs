@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210721-2300";
+        public static string version = "20210724-1330";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -934,6 +934,7 @@ namespace FCBConverter
 
                 var output = File.Create(workingOriginalFile);
                 rez.Serialize(output, Path.GetFileName(file).EndsWith("_nd.oasis.bin.converted.xml") ? GameType.FarCryNewDawn : GameType.FarCry5);
+                output.Close();
 
                 FIN();
                 return;
@@ -992,15 +993,11 @@ namespace FCBConverter
                 var doc = new XPathDocument(input);
                 var nav = doc.CreateNavigator();
 
-                if (nav.MoveToFirstChild() == false)
-                {
-                    throw new FormatException();
-                }
-
-                rez.Root = ReadOSNode(nav);
+                rez.Root = ReadOSNode(nav.SelectSingleNode("/stringtable"));
 
                 var output = File.Create(workingOriginalFile);
                 rez.Serialize(output);
+                output.Close();
 
                 FIN();
                 return;
@@ -2645,7 +2642,7 @@ namespace FCBConverter
 
                 string m_Hash = fatEntry.NameHash.ToString(dwVersion >= 9 ? "X16" : "X8");
                 string fileName;
-                if (listFilesDict.ContainsKey(fatEntry.NameHash))
+                if (listFilesDict.ContainsKey(fatEntry.NameHash) && fatEntry.NameHash > 0)
                 {
                     listFilesDict.TryGetValue(fatEntry.NameHash, out fileName);
                 }
