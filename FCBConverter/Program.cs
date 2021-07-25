@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210725-1615";
+        public static string version = "20210725-2000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -63,7 +63,6 @@ namespace FCBConverter
         public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
         public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheaderoasis = "Special thanks to: AOY";
         public static string xmlheaderbnk = "Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA." + Environment.NewLine +
             "Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
