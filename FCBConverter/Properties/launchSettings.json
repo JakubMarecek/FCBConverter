@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"f:\\fc5 sources\\common_fc4_unpacked\\languages\\english\\oasisstrings_compressed.bin.converted.xml\""
+      "commandLineArgs": "d:\\Desktop\\new_oasisstrings_compressed.bin"
     }
   }
 }

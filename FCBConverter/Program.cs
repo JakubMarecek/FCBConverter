@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210724-1330";
+        public static string version = "20210725-1615";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -179,8 +179,6 @@ namespace FCBConverter
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.oasis.bin files>>>");
-                Console.ResetColor();
-                Console.WriteLine("Because format of oasis is different in FC5 and in New Dawn, if you want convert ND oasis, you must add _nd to filename, see examples.");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
@@ -193,8 +191,8 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin.converted.xml");
                 Console.WriteLine("");
                 Console.WriteLine("[Examples New Dawn]");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings_nd.oasis.bin.converted.xml");
+                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin");
+                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin.converted.xml");
                 Console.WriteLine("");
                 Console.WriteLine("[Examples FC4]");
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_compressed.bin");
@@ -877,6 +875,25 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
+            if (file.EndsWith("soundinfo.bin.converted.xml"))
+            {
+                SoundInfoConvertXml(file);
+                FIN();
+                return;
+            }
+            else if (file.EndsWith("soundinfo.bin"))
+            {
+                SoundInfoConvertBin(file);
+                FIN();
+                return;
+            }
+
+            // ********************************************************************************************************************************************
+
+            LoadString();
+
+            // ********************************************************************************************************************************************
+
             if (file.EndsWith(".oasis.bin"))
             {
                 string workingOriginalFile;
@@ -886,26 +903,7 @@ namespace FCBConverter
                 else
                     workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
 
-
-                OasisstringsCompressedFile rez = new OasisstringsCompressedFile();
-
-                var input = File.OpenRead(file);
-                rez.Deserialize(input, Path.GetFileName(file).EndsWith("_nd.oasis.bin") ? GameType.FarCryNewDawn : GameType.FarCry5);
-
-                var settings = new XmlWriterSettings
-                {
-                    Encoding = Encoding.UTF8,
-                    Indent = true,
-                    OmitXmlDeclaration = true
-                };
-
-                using (var writer = XmlWriter.Create(workingOriginalFile, settings))
-                {
-                    writer.WriteStartDocument();
-                    writer.WriteComment(xmlheader);
-                    WriteOSNode(writer, rez.Root);
-                    writer.WriteEndDocument();
-                }
+                OasisNew.OasisDeserialize(file, workingOriginalFile);
 
                 FIN();
                 return;
@@ -919,22 +917,11 @@ namespace FCBConverter
                     workingOriginalFile = outputFile;
                 else
                 {
-                    workingOriginalFile = file.Replace(".converted.xml", "");
-                    string extension = Path.GetExtension(workingOriginalFile);
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
+                    workingOriginalFile = file.Replace(".oasis.bin.converted.xml", "");
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new.oasis.bin";
                 }
 
-                var rez = new OasisstringsCompressedFile();
-
-                var input = File.OpenRead(file);
-                var doc = new XPathDocument(input);
-                var nav = doc.CreateNavigator();
-
-                rez.Root = ReadOSNode(nav.SelectSingleNode("/stringtable"));
-
-                var output = File.Create(workingOriginalFile);
-                rez.Serialize(output, Path.GetFileName(file).EndsWith("_nd.oasis.bin.converted.xml") ? GameType.FarCryNewDawn : GameType.FarCry5);
-                output.Close();
+                OasisNew.OasisSerialize(file, workingOriginalFile);
 
                 FIN();
                 return;
@@ -963,9 +950,8 @@ namespace FCBConverter
                     workingOriginalFile = outputFile;
                 else
                 {
-                    workingOriginalFile = file.Replace(".converted.xml", "");
-                    string extension = Path.GetExtension(workingOriginalFile);
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".new" + extension;
+                    workingOriginalFile = file.Replace(".bin.converted.xml", "");
+                    workingOriginalFile = Path.GetDirectoryName(file) + "\\new_" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".bin";
                 }
 
                 OasisNew.OasisSerialize(file, workingOriginalFile);
@@ -973,25 +959,6 @@ namespace FCBConverter
                 FIN();
                 return;
             }
-
-            // ********************************************************************************************************************************************
-
-            if (file.EndsWith("soundinfo.bin.converted.xml"))
-            {
-                SoundInfoConvertXml(file);
-                FIN();
-                return;
-            }
-            else if (file.EndsWith("soundinfo.bin"))
-            {
-                SoundInfoConvertBin(file);
-                FIN();
-                return;
-            }
-
-            // ********************************************************************************************************************************************
-
-            LoadString();
 
             // ********************************************************************************************************************************************
 
