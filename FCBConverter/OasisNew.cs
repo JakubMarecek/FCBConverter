@@ -83,7 +83,11 @@ namespace FCBConverter
 
                     if (fileType == 1 || fileType == 2)
                     {
-                        string stringMain = xmlString.Attribute("main").Value;
+                        string stringMain = "";
+
+                        if (fileType == 1) stringMain = xmlString.Attribute("main").Value;
+                        if (fileType == 2) stringMain = xmlString.Attribute("extra").Value;
+
                         uint stringMainCRC = 0;
 
                         if (stringMain.StartsWith("0x"))
@@ -91,7 +95,7 @@ namespace FCBConverter
                         else
                             stringMainCRC = CRC32.Hash(stringMain);
 
-                        if (fileType == 1 || fileType == 2) output.WriteValueU32(stringMainCRC);
+                        output.WriteValueU32(stringMainCRC);
                     }
 
                     oasisStringList.Add(new OasisString
@@ -264,7 +268,8 @@ namespace FCBConverter
 
                     XElement xmlString = new("string");
                     xmlString.Add(new XAttribute("enum", enumVal));
-                    if (oasisString.Value.main != 1) xmlString.Add(new XAttribute("main", mainVal));
+                    if (oasisString.Value.main == 1) xmlString.Add(new XAttribute("main", mainVal));
+                    if (oasisString.Value.main == 2) xmlString.Add(new XAttribute("extra", mainVal));
                     xmlString.Add(new XAttribute("id", oasisString.Value.id));
                     xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(oasisString.Value.id) ? oasisStringValList[oasisString.Value.id] : ""));
                     xmlSection.Add(xmlString);
