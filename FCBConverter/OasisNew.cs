@@ -268,8 +268,8 @@ namespace FCBConverter
 
                     XElement xmlString = new("string");
                     xmlString.Add(new XAttribute("enum", enumVal));
-                    if (oasisString.Value.main == 1) xmlString.Add(new XAttribute("main", mainVal));
-                    if (oasisString.Value.main == 2) xmlString.Add(new XAttribute("extra", mainVal));
+                    if (fileType == 1) xmlString.Add(new XAttribute("main", mainVal));
+                    if (fileType == 2) xmlString.Add(new XAttribute("extra", mainVal));
                     xmlString.Add(new XAttribute("id", oasisString.Value.id));
                     xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(oasisString.Value.id) ? oasisStringValList[oasisString.Value.id] : ""));
                     xmlSection.Add(xmlString);
