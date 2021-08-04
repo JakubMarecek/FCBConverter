@@ -344,7 +344,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // int32
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 8 && ((binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId" || name == "Id"))
+                        else if (binaryHex.Length == 8 && ((binaryHex.GetLast(2) == "00" && !name.StartsWithType("f") && !name.StartsWith("text_") && !name.ContainsCI("name") && name != "String" && name != "shader") || name.Contains("locid") || name.StartsWith("loc") || name.StartsWithType("i") || name.StartsWithType("u") || name == "SoundId" || name == "Id"))
                         {
                             int v = Int32.Parse(binaryHexRev, NumberStyles.HexNumber);
                             writer.WriteAttributeString(prefix + "Int32", v.ToString());
@@ -385,10 +385,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // float32 hash32
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 8 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{8}$", RegexOptions.Compiled) && ((binaryHex != "00000000" && binaryHex != "ffffffff" && binaryHex.GetLast(2) != "00") || name.StartsWithType("f")) && !name.StartsWith("text_")) // && !name.Contains("Id")
+                        else if (binaryHex.Length == 8 && Regex.IsMatch(binaryHex, "^[0-9a-fA-F]{8}$", RegexOptions.Compiled) && ((binaryHex != "00000000" && binaryHex != "ffffffff" && binaryHex.GetLast(2) != "00") || name.StartsWithType("f") || name == "shader") && !name.StartsWith("text_")) // && !name.Contains("Id")
                         {
                             float f = BitConverter.ToSingle(kv.Value, 0);
-                            if ((!name.ContainsCI("hid_DTCTH_ClassName") && !name.ContainsCI("Name") && !name.ContainsCI("BoneID") && !name.Contains("Type") && !name.ContainsCI("Id") && !name.Contains("sDetail") && !name.Contains("class") && !name.Contains("type")) || f == -1 || name.StartsWithType("f") || name.Contains("Duration") || name.Contains("Multiplier"))
+                            if ((!name.ContainsCI("hid_DTCTH_ClassName") && !name.ContainsCI("Name") && !name.ContainsCI("BoneID") && !name.Contains("Type") && !name.ContainsCI("Id") && !name.Contains("sDetail") && !name.Contains("class") && !name.Contains("type") && name != "shader") || f == -1 || name.StartsWithType("f") || name.Contains("Duration") || name.Contains("Multiplier"))
                             {
                                 writer.WriteAttributeString(prefix + "Float32", f.ToString(System.Globalization.CultureInfo.InvariantCulture));
                             }
