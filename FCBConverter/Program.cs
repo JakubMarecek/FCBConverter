@@ -53,18 +53,13 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210805-0000";
+        public static string version = "20210808-2330";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
-        public static string xmlheaderfcb = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Gibbed, xBaebsae";
-        public static string xmlheaderfcb2 = "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.";
-        public static string xmlheaderdepload = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheadermarkup = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheadermove = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheadercombined1 = "Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed";
-        public static string xmlheaderbnk = "Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA." + Environment.NewLine +
-            "Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
+        public static string xmlheaderfcb = "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.";
+        public static string xmlheaderthanks = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed, xBaebsae, id-daemon, Ganic, legendhavoc175";
+        public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
         //public static List<string> aaaa = new List<string>();
 
@@ -79,9 +74,7 @@ namespace FCBConverter
             Console.WriteLine("*******************************************************************************************");
             Console.WriteLine("**** FCBConverter v" + version);
             Console.WriteLine("****   Author: ArmanIII");
-            Console.WriteLine("****   Based on: Gibbed's Dunia Tools");
-            Console.WriteLine("****   Special thanks to: Fireboyd78 (FCBastard), xBaebsae, Ekey (FC5 Unpacker), Gibbed,");
-            Console.WriteLine("****      id-daemon");
+            Console.WriteLine("****   " + xmlheaderthanks);
             Console.WriteLine("*******************************************************************************************");
             Console.ResetColor();
             Console.WriteLine("");
@@ -1543,7 +1536,7 @@ namespace FCBConverter
             xmlDoc.InsertBefore(xmldecl, rootNode);
 
             XmlComment comment1 = xmlDoc.CreateComment(xmlheader);
-            XmlComment comment2 = xmlDoc.CreateComment(xmlheaderdepload);
+            XmlComment comment2 = xmlDoc.CreateComment(xmlheaderthanks);
 
             xmlDoc.InsertBefore(comment1, rootNode);
             xmlDoc.InsertBefore(comment2, rootNode);
@@ -1846,7 +1839,7 @@ namespace FCBConverter
             xmlDoc.InsertBefore(xmldecl, rootNode);
 
             XmlComment comment1 = xmlDoc.CreateComment(xmlheader);
-            XmlComment comment2 = xmlDoc.CreateComment(xmlheadermarkup);
+            XmlComment comment2 = xmlDoc.CreateComment(xmlheaderthanks);
 
             xmlDoc.InsertBefore(comment1, rootNode);
             xmlDoc.InsertBefore(comment2, rootNode);
@@ -1967,7 +1960,7 @@ namespace FCBConverter
             XDocument xmlDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
             xmlDoc.Add(new XComment(xmlheader));
-            xmlDoc.Add(new XComment(xmlheadermarkup));
+            xmlDoc.Add(new XComment(xmlheaderthanks));
 
             XElement root = new XElement("CMarkupResource");
 
@@ -2097,7 +2090,7 @@ namespace FCBConverter
             xmlDoc.InsertBefore(xmldecl, rootNode);
 
             XmlComment comment1 = xmlDoc.CreateComment(xmlheader);
-            XmlComment comment2 = xmlDoc.CreateComment(xmlheadermove);
+            XmlComment comment2 = xmlDoc.CreateComment(xmlheaderthanks);
 
             xmlDoc.InsertBefore(comment1, rootNode);
             xmlDoc.InsertBefore(comment2, rootNode);
@@ -2188,7 +2181,7 @@ namespace FCBConverter
 
             writer.WriteStartDocument();
             writer.WriteComment(xmlheader);
-            writer.WriteComment(xmlheadercombined1);
+            writer.WriteComment(xmlheaderthanks);
             writer.WriteStartElement("CombinedMoveFile");
 
 

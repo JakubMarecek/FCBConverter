@@ -69,7 +69,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 writer.WriteStartDocument();
                 writer.WriteComment(Program.xmlheader);
                 writer.WriteComment(Program.xmlheaderfcb);
-                writer.WriteComment(Program.xmlheaderfcb2);
+                writer.WriteComment(Program.xmlheaderthanks);
                 WriteNode(writer, new BinaryObject[0], bof.Root);
                 writer.WriteEndDocument();
             }
