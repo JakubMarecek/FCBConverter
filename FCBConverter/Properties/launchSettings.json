@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\jakub\\Desktop\\zrwu-m-20140425144922.material.bin"
+      "commandLineArgs": "\"g:\\fc5 sources\\common_fc3\\languages\\czech\\oasisstrings_compressed.bin\""
     }
   }
 }

@@ -42,6 +42,7 @@ namespace FCBConverter
             var output = File.Create(outputFile);
             output.WriteValueU32(1);
             if (fileType == 1) output.WriteValueU32(CRC32.Hash("oasisstrings"));
+            if (fileType == 3) output.WriteValueU32(0x9ba82025);
             output.WriteValueS32(xmlSections.Count());
 
             foreach (XElement xmlSection in xmlSections)
@@ -81,11 +82,11 @@ namespace FCBConverter
                     output.WriteValueU32(sectionNameCRC);
                     output.WriteValueU32(stringEnumCRC);
 
-                    if (fileType == 1 || fileType == 2)
+                    if (fileType == 1 || fileType == 2 || fileType == 3)
                     {
                         string stringMain = "";
 
-                        if (fileType == 1) stringMain = xmlString.Attribute("main").Value;
+                        if (fileType == 1 || fileType == 3) stringMain = xmlString.Attribute("main").Value;
                         if (fileType == 2) stringMain = xmlString.Attribute("extra").Value;
 
                         uint stringMainCRC = 0;
@@ -137,7 +138,7 @@ namespace FCBConverter
                     byte[] compressed = new byte[xmlStrings.Any() ? (int)Math.Ceiling(memStr.Length * 1.2) : 8];
                     int compressedSize = 1;
 
-                    if (fileType == 1)
+                    if (fileType == 1 || fileType == 3)
                         LZO.Compress(memStr, 0, memStr.Length, compressed, 0, ref compressedSize);
                     else
                     {
@@ -179,6 +180,8 @@ namespace FCBConverter
 
             if (hash == CRC32.Hash("oasisstrings"))
                 fileType = 1;
+            else if (hash == 0x9ba82025)
+                fileType = 3;
             else
                 input.Position -= sizeof(uint);
 
@@ -208,6 +211,8 @@ namespace FCBConverter
                         fileType = 2;
                     else if (stringMain == CRC32.Hash("Main"))
                         fileType = 1;
+                    else if (stringMain == CRC32.Hash("main"))
+                        fileType = 3;
                     else
                     {
                         input.Position -= sizeof(uint);
@@ -232,7 +237,7 @@ namespace FCBConverter
                     byte[] compressed = input.ReadBytes(compressedSize);
                     byte[] decompressed = new byte[uncompressedSize];
 
-                    if (fileType == 1)
+                    if (fileType == 1 || fileType == 3)
                         LZO.Decompress(compressed, 0, compressedSize, decompressed, 0, ref uncompressedSize);
                     else
                         decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
@@ -268,7 +273,7 @@ namespace FCBConverter
 
                     XElement xmlString = new("string");
                     xmlString.Add(new XAttribute("enum", enumVal));
-                    if (fileType == 1) xmlString.Add(new XAttribute("main", mainVal));
+                    if (fileType == 1 || fileType == 3) xmlString.Add(new XAttribute("main", mainVal));
                     if (fileType == 2) xmlString.Add(new XAttribute("extra", mainVal));
                     xmlString.Add(new XAttribute("id", oasisString.Value.id));
                     xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(oasisString.Value.id) ? oasisStringValList[oasisString.Value.id] : ""));
