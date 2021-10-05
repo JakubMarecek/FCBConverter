@@ -41,8 +41,18 @@ namespace FCBConverter
 
             var output = File.Create(outputFile);
             output.WriteValueU32(1);
-            if (fileType == 1) output.WriteValueU32(CRC32.Hash("oasisstrings"));
-            if (fileType == 3) output.WriteValueU32(0x9ba82025);
+            if (fileType == 1)
+            {
+                string hdr = xmlRoot.Attribute("hdr").Value;
+                uint hdrCRC = 0;
+
+                if (hdr.StartsWith("0x"))
+                    hdrCRC = uint.Parse(hdr[2..], NumberStyles.HexNumber);
+                else
+                    hdrCRC = CRC32.Hash(hdr);
+
+                output.WriteValueU32(hdrCRC);
+            }
             output.WriteValueS32(xmlSections.Count());
 
             foreach (XElement xmlSection in xmlSections)
@@ -82,12 +92,11 @@ namespace FCBConverter
                     output.WriteValueU32(sectionNameCRC);
                     output.WriteValueU32(stringEnumCRC);
 
-                    if (fileType == 1 || fileType == 2 || fileType == 3)
+                    if (fileType != 0)
                     {
                         string stringMain = "";
 
-                        if (fileType == 1 || fileType == 3) stringMain = xmlString.Attribute("main").Value;
-                        if (fileType == 2) stringMain = xmlString.Attribute("extra").Value;
+                        stringMain = xmlString.Attribute("extra").Value;
 
                         uint stringMainCRC = 0;
 
@@ -172,16 +181,23 @@ namespace FCBConverter
 
         public static void OasisDeserialize(string inputFile, string outputFile)
         {
+            bool subs = false;
+            if (inputFile.Contains("_subtitles"))
+            {
+                subs = IsSubs2();
+            }
+
+            // 0 - FC5
+            // 1 - FC3 FC4
+            // 2 - ND FC6
             int fileType = 0;
 
             var input = File.OpenRead(inputFile);
             input.ReadValueU32();
             uint hash = input.ReadValueU32();
 
-            if (hash == CRC32.Hash("oasisstrings"))
+            if (hash == CRC32.Hash("oasisstrings") || hash == 0x9ba82025)
                 fileType = 1;
-            else if (hash == 0x9ba82025)
-                fileType = 3;
             else
                 input.Position -= sizeof(uint);
 
@@ -207,12 +223,20 @@ namespace FCBConverter
                     uint stringEnum = input.ReadValueU32();
                     uint stringMain = input.ReadValueU32();
 
-                    if (stringMain == 0)
+                    /*if (stringMain == 0 || stringMain == 0xffffffff)
                         fileType = 2;
                     else if (stringMain == CRC32.Hash("Main"))
                         fileType = 1;
                     else if (stringMain == CRC32.Hash("main"))
                         fileType = 3;
+                    else*/
+                    if (stringMain == 0 || stringMain == 0xffffffff || subs)
+                    {
+                        fileType = 2;
+                    }
+                    else if (fileType == 1)
+                    {
+                    }
                     else
                     {
                         input.Position -= sizeof(uint);
@@ -273,8 +297,8 @@ namespace FCBConverter
 
                     XElement xmlString = new("string");
                     xmlString.Add(new XAttribute("enum", enumVal));
-                    if (fileType == 1 || fileType == 3) xmlString.Add(new XAttribute("main", mainVal));
-                    if (fileType == 2) xmlString.Add(new XAttribute("extra", mainVal));
+                    //if (fileType == 1 || fileType == 3) xmlString.Add(new XAttribute("main", mainVal));
+                    if (fileType != 0) xmlString.Add(new XAttribute("extra", mainVal));
                     xmlString.Add(new XAttribute("id", oasisString.Value.id));
                     xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(oasisString.Value.id) ? oasisStringValList[oasisString.Value.id] : ""));
                     xmlSection.Add(xmlString);
@@ -300,9 +324,26 @@ namespace FCBConverter
 
             xmlStringtable.Add(new XAttribute("type", fileType));
 
+            if (fileType == 1)
+            {
+                string hdr = Program.listStringsDict.ContainsKey(hash) ? Program.listStringsDict[hash] : string.Format("0x{0,8:X8}", hash);
+                xmlStringtable.Add(new XAttribute("hdr", hdr));
+            }
+
             xmlDoc.Add(xmlStringtable);
             xmlDoc.Save(outputFile);
             input.Close();
+        }
+
+        private static bool IsSubs2()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("You're trying to convert subtitles oasis file. Unfortunately, ND and FC6 don't have any useful values which can help FCBConverter to know if the oasis file is really for ND or FC6.");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Is the oasis subtitles file from ND or FC6? Type Y for yes, N for no.");
+            Console.ResetColor();
+            ConsoleKeyInfo key = Console.ReadKey();
+            return key.Key == ConsoleKey.Y;
         }
     }
 

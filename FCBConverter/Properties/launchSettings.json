@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"g:\\fc5 sources\\common_fc3\\languages\\czech\\oasisstrings_compressed.bin\""
+      "commandLineArgs": " \"g:\\fc5 sources\\common_fc6\" \"g:\\fc5 sources\\common2.fat\" -v11"
     }
   }
 }

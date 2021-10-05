@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20210918-1315";
+        public static string version = "20211006-0100 DEV";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -65,6 +65,47 @@ namespace FCBConverter
 
         static void Main(string[] args)
         {
+            /*dwUnresolvedOffset = dwUnresolvedOffset << 3;
+
+            dwOffset = dwUnresolvedOffset | dwCompressedSize >> 29;
+            dwOffset = dwOffset << 4;
+
+            dwFlag = dwUncompressedSize & 3;
+            dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
+            dwUncompressedSize = (dwUncompressedSize >> 2);
+
+
+            dwUnresolvedOffset = 22095
+dwCompressedSize = 1073856990
+
+8ul * dwUnresolvedOffset = 176760
+dwCompressedSize >> 29 = 2
+
+dwOffset = 176762
+
+
+
+            
+            uint dwUncompressedSize = 3274166;
+            uint dwUnresolvedOffset = 22095;
+            uint dwCompressedSize = 1073856990;
+
+            uint dwUncompressedSize = 818541;
+            uint dwUnresolvedOffset = 2828192;
+            uint dwCompressedSize = 115166;
+
+            */
+            /*
+            uint dwUnresolvedOffset = 22095;
+            uint dwCompressedSize = 1073856990;
+
+            ulong dwOffset = (dwCompressedSize >> 29 | dwUnresolvedOffset << 3) << 4;
+
+            ulong dwOffsetB = (uint)(((dwOffset >> 4) & 0x7FFFFFFF8) >> 3);
+
+            return;
+            */
+
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
 
@@ -127,7 +168,7 @@ namespace FCBConverter
                 Console.WriteLine("    FCBConverter <input folder> <fat file> <FAT version>");
                 Console.WriteLine("    input folder - input folder path with files");
                 Console.WriteLine("    fat file - path to the new fat file");
-                Console.WriteLine("    FAT version - can be -v9 (FC4, FC3, FC3BD) or -v5 (FC2), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
+                Console.WriteLine("    FAT version - can be -v9 (FC4, FC3, FC3BD) or -v5 (FC2) or -v11 (FC6), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -496,6 +537,9 @@ namespace FCBConverter
                 else if (param2.EndsWith(".fat"))
                 {
                     int ver = 10;
+
+                    if (param3 == "-v11")
+                        ver = 11;
 
                     if (param3 == "-v9")
                         ver = 9;
@@ -2596,7 +2640,7 @@ namespace FCBConverter
                 {
                     TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
 
-                    if (dwVersion == 10)
+                    if (dwVersion == 11 || dwVersion == 10)
                     {
                         pDstBuffer = new byte[fatEntry.UncompressedSize];
                         TDATStream.Read(pDstBuffer, 0, (int)fatEntry.UncompressedSize);
@@ -2799,7 +2843,7 @@ namespace FCBConverter
                 m_UnknownFileName = m_Directory + @"\WSECBDL\" + fileName + ".wsecbdl";
             }
             else
-            if (dwID == 0x694B4942 || dwID == 0x6732424B) //BIKi //KB2g
+            if (dwID == 0x694B4942 || dwID == 0x6732424B || dwID == 0x6A32424B) //BIKi //KB2g // KB2j
             {
                 m_UnknownFileName = m_Directory + @"\BIK\" + fileName + ".bik";
             }
@@ -2886,7 +2930,7 @@ namespace FCBConverter
 
                     entry.CompressionScheme = CompressionScheme.None;
 
-                    if (dwVersion == 10)
+                    if (dwVersion == 10 || dwVersion == 11)
                         entry.UncompressedSize = (uint)bytes.Length;
                     else if (dwVersion <= 9)
                         entry.UncompressedSize = 0;
@@ -2923,6 +2967,27 @@ namespace FCBConverter
             {
                 var fatEntry = Entries[entryE];
 
+                if (dwVersion == 11)
+                {
+                    uint dwHash = (uint)((fatEntry.NameHash & 0xFFFFFFFF00000000ul) >> 32);
+                    uint dwHash2 = (uint)((fatEntry.NameHash & 0x00000000FFFFFFFFul) >> 0);
+
+                    uint dwUncompressedSize = 0u;
+                    dwUncompressedSize = (uint)((int)dwUncompressedSize | ((int)(fatEntry.UncompressedSize << 2) & -4));
+                    dwUncompressedSize = (uint)((int)dwUncompressedSize | (int)((int)fatEntry.CompressionScheme & 3L));
+
+                    uint dwUnresolvedOffset = (uint)(((fatEntry.Offset >> 4) & 0x7FFFFFFF8) >> 3);
+
+                    uint dwCompressedSize = 0u;
+                    dwCompressedSize = (uint)((int)dwCompressedSize | (int)((fatEntry.Offset & 7) << 29));
+                    dwCompressedSize |= (fatEntry.CompressedSize & 0x1FFFFFFF);
+
+                    output.WriteValueU32(dwHash, 0);
+                    output.WriteValueU32(dwHash2, 0);
+                    output.WriteValueU32(dwUncompressedSize, 0);
+                    output.WriteValueU32(dwUnresolvedOffset, 0);
+                    output.WriteValueU32(dwCompressedSize, 0);
+                }
                 if (dwVersion == 10)
                 {
                     uint value = (uint)((ulong)((long)fatEntry.NameHash & -4294967296L) >> 32);
@@ -3009,10 +3074,11 @@ namespace FCBConverter
             }
 
             // versions
+            // 11 - FC6
             // 10 - FC5, FCND
             // 9 - FC3, FC3BD, FC4
             // 5 - FC2
-            if (dwVersion != 10 && dwVersion != 9 && dwVersion != 5)
+            if (dwVersion != 11 && dwVersion != 10 && dwVersion != 9 && dwVersion != 5)
             {
                 Console.WriteLine("Invalid version of FAT Index file!");
                 TFATReader.Dispose();
@@ -3080,7 +3146,7 @@ namespace FCBConverter
         {
             ulong dwHash = 0;
 
-            if (dwVersion == 10 || dwVersion == 9)
+            if (dwVersion == 11 || dwVersion == 10 || dwVersion == 9)
             {
                 dwHash = TFATReader.ReadUInt64();
                 dwHash = (dwHash << 32) + (dwHash >> 32);
@@ -3097,6 +3163,13 @@ namespace FCBConverter
             uint dwFlag = 0;
             ulong dwOffset = 0;
 
+            if (dwVersion == 11)
+            {
+                dwFlag = dwUncompressedSize & 3;
+                dwOffset = (dwCompressedSize >> 29 | dwUnresolvedOffset << 3) << 4; // thx to ミルクティー (miru)
+                dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
+                dwUncompressedSize = (dwUncompressedSize >> 2);
+            }
             if (dwVersion == 10)
             {
                 dwFlag = dwUncompressedSize & 3;
