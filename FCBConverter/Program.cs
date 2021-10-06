@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20211006-0100 DEV";
+        public static string version = "20211006-1800";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -101,7 +101,15 @@ dwOffset = 176762
 
             ulong dwOffset = (dwCompressedSize >> 29 | dwUnresolvedOffset << 3) << 4;
 
+            //****************************************************************************
+
+            dwCompressedSize = 115166;
+
             ulong dwOffsetB = (uint)(((dwOffset >> 4) & 0x7FFFFFFF8) >> 3);
+
+            uint a = 0u;
+            a = (uint)((int)a | (int)((dwOffset >> 4) << 29));
+            a |= (dwCompressedSize & 0x1FFFFFFF);
 
             return;
             */
@@ -2979,7 +2987,7 @@ dwOffset = 176762
                     uint dwUnresolvedOffset = (uint)(((fatEntry.Offset >> 4) & 0x7FFFFFFF8) >> 3);
 
                     uint dwCompressedSize = 0u;
-                    dwCompressedSize = (uint)((int)dwCompressedSize | (int)((fatEntry.Offset & 7) << 29));
+                    dwCompressedSize = (uint)((int)dwCompressedSize | (int)((fatEntry.Offset >> 4) << 29));
                     dwCompressedSize |= (fatEntry.CompressedSize & 0x1FFFFFFF);
 
                     output.WriteValueU32(dwHash, 0);

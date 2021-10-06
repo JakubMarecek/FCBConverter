@@ -15,8 +15,8 @@ namespace FCBConverterGUI
             "Dependency loader file|*_depload.dat|" +
             "Sound info file|soundinfo.bin|" +
             "Animation markup file|*.markup.bin|" +
-            "Far Cry 5 / ND Strings file|oasisstrings.oasis.bin|" +
-            "Far Cry 4 Strings file|oasisstrings_compressed.bin|" +
+            "Far Cry 5 / ND / 6 Strings file|oasisstrings.oasis.bin|" +
+            "Far Cry 3 / 4 Strings file|oasisstrings_compressed.bin|" +
             "Lua file (adds LUAC header)|*.lua|" +
             "Material file|*.material.bin|" +
             "Texture file|*.xbt|" +
@@ -119,6 +119,7 @@ namespace FCBConverterGUI
 
             if (radioButton3.Checked) fatVer = "-v5";
             if (radioButton4.Checked) fatVer = "-v9";
+            if (radioButton12.Checked) fatVer = "-v11";
             if (radioButton5.Checked) fatVer = "";
 
             string compress = "-disablecompress";
