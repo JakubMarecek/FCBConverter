@@ -147,7 +147,7 @@ namespace FCBConverter
                     byte[] compressed = new byte[xmlStrings.Any() ? (int)Math.Ceiling(memStr.Length * 1.2) : 8];
                     int compressedSize = 1;
 
-                    if (fileType == 1 || fileType == 3)
+                    if (fileType == 1)
                         LZO.Compress(memStr, 0, memStr.Length, compressed, 0, ref compressedSize);
                     else
                     {
@@ -261,7 +261,7 @@ namespace FCBConverter
                     byte[] compressed = input.ReadBytes(compressedSize);
                     byte[] decompressed = new byte[uncompressedSize];
 
-                    if (fileType == 1 || fileType == 3)
+                    if (fileType == 1)
                         LZO.Decompress(compressed, 0, compressedSize, decompressed, 0, ref uncompressedSize);
                     else
                         decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
