@@ -116,27 +116,49 @@ namespace FCBConverter
                     });
                 }
 
-                output.WriteValueU32(1);
+                //output.WriteValueU32(1);
 
+
+                
+                oasisStringList = Enumerable.OrderBy(oasisStringList, (OasisString x) => x.enumVal).ToList();
+
+                List<List<OasisString>> oasisStringListDecompress = new();
+                List<OasisString> tmpOasis = new();
+                int decompressSize = 0;
+
+                foreach (OasisString oasisString in oasisStringList)
+                {
+                    decompressSize += Encoding.Unicode.GetBytes(oasisString.value).Length + 6;
+                    tmpOasis.Add(oasisString);
+
+                    if (decompressSize > (1024 * 16) || oasisString.Equals(oasisStringList.Last()))
+                    {
+                        decompressSize = 0;
+                        List<OasisString> tmpOasis2 = new List<OasisString>(tmpOasis);
+                        oasisStringListDecompress.Add(tmpOasis2);
+                        tmpOasis.Clear();
+                    }
+
+                }
+                output.WriteValueU32((uint)(oasisStringListDecompress.Count()));
+                
+                foreach (List<OasisString> oasisStringList2 in oasisStringListDecompress)
                 {
                     MemoryStream memoryStream = new();
-                    oasisStringList = Enumerable.OrderBy(oasisStringList, (OasisString x) => x.enumVal).ToList();
-
-                    memoryStream.WriteValueS32(xmlStrings.Count());
-
-                    foreach (OasisString oasisString in oasisStringList)
+                    memoryStream.WriteValueS32(oasisStringList2.Count());
+                    foreach (OasisString oasisString in oasisStringList2)
                     {
                         memoryStream.WriteValueU32(oasisString.enumVal);
                     }
 
                     int offset = 0;
-                    foreach (OasisString oasisString in oasisStringList)
+                    foreach (OasisString oasisString in oasisStringList2)
                     {
                         memoryStream.WriteValueS32(offset);
                         offset += Encoding.Unicode.GetBytes(oasisString.value).Length + 6;
                     }
 
-                    foreach (OasisString oasisString in oasisStringList)
+                    foreach (OasisString oasisString in oasisStringList2)
                     {
                         memoryStream.WriteValueU32(oasisString.id);
                         memoryStream.WriteStringZ(oasisString.value, Encoding.Unicode);
@@ -155,11 +177,15 @@ namespace FCBConverter
                         compressedSize = compressed.Length;
                     }
 
-                    output.WriteValueU32(xmlStrings.Any() ? oasisStringList[^1].enumVal : 0);
+                    output.WriteValueU32(xmlStrings.Any() ? oasisStringList2[^1].enumVal : 0);
                     output.WriteValueS32(compressedSize);
                     output.WriteValueS32(memStr.Length);
                     output.Write(compressed, 0, compressedSize);
+
                 }
+
+
+
             }
 
             XElement xmlSpeeches = xmlRoot.Element("speeches");
