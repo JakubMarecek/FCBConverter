@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": " \"g:\\fc5 sources\\common_fc6\" \"g:\\fc5 sources\\common2.fat\" -v11"
+      "commandLineArgs": "\"g:\\fc5 sources\\common_fc6_unpacked\\languages\\english\\oasisstrings.oasis.bin.converted.xml\""
     }
   }
 }

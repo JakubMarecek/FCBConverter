@@ -18,6 +18,7 @@
 
 using Gibbed.Dunia2.FileFormats;
 using Gibbed.IO;
+using K4os.Compression.LZ4;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -65,11 +66,8 @@ namespace FCBConverter
                 else
                     sectionNameCRC = CRC32.Hash(sectionName);
 
-                IEnumerable<XElement> xmlStrings = xmlSection.Elements("string");
+                IEnumerable<XElement> xmlStrings = xmlSection/*.Elements("subsection")*/.Elements("string");
                 List<OasisString> oasisStringList = new();
-
-                output.WriteValueU32(sectionNameCRC);
-                output.WriteValueS32(xmlStrings.Count());
 
                 foreach (XElement xmlString in xmlStrings)
                 {
@@ -77,6 +75,7 @@ namespace FCBConverter
                     string stringEnum = xmlString.Attribute("enum").Value;
                     uint stringIDCRC;
                     uint stringEnumCRC;
+                    uint stringMainCRC = 0;
 
                     if (stringID.StartsWith("0x"))
                         stringIDCRC = uint.Parse(stringID[2..], NumberStyles.HexNumber);
@@ -88,55 +87,77 @@ namespace FCBConverter
                     else
                         stringEnumCRC = CRC32.Hash(stringEnum);
 
-                    output.WriteValueU32(stringIDCRC);
-                    output.WriteValueU32(sectionNameCRC);
-                    output.WriteValueU32(stringEnumCRC);
-
                     if (fileType != 0)
                     {
                         string stringMain = "";
 
                         stringMain = xmlString.Attribute("extra").Value;
 
-                        uint stringMainCRC = 0;
-
                         if (stringMain.StartsWith("0x"))
                             stringMainCRC = uint.Parse(stringMain[2..], NumberStyles.HexNumber);
                         else
                             stringMainCRC = CRC32.Hash(stringMain);
-
-                        output.WriteValueU32(stringMainCRC);
                     }
 
                     oasisStringList.Add(new OasisString
                     {
                         enumVal = stringEnumCRC,
                         id = stringIDCRC,
-                        value = xmlString.Attribute("value").Value
+                        value = xmlString.Attribute("value").Value,
+                        extra = stringMainCRC
                     });
                 }
+                oasisStringList = Enumerable.OrderBy(oasisStringList, (OasisString x) => x.id).ToList();
 
-                output.WriteValueU32(1);
+                output.WriteValueU32(sectionNameCRC);
+                output.WriteValueS32(xmlStrings.Count());
 
+                foreach (OasisString os in oasisStringList)
                 {
-                    MemoryStream memoryStream = new();
-                    oasisStringList = Enumerable.OrderBy(oasisStringList, (OasisString x) => x.enumVal).ToList();
+                    output.WriteValueU32(os.id);
+                    output.WriteValueU32(sectionNameCRC);
+                    output.WriteValueU32(os.enumVal);
 
+                    if (fileType != 0)
+                        output.WriteValueU32(os.extra);
+                }
+
+                //output.WriteValueU32(1);
+
+                /*IEnumerable<XElement> xmlSubSections = xmlSection.Elements("subsection");
+                output.WriteValueU32((uint)xmlSubSections.Count());
+
+                foreach (XElement xmlSubSection in xmlSubSections)*/
+                /*{
+                    //var xmlSubSectionStrings = xmlSubSection.Elements("string").Select(s => s.Attribute("id").Value);
+                    var xmlSubSectionStrings = xmlSection.Elements("string").Select(s => s.Attribute("id").Value);
+
+
+                    List<OasisString> oasisStringListTmp = new();
+
+                    foreach (string sid in xmlSubSectionStrings)
+                    {
+                        oasisStringListTmp.Add(oasisStringList.Where(a => a.id == uint.Parse(sid)).Single());
+                    }
+
+                    oasisStringListTmp = Enumerable.OrderBy(oasisStringListTmp, (OasisString x) => x.enumVal).ToList();
+
+                    MemoryStream memoryStream = new();
                     memoryStream.WriteValueS32(xmlStrings.Count());
 
-                    foreach (OasisString oasisString in oasisStringList)
+                    foreach (OasisString oasisString in oasisStringListTmp)
                     {
                         memoryStream.WriteValueU32(oasisString.enumVal);
                     }
 
                     int offset = 0;
-                    foreach (OasisString oasisString in oasisStringList)
+                    foreach (OasisString oasisString in oasisStringListTmp)
                     {
                         memoryStream.WriteValueS32(offset);
                         offset += Encoding.Unicode.GetBytes(oasisString.value).Length + 6;
                     }
 
-                    foreach (OasisString oasisString in oasisStringList)
+                    foreach (OasisString oasisString in oasisStringListTmp)
                     {
                         memoryStream.WriteValueU32(oasisString.id);
                         memoryStream.WriteStringZ(oasisString.value, Encoding.Unicode);
@@ -151,11 +172,83 @@ namespace FCBConverter
                         LZO.Compress(memStr, 0, memStr.Length, compressed, 0, ref compressedSize);
                     else
                     {
-                        compressed = new LZ4Sharp.LZ4Compressor64().Compress(memStr);
-                        compressedSize = compressed.Length;
+                        byte[] tmp = new byte[LZ4Codec.MaximumOutputSize(memStr.Length)];
+                        compressedSize = LZ4Codec.Encode(memStr, tmp, LZ4Level.L00_FAST);
+                        compressed = new byte[compressedSize];
+                        Array.Copy(tmp, compressed, compressedSize);
+
+                        //compressed = new LZ4Sharp.LZ4Compressor64().Compress(memStr);
+                        //compressedSize = compressed.Length;
                     }
 
-                    output.WriteValueU32(xmlStrings.Any() ? oasisStringList[^1].enumVal : 0);
+                    output.WriteValueU32(xmlStrings.Any() ? oasisStringListTmp[^1].enumVal : 0);
+                    output.WriteValueS32(compressedSize);
+                    output.WriteValueS32(memStr.Length);
+                    output.Write(compressed, 0, compressedSize);
+                }*/
+
+
+                // edit by eprilx
+                oasisStringList = Enumerable.OrderBy(oasisStringList, (OasisString x) => x.enumVal).ToList();
+
+                List<List<OasisString>> oasisStringListDecompress = new();
+                List<OasisString> tmpOasis = new();
+                int decompressSize = 0;
+
+                foreach (OasisString oasisString in oasisStringList)
+                {
+                    decompressSize += Encoding.Unicode.GetBytes(oasisString.value).Length + 6;
+                    tmpOasis.Add(oasisString);
+
+                    if (decompressSize > (1024 * 16) || oasisString.Equals(oasisStringList.Last()))
+                    {
+                        decompressSize = 0;
+                        List<OasisString> tmpOasis2 = new List<OasisString>(tmpOasis);
+                        oasisStringListDecompress.Add(tmpOasis2);
+                        tmpOasis.Clear();
+                    }
+
+                }
+                output.WriteValueU32((uint)(oasisStringListDecompress.Count()));
+
+                foreach (List<OasisString> oasisStringList2 in oasisStringListDecompress)
+                {
+                    MemoryStream memoryStream = new();
+                    memoryStream.WriteValueS32(oasisStringList2.Count());
+                    foreach (OasisString oasisString in oasisStringList2)
+                    {
+                        memoryStream.WriteValueU32(oasisString.enumVal);
+                    }
+
+                    int offset = 0;
+                    foreach (OasisString oasisString in oasisStringList2)
+                    {
+                        memoryStream.WriteValueS32(offset);
+                        offset += Encoding.Unicode.GetBytes(oasisString.value).Length + 6;
+                    }
+
+                    foreach (OasisString oasisString in oasisStringList2)
+                    {
+                        memoryStream.WriteValueU32(oasisString.id);
+                        memoryStream.WriteStringZ(oasisString.value, Encoding.Unicode);
+                    }
+
+                    memoryStream.Position = 0;
+                    byte[] memStr = memoryStream.ToArray();
+                    byte[] compressed = new byte[xmlStrings.Any() ? (int)Math.Ceiling(memStr.Length * 1.2) : 8];
+                    int compressedSize = 1;
+
+                    if (fileType == 1)
+                        LZO.Compress(memStr, 0, memStr.Length, compressed, 0, ref compressedSize);
+                    else
+                    {
+                        byte[] tmp = new byte[LZ4Codec.MaximumOutputSize(memStr.Length)];
+                        compressedSize = LZ4Codec.Encode(memStr, tmp, LZ4Level.L00_FAST);
+                        compressed = new byte[compressedSize];
+                        Array.Copy(tmp, compressed, compressedSize);
+                    }
+
+                    output.WriteValueU32(xmlStrings.Any() ? oasisStringList2[^1].enumVal : 0);
                     output.WriteValueS32(compressedSize);
                     output.WriteValueS32(memStr.Length);
                     output.Write(compressed, 0, compressedSize);
@@ -214,7 +307,6 @@ namespace FCBConverter
                 uint stringsCount = input.ReadValueU32();
 
                 Dictionary<uint, OasisString> oasisStringList = new();
-                Dictionary<uint, string> oasisStringValList = new();
 
                 for (int j = 0; j < stringsCount; j++)
                 {
@@ -252,9 +344,15 @@ namespace FCBConverter
                     });
                 }
 
+                string sectionVal = Program.listStringsDict.ContainsKey(sectionNameCRC) ? Program.listStringsDict[sectionNameCRC] : string.Format("0x{0,8:X8}", sectionNameCRC);
+
+                XElement xmlSection = new("section", new XAttribute("name", sectionVal));
+
                 int compressedSections = input.ReadValueS32();
                 for (int m = 0; m < compressedSections; m++)
                 {
+                    Dictionary<uint, string> oasisStringValList = new();
+
                     input.ReadValueU32();
                     int compressedSize = input.ReadValueS32();
                     int uncompressedSize = input.ReadValueS32();
@@ -264,7 +362,8 @@ namespace FCBConverter
                     if (fileType == 1)
                         LZO.Decompress(compressed, 0, compressedSize, decompressed, 0, ref uncompressedSize);
                     else
-                        decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
+                        LZ4Codec.Decode(compressed, decompressed);
+                        //decompressed = new LZ4Sharp.LZ4Decompressor64().Decompress(compressed);
 
                     {
                         MemoryStream memoryStream = new(decompressed);
@@ -284,24 +383,27 @@ namespace FCBConverter
                             oasisStringValList.Add(id, str);
                         }
                     }
-                }
 
-                string sectionVal = Program.listStringsDict.ContainsKey(sectionNameCRC) ? Program.listStringsDict[sectionNameCRC] : string.Format("0x{0,8:X8}", sectionNameCRC);
+                    XElement xmlSubSection = new("subsection");
 
-                XElement xmlSection = new("section", new XAttribute("name", sectionVal));
+                    foreach (KeyValuePair<uint, string> oasisStringVal in oasisStringValList)
+                    {
+                        OasisString os = oasisStringList[oasisStringVal.Key];
 
-                foreach (KeyValuePair<uint, OasisString> oasisString in oasisStringList)
-                {
-                    string enumVal = Program.listStringsDict.ContainsKey(oasisString.Value.enumVal)? Program.listStringsDict[oasisString.Value.enumVal] : string.Format("0x{0,8:X8}", oasisString.Value.enumVal);
-                    string mainVal = Program.listStringsDict.ContainsKey(oasisString.Value.main) ? Program.listStringsDict[oasisString.Value.main] : string.Format("0x{0,8:X8}", oasisString.Value.main);
+                        string enumVal = Program.listStringsDict.ContainsKey(os.enumVal) ? Program.listStringsDict[os.enumVal] : string.Format("0x{0,8:X8}", os.enumVal);
+                        string mainVal = Program.listStringsDict.ContainsKey(os.main) ? Program.listStringsDict[os.main] : string.Format("0x{0,8:X8}", os.main);
 
-                    XElement xmlString = new("string");
-                    xmlString.Add(new XAttribute("enum", enumVal));
-                    //if (fileType == 1 || fileType == 3) xmlString.Add(new XAttribute("main", mainVal));
-                    if (fileType != 0) xmlString.Add(new XAttribute("extra", mainVal));
-                    xmlString.Add(new XAttribute("id", oasisString.Value.id));
-                    xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(oasisString.Value.id) ? oasisStringValList[oasisString.Value.id] : ""));
-                    xmlSection.Add(xmlString);
+                        XElement xmlString = new("string");
+                        xmlString.Add(new XAttribute("enum", enumVal));
+                        //if (fileType == 1 || fileType == 3) xmlString.Add(new XAttribute("main", mainVal));
+                        if (fileType != 0) xmlString.Add(new XAttribute("extra", mainVal));
+                        xmlString.Add(new XAttribute("id", os.id));
+                        xmlString.Add(new XAttribute("value", oasisStringValList.ContainsKey(os.id) ? oasisStringValList[os.id] : ""));
+                        //xmlSubSection.Add(xmlString);
+                        xmlSection.Add(xmlString);
+                    }
+
+                    //xmlSection.Add(xmlSubSection);
                 }
 
                 xmlStringtable.Add(xmlSection);
@@ -353,5 +455,6 @@ namespace FCBConverter
         public uint id;
         public uint main;
         public string value;
+        public uint extra;
     }
 }

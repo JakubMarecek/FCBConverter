@@ -65,6 +65,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.2.13" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="FCBConverterSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
