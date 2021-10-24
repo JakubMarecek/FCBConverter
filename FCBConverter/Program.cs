@@ -53,7 +53,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20211012-2300";
+        public static string version = "20211024-1200";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1334,6 +1334,8 @@ dwOffset = 176762
 
         static void LoadFile(int dwVersion = 10)
         {
+            Console.WriteLine("Loading list of files...");
+
             if (listFilesDict.Count() > 0)
                 return;
 
@@ -1362,6 +1364,8 @@ dwOffset = 176762
 
         static void LoadString()
         {
+            Console.WriteLine("Loading list of strings...");
+
             if (listStringsDict.Count() > 0)
                 return;
 
