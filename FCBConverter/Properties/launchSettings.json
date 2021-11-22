@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"d:\\Desktop\\oasisstrings.oasis.bin.converted.xml\""
+      "commandLineArgs": "\"e:\\Far Cry 5\\data_final\\pc\\worlds\\farcry5_hd.fat\""
     }
   }
 }
