@@ -98,7 +98,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             if (node.NameHash.ToString("X8") == "256A1FF9" && parentChain.Any())
             {
-                string fld = Program.m_Path + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
+                string fld = Path.GetDirectoryName(outputPath) + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
                 if (!Directory.Exists(fld))
                     Directory.CreateDirectory(fld);
 
