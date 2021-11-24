@@ -49,11 +49,12 @@ namespace FCBConverter
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
         public static bool isNewDawn = false;
+        public static bool isEntLibNamesStores = false;
         public static bool isFC2 = false;
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20211123-0015";
+        public static string version = "20211124-1900";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -550,6 +551,9 @@ dwOffset = 176762
             }
 
             Console.Title = "FCBConverter - " + file;
+
+            if (file.EndsWith("entitylibrarynamestoresid.fcb"))
+                isEntLibNamesStores = true;
 
             try
             {

@@ -43,6 +43,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.XPath;
 using FCBConverter;
 using Gibbed.Dunia2.BinaryObjectInfo;
@@ -193,6 +194,37 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     // do nothing
                 }
+                else if (fieldName == "ArchetypeNamesStores")
+                {
+                    List<byte[]> ArchetypeNameIds = new List<byte[]>();
+                    List<byte[]> ArchetypeIds = new List<byte[]>();
+                    List<byte[]> ArchetypeNameStrings = new List<byte[]>();
+
+                    int stringsSize = 0;
+                    var resIds = fields.Current.Select("Archetype");
+                    while (resIds.MoveNext() == true)
+                    {
+                        ulong ArchetypeId = ulong.Parse(resIds.Current.GetAttribute("ArchetypeId", ""));
+                        var ArchetypeName = resIds.Current.GetAttribute("ArchetypeName", "");
+
+                        var ArchetypeNameB = Encoding.UTF8.GetBytes(ArchetypeName);
+                        Array.Resize(ref ArchetypeNameB, ArchetypeNameB.Length + 1);
+
+                        ArchetypeIds.Add(BitConverter.GetBytes(ArchetypeId));
+                        ArchetypeNameStrings.Add(ArchetypeNameB);
+                        ArchetypeNameIds.Add(BitConverter.GetBytes(CRC32.Hash(ArchetypeName)));
+
+                        stringsSize += ArchetypeNameB.Length;
+                    }
+
+                    ArchetypeIds.Insert(0, BitConverter.GetBytes(ArchetypeIds.Count));
+                    ArchetypeNameStrings.Insert(0, BitConverter.GetBytes(stringsSize));
+                    ArchetypeNameIds.Insert(0, BitConverter.GetBytes(ArchetypeNameIds.Count));
+
+                    node.Fields.Add(CRC32.Hash("ArchetypeNameIds"), ArchetypeNameIds.SelectMany(byteArr => byteArr).ToArray());
+                    node.Fields.Add(CRC32.Hash("ArchetypeIds"), ArchetypeIds.SelectMany(byteArr => byteArr).ToArray());
+                    node.Fields.Add(CRC32.Hash("ArchetypeNameStrings"), ArchetypeNameStrings.SelectMany(byteArr => byteArr).ToArray());
+                }
                 else if (fieldName == "buffer")
                 {
                     string buffer = fields.Current.SelectSingleNode("buffer").InnerXml;
@@ -236,7 +268,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 FCBConverter.CombinedMoveFile.PerMoveResourceInfo.Serialize(node);
             }
 
-            
 
             var children = nav.Select("object");
             while (children.MoveNext() == true)

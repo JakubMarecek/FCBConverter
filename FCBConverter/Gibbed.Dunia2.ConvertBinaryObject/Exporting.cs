@@ -41,6 +41,7 @@
 using FCBConverter;
 using Gibbed.Dunia2.BinaryObjectInfo;
 using Gibbed.Dunia2.FileFormats;
+using Gibbed.IO;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -70,27 +71,15 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 writer.WriteComment(Program.xmlheader);
                 writer.WriteComment(Program.xmlheaderfcb);
                 writer.WriteComment(Program.xmlheaderthanks);
-                WriteNode(writer, new BinaryObject[0], bof.Root);
+                WriteNode(writer, new BinaryObject[0], bof.Root, outputPath);
                 writer.WriteEndDocument();
             }
         }
 
-        internal const uint EntityLibrariesHash = 0xBCDD10B4u; // crc32(EntityLibraries)
-        internal const uint EntityLibraryHash = 0xE0BDB3DBu; // crc32(EntityLibrary)
-        internal const uint NameHash = 0xFE11D138u; // crc32(Name);
-        internal const uint EntityLibraryItemHash = 0x256A1FF9u; // unknown source name
-        internal const uint DisLibItemIdHash = 0x8EDB0295u; // crc32(disLibItemId)
-        internal const uint EntityHash = 0x0984415Eu; // crc32(Entity)
-        internal const uint LibHash = 0xA90F3BCC; // crc32(lib)
-        internal const uint LibItemHash = 0x72DE4948; // unknown source name
-        internal const uint TextHidNameHash = 0x9D8873F8; // crc32(text_hidName)
-        internal const uint NomadObjectTemplatesHash = 0x4C4C4CA4; // crc32(NomadObjectTemplates)
-        internal const uint NomadObjectTemplateHash = 0x142371CF; // unknown source name
-        internal const uint TemplateHash = 0x6E167DD5; // crc32(Template)
-
         private static void WriteNode(XmlWriter writer,
                                       IEnumerable<BinaryObject> parentChain,
-                                      BinaryObject node)
+                                      BinaryObject node,
+                                      string outputPath)
         {
             var chain = parentChain.Concat(new[] { node });
             /*
@@ -107,6 +96,38 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             writer.WriteStartElement("object");
 
+            if (node.NameHash.ToString("X8") == "256A1FF9" && parentChain.Any())
+            {
+                string fld = Program.m_Path + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
+                if (!Directory.Exists(fld))
+                    Directory.CreateDirectory(fld);
+
+                byte[] nameBytes = node.Fields[CRC32.Hash("Name")];
+                string fileName = Encoding.ASCII.GetString(nameBytes, 0, nameBytes.Length - 1);
+
+                var settings = new XmlWriterSettings
+                {
+                    Encoding = Encoding.UTF8,
+                    Indent = true,
+                    CheckCharacters = false,
+                    OmitXmlDeclaration = false
+                };
+
+                using (var writer2 = XmlWriter.Create(fld + fileName.Replace("/", "_") + ".xml", settings))
+                {
+                    writer2.WriteStartDocument();
+                    writer2.WriteComment(Program.xmlheader);
+                    writer2.WriteComment(Program.xmlheaderfcb);
+                    writer2.WriteComment(Program.xmlheaderthanks);
+                    WriteNode(writer2, new BinaryObject[0], node, outputPath);
+                    writer2.WriteEndDocument();
+                }
+
+                writer.WriteAttributeString("external", fileName.Replace("/", "_") + ".xml");
+                writer.WriteEndElement();
+                return;
+            }
+
             writer.WriteAttributeString("hash", node.NameHash.ToString("X8"));
 
             if (FCBConverter.Program.listStringsDict.ContainsKey(node.NameHash))
@@ -121,6 +142,53 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 else if (Program.isCombinedMoveFile && node.Fields.Count == 3 && node.Fields.ContainsKey(CRC32.Hash("rootNodeIds")) && node.Fields.ContainsKey(CRC32.Hash("resourcePathIds")))
                 {
                     FCBConverter.CombinedMoveFile.PerMoveResourceInfo.Deserialize(node.Fields);
+                }
+                else if (Program.isEntLibNamesStores)
+                {
+                    var ArchetypeIds = node.Fields[CRC32.Hash("ArchetypeIds")];
+                    var ArchetypeNameStrings = node.Fields[CRC32.Hash("ArchetypeNameStrings")];
+
+                    var ArchetypeIdsArr = Helpers.UnpackArray(ArchetypeIds, 8);
+                    List<string> ArchetypeNameStringsArr = new();
+
+                    MemoryStream ms = new(ArchetypeNameStrings);
+                    ms.ReadValueU32();
+                    for (int i = 0; i < ArchetypeIdsArr.Count; i++)
+                    {
+                        ArchetypeNameStringsArr.Add(ms.ReadStringZ());
+                    }
+                    ms.Close();
+
+                    writer.WriteStartElement("field");
+                    writer.WriteAttributeString("name", "ArchetypeNamesStores");
+
+                    for (int i = 0; i < ArchetypeIdsArr.Count; i++)
+                    {
+                        ulong idU = BitConverter.ToUInt64(ArchetypeIdsArr[i], 0);
+
+                        writer.WriteStartElement("Archetype");
+                        writer.WriteAttributeString("ArchetypeId", idU.ToString());
+                        writer.WriteAttributeString("ArchetypeName", ArchetypeNameStringsArr[i]);
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+
+                    var WeaponArchetypesResIdsList = node.Fields[CRC32.Hash("WeaponArchetypesResIdsList")];
+
+                    writer.WriteStartElement("field");
+                    writer.WriteAttributeString("name", "WeaponArchetypesResIdsList");
+                    writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                    writer.WriteBinHex(WeaponArchetypesResIdsList, 0, WeaponArchetypesResIdsList.Length);
+                    writer.WriteEndElement();
+
+                    var WeaponPropertiesIdsList = node.Fields[CRC32.Hash("WeaponPropertiesIdsList")];
+
+                    writer.WriteStartElement("field");
+                    writer.WriteAttributeString("name", "WeaponPropertiesIdsList");
+                    writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                    writer.WriteBinHex(WeaponPropertiesIdsList, 0, WeaponPropertiesIdsList.Length);
+                    writer.WriteEndElement();
                 }
                 else
                 {
@@ -492,7 +560,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             foreach (var childNode in node.Children)
             {
-                WriteNode(writer, chain, childNode);
+                WriteNode(writer, chain, childNode, outputPath);
             }
 
             /*
