@@ -404,7 +404,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         // *****************************************************************************************************************
                         // uint32
                         // *****************************************************************************************************************
-                        else if (binaryHex.Length == 8 && name.StartsWithType("snd"))
+                        else if (binaryHex.Length == 8 && (name.StartsWithType("snd") || name.StartsWith("SoundId")))
                         {
                             uint v = BitConverter.ToUInt32(kv.Value, 0);
                             writer.WriteAttributeString(prefix + "UInt32", v.ToString());
