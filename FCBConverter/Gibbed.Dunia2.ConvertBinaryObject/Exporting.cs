@@ -57,6 +57,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
     {
         public static void Export(string outputPath, BinaryObjectFile bof)
         {
+            string fld = Path.GetDirectoryName(outputPath) + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
+
+            if (Directory.Exists(fld))
+                Directory.Delete(fld, true);
+
             var settings = new XmlWriterSettings
             {
                 Encoding = Encoding.UTF8,
@@ -99,8 +104,9 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             if (node.NameHash.ToString("X8") == "256A1FF9" && parentChain.Any())
             {
                 string fld = Path.GetDirectoryName(outputPath) + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
+                
                 if (!Directory.Exists(fld))
-                    Directory.CreateDirectory(fld);
+                        Directory.CreateDirectory(fld);
 
                 byte[] nameBytes = node.Fields[CRC32.Hash("Name")];
                 string fileName = Encoding.ASCII.GetString(nameBytes, 0, nameBytes.Length - 1);
@@ -113,7 +119,17 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     OmitXmlDeclaration = false
                 };
 
-                using (var writer2 = XmlWriter.Create(fld + fileName.Replace("/", "_") + ".xml", settings))
+                fileName = fileName.Replace("/", "_");
+                string fileNameX = fileName;
+                int cnt = 1;
+                do
+                {
+                    fileNameX = fileName + "_" + cnt;
+                    cnt++;
+                }
+                while (File.Exists(fld + fileNameX + ".xml"));
+
+                using (var writer2 = XmlWriter.Create(fld + fileNameX + ".xml", settings))
                 {
                     writer2.WriteStartDocument();
                     writer2.WriteComment(Program.xmlheader);
@@ -123,7 +139,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     writer2.WriteEndDocument();
                 }
 
-                writer.WriteAttributeString("external", fileName.Replace("/", "_") + ".xml");
+                writer.WriteAttributeString("external", fileNameX + ".xml");
                 writer.WriteEndElement();
                 return;
             }
