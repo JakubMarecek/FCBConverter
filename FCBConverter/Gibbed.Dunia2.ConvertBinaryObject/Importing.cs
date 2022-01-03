@@ -125,7 +125,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                     node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
                 }
-                else if (fieldName == "hidDescriptor")
+                else if (fieldName == "hidDescriptor" || fields.Current.GetAttribute("hash", "") == "F38022C8")
                 {
                     string legacy = fields.Current.GetAttribute("legacy", "");
                     if (legacy == "1")

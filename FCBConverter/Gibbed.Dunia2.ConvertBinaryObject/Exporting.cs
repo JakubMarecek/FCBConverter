@@ -108,8 +108,16 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 if (!Directory.Exists(fld))
                         Directory.CreateDirectory(fld);
 
-                byte[] nameBytes = node.Fields[CRC32.Hash("Name")];
-                string fileName = Encoding.ASCII.GetString(nameBytes, 0, nameBytes.Length - 1);
+                string fileName;
+                if (node.Fields.ContainsKey(CRC32.Hash("Name")))
+                {
+                    byte[] nameBytes = node.Fields[CRC32.Hash("Name")];
+                    fileName = Encoding.ASCII.GetString(nameBytes, 0, nameBytes.Length - 1);
+                }
+                else
+                {
+                    fileName = "EntityPrototype";
+                }
 
                 var settings = new XmlWriterSettings
                 {
@@ -120,7 +128,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 };
 
                 fileName = fileName.Replace("/", "_");
-                string fileNameX = fileName;
+                string fileNameX;
                 int cnt = 1;
                 do
                 {
@@ -287,7 +295,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 writer.WriteEndElement();
                             }
                         }
-                        else if (name == "hidDescriptor")
+                        else if (name == "hidDescriptor" || kv.Key.ToString("X8") == "F38022C8")
                         {
                             if (kv.Value[0] == 0)
                             {
@@ -561,7 +569,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         }
 
-                        if (name != "data" && name != "ResIds" && name != "TypeIds" && name != "ArchetypeResDepList" && name != "CNH_CompressedData" && name != "buffer" && name != "hidDescriptor" && name != "hidShapePoints")
+                        if (name != "data" && name != "ResIds" && name != "TypeIds" && name != "ArchetypeResDepList" && name != "CNH_CompressedData" && name != "buffer" && name != "hidDescriptor" && name != "hidShapePoints" && kv.Key.ToString("X8") != "F38022C8")
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
