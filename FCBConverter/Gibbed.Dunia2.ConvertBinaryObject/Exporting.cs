@@ -99,14 +99,21 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
             }*/
 
+            string nodeName = "";
+
+            if (Program.listStringsDict.ContainsKey(node.NameHash))
+                nodeName = Program.listStringsDict[node.NameHash];
+
             writer.WriteStartElement("object");
 
-            if (node.NameHash.ToString("X8") == "256A1FF9" && parentChain.Any())
+            var to = DefinitionsLoader.ProcessObject(nodeName, node.NameHash.ToString("X8"));
+
+            if (to.Action == "External" && parentChain.Any())
             {
                 string fld = Path.GetDirectoryName(outputPath) + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
-                
+
                 if (!Directory.Exists(fld))
-                        Directory.CreateDirectory(fld);
+                    Directory.CreateDirectory(fld);
 
                 string fileName;
                 if (node.Fields.ContainsKey(CRC32.Hash("Name")))
@@ -154,8 +161,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             writer.WriteAttributeString("hash", node.NameHash.ToString("X8"));
 
-            if (FCBConverter.Program.listStringsDict.ContainsKey(node.NameHash))
-                writer.WriteAttributeString("name", FCBConverter.Program.listStringsDict[node.NameHash]);
+            if (nodeName != "")
+                writer.WriteAttributeString("name", nodeName);
 
             if (node.Fields != null)
             {
@@ -223,13 +230,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         string prefix = "value-";
 
                         string name = "";
-                        if (FCBConverter.Program.listStringsDict.ContainsKey(kv.Key))
+                        if (Program.listStringsDict.ContainsKey(kv.Key))
                         {
-                            name = FCBConverter.Program.listStringsDict[kv.Key];
+                            name = Program.listStringsDict[kv.Key];
                         }
-
-                        if (name == "CNH_UncompressedSize")
-                            writer.WriteComment("Do not edit CNH_UncompressedSize and CNH_CompressedSize, they will be changed during converting back to FCB.");
 
                         writer.WriteStartElement("field");
                         writer.WriteAttributeString("hash", kv.Key.ToString("X8"));
@@ -241,8 +245,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         //str = Regex.Replace(str, @"\p{C}+", string.Empty);
 
                         string binaryHex = Helpers.ByteArrayToString(kv.Value);
-                        bool resetPrevNodeVal = true;
-                        bool stringRegex = Regex.IsMatch(str, @"^[a-zA-Z0-9_.:\/\-\x20\\\(\)]+$");
 
                         byte[] reversed = new byte[kv.Value.Length];
                         for (int i = 0; i < reversed.Length; i++)
@@ -256,7 +258,215 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         bool isHash32 = (prevNodeVal != "" && CRC32.Hash(prevNodeVal).ToString("x8").ToLower() == binaryHexRev.ToLower());
                         bool isHash64 = (prevNodeVal != "" && CRC64.Hash(prevNodeVal).ToString("x16").ToLower() == binaryHexRev.ToLower());
 
-                        if (name == "data")
+                        bool skipValue = false;
+                        FieldType fieldType = FieldType.Invalid;
+
+                        if (isHash32)
+                        {
+                            writer.WriteAttributeString(prefix + "ComputeHash32", prevNodeVal);
+                        }
+                        else if (isHash64)
+                        {
+                            writer.WriteAttributeString(prefix + "ComputeHash64", prevNodeVal);
+                        }
+                        else
+                        {
+                            var t = DefinitionsLoader.Process(nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true);
+                            fieldType = t.Type;
+
+                            if (t.Comment != null & t.Comment != "")
+                                writer.WriteComment(t.Comment);
+
+                            if (t.Action != null && t.Action != "")
+                                skipValue = true;
+
+                            if (t.Action == "FindInDictionarySkip")
+                            {
+                                uint v = BitConverter.ToUInt32(kv.Value, 0);
+                                if (Program.listStringsDict.ContainsKey(v))
+                                    writer.WriteAttributeString("value-" + t.Type, Program.listStringsDict[v]);
+                            }
+
+                            if (t.Action == "XMLRML")
+                            {
+                                if (kv.Value[0] == 0)
+                                {
+                                    // legacy, RML format
+                                    MemoryStream ms = new MemoryStream(kv.Value);
+
+                                    var rez = new XmlResourceFile();
+                                    rez.Deserialize(ms);
+
+                                    writer.WriteAttributeString("legacy", "1");
+
+                                    ConvertXml.Program.WriteNode(writer, rez.Root);
+                                }
+                                else
+                                {
+                                    // new format XML
+                                    XmlReaderSettings settings = new XmlReaderSettings
+                                    {
+                                        IgnoreComments = true,
+                                        //IgnoreWhitespace = false,
+                                        IgnoreWhitespace = true,
+                                        IgnoreProcessingInstructions = true
+                                    };
+                                    XmlReader xmlReader = XmlReader.Create(new System.IO.StringReader(str), settings);
+                                    writer.WriteNode(xmlReader, false);
+                                }
+                            }
+
+                            if (t.Action == "MoveBinDataChunk")
+                            {
+                                var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(Program.isNewDawn);
+                                moveBinDataChunk.Deserialize(writer, kv.Value);
+                            }
+
+                            if (t.Action == "ReadListHashes")
+                            {
+                                ReadListHashes(kv.Value, writer);
+                            }
+
+                            if (t.Action == "ReadListFiles")
+                            {
+                                ReadListFiles(kv.Value, writer);
+                            }
+
+                            if (t.Action == "ShapePoints")
+                            {
+                                byte[] trimmed = kv.Value.Skip(4).ToArray();
+                                List<byte[]> unpA = Helpers.UnpackArraySize(trimmed, 12);
+
+                                foreach (byte[] pnt in unpA)
+                                {
+                                    byte[] vecX = pnt.Skip(0).Take(4).ToArray();
+                                    byte[] vecY = pnt.Skip(4).Take(4).ToArray();
+                                    byte[] vecZ = pnt.Skip(8).Take(4).ToArray();
+
+                                    float vecfX = BitConverter.ToSingle(vecX, 0);
+                                    float vecfY = BitConverter.ToSingle(vecY, 0);
+                                    float vecfZ = BitConverter.ToSingle(vecZ, 0);
+
+                                    writer.WriteStartElement("Point");
+                                    writer.WriteString(vecfX.ToString(CultureInfo.InvariantCulture) + "," +
+                                        vecfY.ToString(CultureInfo.InvariantCulture) + "," +
+                                        vecfZ.ToString(CultureInfo.InvariantCulture));
+                                    writer.WriteEndElement();
+                                }
+                            }
+
+                            if (t.Action == "CompressedFCB")
+                            {
+                                BinaryReader binaryReader = new BinaryReader(new MemoryStream(kv.Value));
+                                int len = kv.Value.Length;
+
+                                if (name != "buffer")
+                                    len = binaryReader.ReadInt32();
+
+                                byte[] bytes = binaryReader.ReadBytes(len);
+                                binaryReader.Close();
+
+                                string compressionType = "";
+
+                                if (name != "buffer")
+                                {
+                                    try
+                                    {
+                                        bytes = new LZ4Sharp.LZ4Decompressor64().Decompress(bytes);
+                                        compressionType = "LZ4";
+                                    }
+                                    catch (Exception)
+                                    {
+                                        int uncompressedSize = BitConverter.ToInt32(node.Fields[CRC32.Hash("CNH_UncompressedSize")], 0);
+                                        byte[] bytesOut = new byte[uncompressedSize];
+
+                                        var result = LZO.Decompress(bytes,
+                                                                    0,
+                                                                    bytes.Length,
+                                                                    bytesOut,
+                                                                    0,
+                                                                    ref uncompressedSize);
+
+                                        bytes = bytesOut;
+                                        compressionType = "LZO";
+                                    }
+                                }
+
+                                File.WriteAllBytes(Program.m_Path + "\\tmp", bytes);
+                                Program.ConvertFCB(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+
+                                XmlReaderSettings settings = new XmlReaderSettings
+                                {
+                                    IgnoreComments = true,
+                                    //IgnoreWhitespace = false,
+                                    IgnoreWhitespace = true,
+                                    IgnoreProcessingInstructions = true
+                                };
+                                XmlReader xmlReader = XmlReader.Create(Program.m_Path + "\\tmpc", settings);
+                                xmlReader.MoveToContent();
+                                writer.WriteStartElement(name);
+                                writer.WriteAttributeString("CompressionType", compressionType.ToString());
+                                writer.WriteNode(xmlReader, false);
+                                writer.WriteEndElement();
+                                xmlReader.Close();
+
+                                File.Delete(Program.m_Path + "\\tmp");
+                                File.Delete(Program.m_Path + "\\tmpc");
+                            }
+
+
+
+
+
+
+
+                            if (!skipValue && fieldType != FieldType.BinHex)
+                            {
+                                object data = FieldTypeDeserializers.Deserialize(fieldType, kv.Value, 0, kv.Value.Length, out _);
+                                string dataVal = "";
+
+                                if (data is float single)
+                                    dataVal = single.ToString(CultureInfo.InvariantCulture);
+                                else
+                                    dataVal = data.ToString();
+
+                                writer.WriteAttributeString(prefix + t.Type, dataVal);
+
+                                if (fieldType == FieldType.String)
+                                {
+                                    prevNodeVal = dataVal;
+                                }
+                            }
+
+
+
+                            
+
+
+                            if (!skipValue && (fieldType == FieldType.BinHex))
+                            {
+                                str = Regex.Replace(str, @"\p{C}+", string.Empty).Replace("?", "");
+                                if (str != "")
+                                    writer.WriteAttributeString("strVal", str);
+                            }
+                        }
+
+                        if (!skipValue)
+                        {
+                            writer.WriteAttributeString("type", FieldType.BinHex.GetString());
+                            writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
+                        }
+
+                        if (fieldType != FieldType.String) prevNodeVal = "";
+
+                        writer.WriteEndElement();
+                        writer.Flush();
+
+
+
+
+
+                        /*if (name == "data")
                         {
                             var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(Program.isNewDawn);
                             moveBinDataChunk.Deserialize(writer, kv.Value);
@@ -388,7 +598,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         {
                             writer.WriteAttributeString("type", FieldType.BinHex.GetString());
                             writer.WriteBinHex(kv.Value, 0, kv.Value.Length);
-                        }*/
+                        }*
 
                         // *****************************************************************************************************************
                         // hash32
@@ -396,7 +606,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         else if (isHash32)
                         {
                             /*if (!Program.aaaa.Contains(prevNodeVal) && name == "name")
-                                Program.aaaa.Add(prevNodeVal);*/
+                                Program.aaaa.Add(prevNodeVal);*
                             writer.WriteAttributeString(prefix + "ComputeHash32", prevNodeVal);
                         }
                         // *****************************************************************************************************************
@@ -577,7 +787,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         if (resetPrevNodeVal) prevNodeVal = "";
 
-                        writer.WriteEndElement();
+                        writer.WriteEndElement();*/
                     }
                 }
             }
@@ -608,7 +818,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             writer.WriteEndElement();
         }
 
-        private static void ReadListFiles(byte[] bytes, XmlWriter xmlWriter, string nodeName)
+        private static void ReadListFiles(byte[] bytes, XmlWriter xmlWriter)
         {
             var resIds = Helpers.UnpackArray(bytes, Program.isFC2 ? 4 : 8);
 
@@ -621,13 +831,13 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 else
                     fileName = BitConverter.ToUInt64(fileNameBytes, 0);
 
-                xmlWriter.WriteStartElement(nodeName);
+                xmlWriter.WriteStartElement("Resource");
                 xmlWriter.WriteAttributeString("ID", Program.listFilesDict.ContainsKey(fileName) ? Program.listFilesDict[fileName] : "__Unknown\\" + fileName.ToString("X16"));
                 xmlWriter.WriteEndElement();
             }
         }
 
-        private static void ReadListHashes(byte[] bytes, XmlWriter xmlWriter, string nodeName)
+        private static void ReadListHashes(byte[] bytes, XmlWriter xmlWriter)
         {
             var resIds = Helpers.UnpackArray(bytes, 4);
 
@@ -635,7 +845,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             {
                 uint fileName = BitConverter.ToUInt32(fileNameBytes, 0);
                 
-                xmlWriter.WriteStartElement(nodeName);
+                xmlWriter.WriteStartElement("Resource");
                 xmlWriter.WriteAttributeString("ID", Program.listStringsDict.ContainsKey(fileName) ? Program.listStringsDict[fileName] : fileName.ToString("X16"));
                 xmlWriter.WriteEndElement();
             }

@@ -79,6 +79,8 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             node.NameHash = classNameHash;
 
+            string nodeName = nav.GetAttribute("name", "");
+
             var fields = nav.Select("field");
             while (fields.MoveNext() == true)
             {
@@ -92,109 +94,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                 LoadNameAndHash(fields.Current, out fieldName, out fieldNameHash);
 
-                if (fieldName == "data")
-                {
-                    var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(FCBConverter.Program.isNewDawn);
-                    byte[] data = moveBinDataChunk.Serialize(fields.Current);
-                    node.Fields.Add(fieldNameHash, data);
-                }
-                else if (fieldName == "ResIds")
-                {
-                    WriteListFiles(fields, node, fieldNameHash, "ResId");
-                }
-                else if (fieldName == "TypeIds")
-                {
-                    WriteListHashes(fields, node, fieldNameHash, "TypeId");
-                }
-                else if (fieldName == "ArchetypeResDepList")
-                {
-                    WriteListFiles(fields, node, fieldNameHash, "Resource");
-                }
-                else if (fieldName == "hidShapePoints")
-                {
-                    List<byte[]> resIdsBytes = new List<byte[]>();
-
-                    var resIds = fields.Current.Select("Point");
-                    while (resIds.MoveNext() == true)
-                    {
-                        var data = FieldTypeSerializers.Serialize(FieldType.Vector3, FieldType.Invalid, resIds.Current);
-                        resIdsBytes.Add(data);
-                    }
-
-                    resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
-
-                    node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
-                }
-                else if (fieldName == "hidDescriptor" || fields.Current.GetAttribute("hash", "") == "F38022C8")
-                {
-                    string legacy = fields.Current.GetAttribute("legacy", "");
-                    if (legacy == "1")
-                    {
-                        MemoryStream ms = new MemoryStream();
-
-                        var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
-                        rez.Root = Gibbed.Dunia2.ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("hidDescriptor"));
-                        rez.Serialize(ms);
-
-                        node.Fields.Add(fieldNameHash, ms.ToArray());
-                    }
-                    else
-                    {
-                        string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
-                        byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
-                        node.Fields.Add(fieldNameHash, bytes);
-                    }
-                }
-                else if (fieldName == "CNH_CompressedData")
-                {
-                    string CNH_CompressedData = fields.Current.SelectSingleNode("CNH_CompressedData").InnerXml;
-                    File.WriteAllText(Program.m_Path + "\\tmp", CNH_CompressedData);
-                    Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
-
-                    byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
-
-                    string compressionType = fields.Current.SelectSingleNode("CNH_CompressedData").GetAttribute("CompressionType", "");
-
-                    byte[] compressedBytes = null;
-
-                    if (compressionType == "LZ4")
-                        compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
-
-                    if (compressionType == "LZO")
-                    {
-                        int compressedSize = bytes.Length + (bytes.Length / 16) + 64 + 3; // weird magic
-                        compressedBytes = new byte[compressedSize];
-
-                        var result = Gibbed.Dunia2.FileFormats.LZO.Compress(bytes,
-                                                    0,
-                                                    bytes.Length,
-                                                    compressedBytes,
-                                                    0,
-                                                    ref compressedSize);
-
-                        Array.Resize(ref compressedBytes, compressedSize);
-                    }
-
-                    List<byte[]> output = new List<byte[]>
-                    {
-                        compressedBytes
-                    };
-
-                    output.Insert(0, BitConverter.GetBytes(compressedBytes.Length));
-
-                    node.Fields.Add(fieldNameHash, output.SelectMany(output => output).ToArray());
-
-                    node.Fields.Add(CRC32.Hash("CNH_UncompressedSize"), BitConverter.GetBytes(bytes.Length));
-                    node.Fields.Add(CRC32.Hash("CNH_CompressedSize"), BitConverter.GetBytes(compressedBytes.Length));
-
-                    File.Delete(Program.m_Path + "\\tmp");
-                    File.Delete(Program.m_Path + "\\tmpc");
-                }
-                else if (fieldName == "CNH_UncompressedSize" || fieldName == "CNH_CompressedSize")
-                {
-                    // do nothing
-                }
-                else if (fieldName == "ArchetypeNamesStores")
+                if (fieldName == "ArchetypeNamesStores")
                 {
                     List<byte[]> ArchetypeNameIds = new List<byte[]>();
                     List<byte[]> ArchetypeIds = new List<byte[]>();
@@ -225,19 +125,123 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     node.Fields.Add(CRC32.Hash("ArchetypeIds"), ArchetypeIds.SelectMany(byteArr => byteArr).ToArray());
                     node.Fields.Add(CRC32.Hash("ArchetypeNameStrings"), ArchetypeNameStrings.SelectMany(byteArr => byteArr).ToArray());
                 }
-                else if (fieldName == "buffer")
+
+
+                var t = DefinitionsLoader.Process(nodeName, fieldNameHash.ToString("X8"), "", fieldName, node.NameHash.ToString("X8"), "", true);
+
+                if (t.Action == "MoveBinDataChunk")
                 {
-                    string buffer = fields.Current.SelectSingleNode("buffer").InnerXml;
-                    File.WriteAllText(Program.m_Path + "\\tmp", buffer);
-                    Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
-
-                    byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
-                    node.Fields.Add(fieldNameHash, bytes);
-
-                    File.Delete(Program.m_Path + "\\tmp");
-                    File.Delete(Program.m_Path + "\\tmpc");
+                    var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(FCBConverter.Program.isNewDawn);
+                    byte[] data = moveBinDataChunk.Serialize(fields.Current);
+                    node.Fields.Add(fieldNameHash, data);
                 }
-                else
+
+                if (t.Action == "ReadListFiles")
+                {
+                    WriteListFiles(fields, node, fieldNameHash, "ResId");
+                }
+
+                if (t.Action == "ReadListHashes")
+                {
+                    WriteListHashes(fields, node, fieldNameHash, "TypeId");
+                }
+
+                if (t.Action == "ShapePoints")
+                {
+                    List<byte[]> resIdsBytes = new List<byte[]>();
+
+                    var resIds = fields.Current.Select("Point");
+                    while (resIds.MoveNext() == true)
+                    {
+                        var data = FieldTypeSerializers.Serialize(FieldType.Vector3, FieldType.Invalid, resIds.Current);
+                        resIdsBytes.Add(data);
+                    }
+
+                    resIdsBytes.Insert(0, BitConverter.GetBytes(resIdsBytes.Count));
+
+                    node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
+                }
+
+                if (t.Action == "XMLRML")
+                {
+                    string legacy = fields.Current.GetAttribute("legacy", "");
+                    if (legacy == "1")
+                    {
+                        MemoryStream ms = new MemoryStream();
+
+                        var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
+                        rez.Root = Gibbed.Dunia2.ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("hidDescriptor"));
+                        rez.Serialize(ms);
+
+                        node.Fields.Add(fieldNameHash, ms.ToArray());
+                    }
+                    else
+                    {
+                        string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
+                        byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
+                        node.Fields.Add(fieldNameHash, bytes);
+                    }
+                }
+
+                if (t.Action == "CompressedFCB")
+                {
+                    if (fieldName == "buffer")
+                    {
+                        string buffer = fields.Current.SelectSingleNode("buffer").InnerXml;
+                        File.WriteAllText(Program.m_Path + "\\tmp", buffer);
+                        Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+
+                        byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
+                        node.Fields.Add(fieldNameHash, bytes);
+
+                        File.Delete(Program.m_Path + "\\tmp");
+                        File.Delete(Program.m_Path + "\\tmpc");
+                    }
+                    else
+                    {
+                        string CNH_CompressedData = fields.Current.SelectSingleNode("CNH_CompressedData").InnerXml;
+                        File.WriteAllText(Program.m_Path + "\\tmp", CNH_CompressedData);
+                        Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+
+                        byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
+
+                        string compressionType = fields.Current.SelectSingleNode("CNH_CompressedData").GetAttribute("CompressionType", "");
+
+                        byte[] compressedBytes = null;
+
+                        if (compressionType == "LZ4")
+                            compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+
+                        if (compressionType == "LZO")
+                        {
+                            int compressedSize = bytes.Length + (bytes.Length / 16) + 64 + 3; // weird magic
+                            compressedBytes = new byte[compressedSize];
+
+                            var result = Gibbed.Dunia2.FileFormats.LZO.Compress(bytes,
+                                                        0,
+                                                        bytes.Length,
+                                                        compressedBytes,
+                                                        0,
+                                                        ref compressedSize);
+
+                            Array.Resize(ref compressedBytes, compressedSize);
+                        }
+
+                        List<byte[]> output = new List<byte[]> { compressedBytes };
+
+                        output.Insert(0, BitConverter.GetBytes(compressedBytes.Length));
+
+                        node.Fields.Add(fieldNameHash, output.SelectMany(output => output).ToArray());
+
+                        node.Fields.Add(CRC32.Hash("CNH_UncompressedSize"), BitConverter.GetBytes(bytes.Length));
+                        node.Fields.Add(CRC32.Hash("CNH_CompressedSize"), BitConverter.GetBytes(compressedBytes.Length));
+
+                        File.Delete(Program.m_Path + "\\tmp");
+                        File.Delete(Program.m_Path + "\\tmpc");
+                    }
+                }
+
+                if (t.Action == "")
                 {
                     FieldType fieldType;
                     var fieldTypeName = fields.Current.GetAttribute("type", "");

@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"D:\\Desktop\\9015398120832740.ark.fcb\""
+      "commandLineArgs": "\"d:\\Documents\\fc4_fc5_tools\\FCBConverter\\bin_debug\\net6.0-windows\\patch.dbt.fcb\""
     }
   }
 }

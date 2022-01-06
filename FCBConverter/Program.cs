@@ -554,6 +554,8 @@ dwOffset = 176762
             if (file.EndsWith("entitylibrarynamestoresid.fcb"))
                 isEntLibNamesStores = true;
 
+            DefinitionsLoader.Parse(file);
+
             try
             {
                 if (file.EndsWith("_replace.txt"))
