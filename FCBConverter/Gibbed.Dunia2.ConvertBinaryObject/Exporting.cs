@@ -414,6 +414,42 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 File.Delete(Program.m_Path + "\\tmpc");
                             }
 
+                            if (t.Action == "SectorData")
+                            {
+                                MemoryStream ms = new(kv.Value);
+                                int len = ms.ReadValueS32();
+                                byte[] bytes = ms.ReadBytes(len);
+                                ms.Close();
+
+                                ms = new(bytes);
+                                uint childCount = ms.ReadValueU32();
+                                ms.ReadValueU32();
+                                for (int i = 0; i < childCount; i++)
+                                {
+                                    long padding = ms.Position + (8 - (ms.Position % 8)) % 8;
+                                    ms.Seek(padding, SeekOrigin.Begin);
+
+                                    ulong id = ms.ReadValueU64();
+                                    float posX = ms.ReadValueF32();
+                                    float posY = ms.ReadValueF32();
+                                    float posZ = ms.ReadValueF32();
+                                    float rotX = ms.ReadValueF32();
+                                    float rotY = ms.ReadValueF32();
+                                    float rotZ = ms.ReadValueF32();
+                                    ulong arkID = ms.ReadValueU64();
+                                    string objName = ms.ReadStringZ();
+
+                                    writer.WriteStartElement("object");
+                                    writer.WriteAttributeString("ID", id.ToString());
+                                    writer.WriteAttributeString("Position", $"{posX.ToString(CultureInfo.InvariantCulture)},{posY.ToString(CultureInfo.InvariantCulture)},{posZ.ToString(CultureInfo.InvariantCulture)}");
+                                    writer.WriteAttributeString("Rotation", $"{rotX.ToString(CultureInfo.InvariantCulture)},{rotY.ToString(CultureInfo.InvariantCulture)},{rotZ.ToString(CultureInfo.InvariantCulture)}");
+                                    writer.WriteAttributeString("ArkID", arkID.ToString());
+                                    writer.WriteAttributeString("Name", objName);
+                                    writer.WriteEndElement();
+                                }
+                                ms.Close();
+                            }
+
 
 
 

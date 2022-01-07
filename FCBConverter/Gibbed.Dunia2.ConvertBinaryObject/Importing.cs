@@ -49,6 +49,7 @@ using FCBConverter;
 using Gibbed.Dunia2.BinaryObjectInfo;
 using Gibbed.Dunia2.BinaryObjectInfo.Definitions;
 using Gibbed.Dunia2.FileFormats;
+using Gibbed.IO;
 
 namespace Gibbed.Dunia2.ConvertBinaryObject
 {
@@ -239,6 +240,52 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         File.Delete(Program.m_Path + "\\tmp");
                         File.Delete(Program.m_Path + "\\tmpc");
                     }
+                }
+
+                if (t.Action == "SectorData")
+                {
+                    MemoryStream ms = new();
+                    ms.WriteValueU32(0);
+                    ms.WriteValueU32(0);
+
+                    uint cnt = 0;
+
+                    var objects = fields.Current.Select("object");
+                    while (objects.MoveNext() == true)
+                    {
+                        long padding = ms.Position + (8 - (ms.Position % 8)) % 8;
+                        ms.Seek(padding, SeekOrigin.Begin);
+
+                        string[] pos = objects.Current.GetAttribute("Position", "").Split(',');
+                        string[] rot = objects.Current.GetAttribute("Rotation", "").Split(',');
+
+                        ms.WriteValueU64(ulong.Parse(objects.Current.GetAttribute("ID", "")));
+                        ms.WriteValueF32(float.Parse(pos[0]));
+                        ms.WriteValueF32(float.Parse(pos[1]));
+                        ms.WriteValueF32(float.Parse(pos[2]));
+                        ms.WriteValueF32(float.Parse(rot[0]));
+                        ms.WriteValueF32(float.Parse(rot[1]));
+                        ms.WriteValueF32(float.Parse(rot[2]));
+                        ms.WriteValueU64(ulong.Parse(objects.Current.GetAttribute("ArkID", "")));
+                        ms.WriteStringZ(objects.Current.GetAttribute("Name", ""));
+
+                        cnt++;
+                    }
+
+                    ms.Seek(0, SeekOrigin.Begin);
+                    ms.WriteValueU32(cnt);
+
+                    byte[] data = ms.ToArray();
+                    ms.Close();
+
+                    ms = new();
+                    ms.WriteValueS32(data.Length);
+                    ms.WriteBytes(data);
+                    ms.Close();
+
+                    data = ms.ToArray();
+
+                    node.Fields.Add(fieldNameHash, data);
                 }
 
                 if (t.Action == "")

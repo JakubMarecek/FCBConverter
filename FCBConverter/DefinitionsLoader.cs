@@ -124,6 +124,7 @@ namespace FCBConverter
                         {
                             defReturnVal.Type = defField.Type;
                             defReturnVal.Action = defField.Action;
+                            defReturnVal.Comment = defField.Comment;
                             return defReturnVal;
                         }
                     }
