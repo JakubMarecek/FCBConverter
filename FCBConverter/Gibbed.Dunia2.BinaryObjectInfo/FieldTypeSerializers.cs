@@ -20,16 +20,14 @@
  *    distribution.
  */
 
+using Gibbed.Dunia2.FileFormats;
+using Gibbed.IO;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
-using Gibbed.Dunia2.BinaryObjectInfo.Definitions;
-using Gibbed.Dunia2.FileFormats;
-using Gibbed.IO;
 
 namespace Gibbed.Dunia2.BinaryObjectInfo
 {
