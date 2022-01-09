@@ -44,6 +44,9 @@ namespace FCBConverter
         public static Dictionary<uint, string> listStringsDict = new Dictionary<uint, string>();
 
         static readonly string settingsFile = @"\FCBConverterSettings.xml";
+        static readonly string defsFile = @"\FCBConverterDefinitions.xml";
+
+        static DefinitionsLoader definitionLoader;
 
         public static bool isCompressEnabled = true;
         public static bool isCombinedMoveFile = false;
@@ -53,7 +56,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20211130-2200";
+        public static string version = "20220109-1330";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -554,7 +557,7 @@ dwOffset = 176762
             if (file.EndsWith("entitylibrarynamestoresid.fcb"))
                 isEntLibNamesStores = true;
 
-            DefinitionsLoader.Parse(file);
+            definitionLoader = new DefinitionsLoader(m_Path + defsFile, file);
 
             try
             {
@@ -1158,8 +1161,7 @@ dwOffset = 176762
 
                     var root = nav.SelectSingleNode("/object");
 
-                    var importing = new Gibbed.Dunia2.ConvertBinaryObject.Importing();
-                    bof.Root = importing.Import(basePath, root);
+                    bof.Root = Gibbed.Dunia2.ConvertBinaryObject.Importing.Import(basePath, root, definitionLoader);
 
                     MemoryStream ms = new MemoryStream();
                     bof.Serialize(ms);
@@ -1248,7 +1250,7 @@ dwOffset = 176762
 
                     var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
                     bof.Deserialize(new MemoryStream(eee));
-                    Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(workingOriginalFile.Replace(".fcb", ".fcb.lzo"), bof);
+                    Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(workingOriginalFile.Replace(".fcb", ".fcb.lzo"), bof, definitionLoader);
                 }
                 else
                 {
@@ -1398,7 +1400,7 @@ dwOffset = 176762
             bof.Deserialize(input);
             input.Close();
 
-            Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(outputPath, bof);
+            Gibbed.Dunia2.ConvertBinaryObject.Exporting.Export(outputPath, bof, definitionLoader);
         }
 
         public static void ConvertXML(string inputPath, string outputPath)
@@ -1412,8 +1414,7 @@ dwOffset = 176762
 
             var root = nav.SelectSingleNode("/object");
 
-            var importing = new Gibbed.Dunia2.ConvertBinaryObject.Importing();
-            bof.Root = importing.Import(basePath, root);
+            bof.Root = Gibbed.Dunia2.ConvertBinaryObject.Importing.Import(basePath, root, definitionLoader);
 
             var output = File.Create(outputPath);
             bof.Serialize(output);

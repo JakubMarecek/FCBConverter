@@ -8,12 +8,15 @@ namespace FCBConverter
 {
     public class DefinitionsLoader
     {
-        static List<DefFile> Files = new();
-        static List<DefObject> Objects = new();
+        List<DefFile> Files = new();
+        List<DefObject> Objects = new();
+        List<DefGlobal> Globals = new();
 
-        public static void Parse(string file)
+        public DefinitionsLoader(string conf, string file)
         {
-            XDocument xmlDoc = XDocument.Load("a.xml");
+            Console.WriteLine("Loading definitions...");
+
+            XDocument xmlDoc = XDocument.Load(conf);
             XElement root = xmlDoc.Element("FCBConverter");
 
             IEnumerable<XElement> xFiles = root.Elements("File");
@@ -23,17 +26,16 @@ namespace FCBConverter
                 defFile.Name = xFile.Attribute("name").Value;
                 defFile.Objects = new();
 
-                IEnumerable<XElement> xObjects = xFile.Elements("object");
-                foreach (XElement xObject in xObjects)
-                {
-                    DefObject defObject = new DefObject();
-                    defObject.Name = xObject.Attribute("name").Value;
-                    defObject.Hash = xObject.Attribute("hash").Value;
-                    defObject.Action = xObject.Attribute("action")?.Value;
-                    defObject.Lists = new();
-                    defObject.Fields = new();
+                defFile.Objects.AddRange(ParseObjects(xFile));
 
-                    IEnumerable<XElement> xConditionLists = xObject.Elements("ConditionList");
+                XElement xGlobal = xFile.Element("Globals");
+                if (xGlobal != null)
+                {
+                    DefGlobal defGlobal = new DefGlobal();
+                    defGlobal.Lists = new();
+                    defGlobal.Fields = new();
+
+                    IEnumerable<XElement> xConditionLists = xGlobal.Elements("ConditionList");
                     foreach (XElement xConditionList in xConditionLists)
                     {
                         string t = xConditionList.Attribute("type").Value;
@@ -44,27 +46,12 @@ namespace FCBConverter
                         defList.ForceType = xConditionList.Attribute("forceType").Value;
                         defList.Action = xConditionList.Attribute("action")?.Value;
                         defList.Array = ParseConditionArray(xConditionList.Element("ConditionArray"));
-                        defObject.Lists.Add(defList);
+                        defGlobal.Lists.Add(defList);
                     }
 
-                    IEnumerable<XElement> xFields = xObject.Elements("field");
-                    foreach (XElement xField in xFields)
-                    {
-                        string t = xField.Attribute("type").Value;
-                        _ = Enum.TryParse(t, out FieldType fieldType);
+                    defGlobal.Fields.AddRange(ParseFields(xGlobal));
 
-                        DefField defField = new DefField();
-                        defField.Hash = xField.Attribute("hash").Value;
-                        defField.Name = xField.Attribute("name").Value;
-                        defField.Type = fieldType;
-                        defField.ForceType = xField.Attribute("forceType").Value;
-                        defField.Action = xField.Attribute("action").Value;
-                        defField.ListFromParent = xField.Attribute("listFromParent")?.Value;
-                        defField.Comment = xField.Attribute("comment")?.Value;
-                        defObject.Fields.Add(defField);
-                    }
-
-                    defFile.Objects.Add(defObject);
+                    defFile.Global = defGlobal;
                 }
 
                 Files.Add(defFile);
@@ -75,11 +62,14 @@ namespace FCBConverter
                 if (defFile1.Name == "" || file.Contains(defFile1.Name))
                 {
                     Objects.AddRange(defFile1.Objects);
+                    Globals.Add(defFile1.Global);
                 }
             }
+
+            Console.WriteLine("Definitions loaded.");
         }
 
-        private static DefConditionArray ParseConditionArray(XElement parent)
+        private DefConditionArray ParseConditionArray(XElement parent)
         {
             DefConditionArray a = new();
             a.Type = parent.Attribute("type").Value;
@@ -105,20 +95,74 @@ namespace FCBConverter
             return a;
         }
 
-        public static DefReturnVal Process(string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists)
+        private IEnumerable<DefField> ParseFields(XElement parent)
+        {
+            List<DefField> fields = new List<DefField>();
+
+            IEnumerable<XElement> xFields = parent.Elements("field");
+            foreach (XElement xField in xFields)
+            {
+                string t = xField.Attribute("type").Value;
+                _ = Enum.TryParse(t, out FieldType fieldType);
+
+                DefField defField = new DefField();
+                defField.Hash = xField.Attribute("hash").Value;
+                defField.Name = xField.Attribute("name").Value;
+                defField.Type = fieldType;
+                defField.ForceType = xField.Attribute("forceType").Value;
+                defField.Action = xField.Attribute("action").Value;
+                defField.ListFromParent = xField.Attribute("listFromParent")?.Value;
+                defField.Comment = xField.Attribute("comment")?.Value;
+                fields.Add(defField);
+            }
+
+            return fields;
+        }
+
+        private IEnumerable<DefObject> ParseObjects(XElement parent)
+        {
+            List<DefObject> objects = new List<DefObject>();
+
+            IEnumerable<XElement> xObjects = parent.Elements("object");
+            foreach (XElement xObject in xObjects)
+            {
+                DefObject defObject = new DefObject();
+                defObject.Name = xObject.Attribute("name").Value;
+                defObject.Hash = xObject.Attribute("hash").Value;
+                defObject.Action = xObject.Attribute("action")?.Value;
+                defObject.Fields = new();
+                defObject.Objects = new();
+
+                defObject.Fields.AddRange(ParseFields(xObject));
+
+                IEnumerable<XElement> xObjectsChild = xObject.Elements("object");
+                foreach (XElement xObjectChild in xObjectsChild)
+                {
+                    defObject.Objects.AddRange(ParseObjects(xObjectChild));
+                }
+
+                objects.Add(defObject);
+            }
+
+            return objects;
+        }
+
+
+
+
+        public DefReturnVal Process(DefObject pntDefObject, string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists)
         {
             DefReturnVal defReturnVal = new DefReturnVal();
             defReturnVal.Type = FieldType.BinHex;
 
-            foreach (DefObject defObject in Objects)
+            if (pntDefObject != null)
             {
                 if (
-                    (defObject.Name != "" && defObject.Name == objectName) ||
-                    (defObject.Hash != "" && defObject.Hash == objectHash) ||
-                    (defObject.Name == "" && defObject.Hash == "")
+                    (pntDefObject.Name != "" && pntDefObject.Name == objectName) ||
+                    (pntDefObject.Hash != "" && pntDefObject.Hash == objectHash)
                     )
                 {
-                    foreach (DefField defField in defObject.Fields)
+                    foreach (DefField defField in pntDefObject.Fields)
                     {
                         if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
                         {
@@ -128,10 +172,50 @@ namespace FCBConverter
                             return defReturnVal;
                         }
                     }
-
-                    if (useLists)
+                }
+            }
+            else
+            {
+                foreach (DefObject defObject in Objects)
+                {
+                    if (
+                        (defObject.Name != "" && defObject.Name == objectName) ||
+                        (defObject.Hash != "" && defObject.Hash == objectHash)
+                        )
                     {
-                        foreach (DefList defList in defObject.Lists)
+                        foreach (DefField defField in defObject.Fields)
+                        {
+                            if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
+                            {
+                                defReturnVal.Type = defField.Type;
+                                defReturnVal.Action = defField.Action;
+                                defReturnVal.Comment = defField.Comment;
+                                return defReturnVal;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            if (useLists)
+            {
+                foreach (DefGlobal defGlobal in Globals)
+                {
+                    if (defGlobal != null)
+                    {
+                        foreach (DefField defField in defGlobal.Fields)
+                        {
+                            if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
+                            {
+                                defReturnVal.Type = defField.Type;
+                                defReturnVal.Action = defField.Action;
+                                defReturnVal.Comment = defField.Comment;
+                                return defReturnVal;
+                            }
+                        }
+
+                        foreach (DefList defList in defGlobal.Lists)
                         {
                             bool p = Process(defList.Array, binaryHex, fieldName, str);
                             if (p)
@@ -148,20 +232,27 @@ namespace FCBConverter
             return defReturnVal;
         }
 
-        public static DefReturnVal ProcessObject(string objectName, string objectHash)
+        public DefReturnVal ProcessObject(DefObject pntDefObject, string objectName, string objectHash)
         {
             DefReturnVal defReturnVal = new DefReturnVal();
             defReturnVal.Type = FieldType.BinHex;
 
-            foreach (DefObject defObject in Objects)
+            List<DefObject> defObjectsToProcess;
+
+            if (pntDefObject != null)
+                defObjectsToProcess = pntDefObject.Objects;
+            else
+                defObjectsToProcess = Objects;
+
+            foreach (DefObject defObject in defObjectsToProcess)
             {
                 if (
                     (defObject.Name != "" && defObject.Name == objectName) ||
-                    (defObject.Hash != "" && defObject.Hash == objectHash) ||
-                    (defObject.Name == "" && defObject.Hash == "")
+                    (defObject.Hash != "" && defObject.Hash == objectHash)
                     )
                 {
                     defReturnVal.Action = defObject.Action;
+                    defReturnVal.CurrentObject = defObject;
                     return defReturnVal;
                 }
             }
@@ -169,7 +260,7 @@ namespace FCBConverter
             return defReturnVal;
         }
 
-        private static bool Process(DefConditionArray arr, string binaryHex, string name, string str)
+        private bool Process(DefConditionArray arr, string binaryHex, string name, string str)
         {
             bool useAnd = arr.Type == "and";
 
@@ -256,80 +347,91 @@ namespace FCBConverter
 
             return tempCond;
         }
+    }
 
-        public class DefReturnVal
-        {
-            public FieldType Type { get; set; }
+    public class DefReturnVal
+    {
+        public FieldType Type { get; set; }
 
-            public string Action { get; set; }
+        public string Action { get; set; }
 
-            public string Comment { get; set; }
-        }
+        public string Comment { get; set; }
 
-        public class DefFile
-        {
-            public string Name { get; set; }
+        public DefObject CurrentObject { get; set; }
+    }
 
-            public List<DefObject> Objects { get; set; }
-        }
+    public class DefFile
+    {
+        public string Name { get; set; }
 
-        public class DefObject
-        {
-            public string Hash { get; set; }
+        public List<DefObject> Objects { get; set; }
 
-            public string Name { get; set; }
+        public DefGlobal Global { get; set; }
+    }
 
-            public string Action { get; set; }
+    public class DefObject
+    {
+        public string Hash { get; set; }
 
-            public List<DefList> Lists { get; set; }
+        public string Name { get; set; }
 
-            public List<DefField> Fields { get; set; }
-        }
+        public string Action { get; set; }
 
-        public class DefField
-        {
-            public FieldType Type { get; set; }
+        public List<DefField> Fields { get; set; }
 
-            public string Hash { get; set; }
+        public List<DefObject> Objects { get; set; }
+    }
 
-            public string Name { get; set; }
+    public class DefGlobal
+    {
+        public List<DefField> Fields { get; set; }
 
-            public string ForceType { get; set; }
+        public List<DefList> Lists { get; set; }
+    }
 
-            public string Action { get; set; }
+    public class DefField
+    {
+        public FieldType Type { get; set; }
 
-            public string Comment { get; set; }
+        public string Hash { get; set; }
 
-            public string ListFromParent { get; set; }
-        }
+        public string Name { get; set; }
 
-        public class DefList
-        {
-            public FieldType Type { get; set; }
+        public string ForceType { get; set; }
 
-            public string ForceType { get; set; }
+        public string Action { get; set; }
 
-            public string Action { get; set; }
+        public string Comment { get; set; }
 
-            public DefConditionArray Array { get; set; }
-        }
+        public string ListFromParent { get; set; }
+    }
 
-        public class DefCondition
-        {
-            public string Action { get; set; }
+    public class DefList
+    {
+        public FieldType Type { get; set; }
 
-            public string Value { get; set; }
+        public string ForceType { get; set; }
 
-            public string Type { get; set; }
-        }
+        public string Action { get; set; }
 
-        public class DefConditionArray
-        {
-            public string Type { set; get; }
+        public DefConditionArray Array { get; set; }
+    }
 
-            public List<DefCondition> Conditions { get; set; }
+    public class DefCondition
+    {
+        public string Action { get; set; }
 
-            public List<DefConditionArray> Arrays { get; set; }
-        }
+        public string Value { get; set; }
+
+        public string Type { get; set; }
+    }
+
+    public class DefConditionArray
+    {
+        public string Type { set; get; }
+
+        public List<DefCondition> Conditions { get; set; }
+
+        public List<DefConditionArray> Arrays { get; set; }
     }
 }

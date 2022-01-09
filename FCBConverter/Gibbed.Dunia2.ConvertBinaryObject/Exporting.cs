@@ -55,7 +55,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 {
     public static class Exporting
     {
-        public static void Export(string outputPath, BinaryObjectFile bof)
+        public static void Export(string outputPath, BinaryObjectFile bof, DefinitionsLoader defLoader)
         {
             string fld = Path.GetDirectoryName(outputPath) + "\\" + Path.GetFileNameWithoutExtension(outputPath) + "\\";
 
@@ -76,7 +76,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 writer.WriteComment(Program.xmlheader);
                 writer.WriteComment(Program.xmlheaderfcb);
                 writer.WriteComment(Program.xmlheaderthanks);
-                WriteNode(writer, new BinaryObject[0], bof.Root, outputPath);
+                WriteNode(writer, new BinaryObject[0], bof.Root, outputPath, defLoader, null);
                 writer.WriteEndDocument();
             }
         }
@@ -84,7 +84,9 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
         private static void WriteNode(XmlWriter writer,
                                       IEnumerable<BinaryObject> parentChain,
                                       BinaryObject node,
-                                      string outputPath)
+                                      string outputPath,
+                                      DefinitionsLoader defLoader,
+                                      DefObject defObject)
         {
             var chain = parentChain.Concat(new[] { node });
             /*
@@ -106,7 +108,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             writer.WriteStartElement("object");
 
-            var to = DefinitionsLoader.ProcessObject(nodeName, node.NameHash.ToString("X8"));
+            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"));
+
+            if (to.CurrentObject != null)
+                defObject = to.CurrentObject;
 
             if (to.Action == "External" && parentChain.Any())
             {
@@ -150,7 +155,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     writer2.WriteComment(Program.xmlheader);
                     writer2.WriteComment(Program.xmlheaderfcb);
                     writer2.WriteComment(Program.xmlheaderthanks);
-                    WriteNode(writer2, new BinaryObject[0], node, outputPath);
+                    WriteNode(writer2, new BinaryObject[0], node, outputPath, defLoader, defObject);
                     writer2.WriteEndDocument();
                 }
 
@@ -271,7 +276,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else
                         {
-                            var t = DefinitionsLoader.Process(nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true);
+                            var t = defLoader.Process(defObject, nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true);
                             fieldType = t.Type;
 
                             if (t.Comment != null & t.Comment != "")
@@ -284,7 +289,16 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                             {
                                 uint v = BitConverter.ToUInt32(kv.Value, 0);
                                 if (Program.listStringsDict.ContainsKey(v))
+                                {
                                     writer.WriteAttributeString("value-" + t.Type, Program.listStringsDict[v]);
+                                    skipValue = false;
+                                    fieldType = FieldType.BinHex;
+                                }
+                                else
+                                {
+                                    skipValue = false;
+                                    fieldType = FieldType.Hash32;
+                                }
                             }
 
                             if (t.Action == "XMLRML")
@@ -392,6 +406,17 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                     }
                                 }
 
+                                var bof = new BinaryObjectFile();
+                                var input = new MemoryStream(bytes);
+                                bof.Deserialize(input);
+                                input.Close();
+
+                                writer.WriteStartElement(name);
+                                writer.WriteAttributeString("CompressionType", compressionType.ToString());
+                                WriteNode(writer, new BinaryObject[0], bof.Root, outputPath, defLoader, null);
+                                writer.WriteEndElement();
+
+                                /*
                                 File.WriteAllBytes(Program.m_Path + "\\tmp", bytes);
                                 Program.ConvertFCB(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
 
@@ -404,6 +429,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 };
                                 XmlReader xmlReader = XmlReader.Create(Program.m_Path + "\\tmpc", settings);
                                 xmlReader.MoveToContent();
+
                                 writer.WriteStartElement(name);
                                 writer.WriteAttributeString("CompressionType", compressionType.ToString());
                                 writer.WriteNode(xmlReader, false);
@@ -411,10 +437,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 xmlReader.Close();
 
                                 File.Delete(Program.m_Path + "\\tmp");
-                                File.Delete(Program.m_Path + "\\tmpc");
+                                File.Delete(Program.m_Path + "\\tmpc");*/
                             }
 
-                            if (t.Action == "SectorData")
+                            if (t.Action == "InstancesSectorData")
                             {
                                 MemoryStream ms = new(kv.Value);
                                 int len = ms.ReadValueS32();
@@ -466,7 +492,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 else
                                     dataVal = data.ToString();
 
-                                writer.WriteAttributeString(prefix + t.Type, dataVal);
+                                writer.WriteAttributeString(prefix + fieldType.ToString(), dataVal);
 
                                 if (fieldType == FieldType.String)
                                 {
@@ -479,7 +505,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                             
 
 
-                            if (!skipValue && (fieldType == FieldType.BinHex))
+                            if (!skipValue && fieldType == FieldType.BinHex && (t.Action == null || t.Action == ""))
                             {
                                 str = Regex.Replace(str, @"\p{C}+", string.Empty).Replace("?", "");
                                 if (str != "")
@@ -830,7 +856,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             foreach (var childNode in node.Children)
             {
-                WriteNode(writer, chain, childNode, outputPath);
+                WriteNode(writer, chain, childNode, outputPath, defLoader, defObject);
             }
 
             /*

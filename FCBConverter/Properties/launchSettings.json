@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"d:\\Documents\\fc4_fc5_tools\\FCBConverter\\bin_debug\\net6.0-windows\\worldsector_14618.data.fcb\""
+      "commandLineArgs": "\"d:\\Documents\\fc4_fc5_tools\\FCBConverter\\bin_debug\\net6.0-windows\\nomadobjecttemplates_rt_new.fcb\""
     }
   }
 }

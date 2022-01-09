@@ -55,21 +55,19 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 {
     public class Importing
     {
-        public Importing()
-        {
-        }
-
-        public BinaryObject Import(string basePath, XPathNavigator nav)
+        public static BinaryObject Import(string basePath, XPathNavigator nav, DefinitionsLoader defLoader)
         {
             var root = new BinaryObject();
-            ReadNode(root, new BinaryObject[0], basePath, nav);
+            ReadNode(root, new BinaryObject[0], basePath, nav, defLoader, null);
             return root;
         }
 
-        private void ReadNode(BinaryObject node,
+        private static void ReadNode(BinaryObject node,
                               IEnumerable<BinaryObject> parentChain,
                               string basePath,
-                              XPathNavigator nav)
+                              XPathNavigator nav,
+                              DefinitionsLoader defLoader,
+                              DefObject defObject)
         {
             var chain = parentChain.Concat(new[] {node});
 
@@ -81,6 +79,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             node.NameHash = classNameHash;
 
             string nodeName = nav.GetAttribute("name", "");
+
+            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"));
+
+            if (to.CurrentObject != null)
+                defObject = to.CurrentObject;
 
             var fields = nav.Select("field");
             while (fields.MoveNext() == true)
@@ -128,7 +131,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
 
 
-                var t = DefinitionsLoader.Process(nodeName, fieldNameHash.ToString("X8"), "", fieldName, node.NameHash.ToString("X8"), "", true);
+                DefReturnVal t = defLoader.Process(defObject, nodeName, fieldNameHash.ToString("X8"), "", fieldName ?? "", node.NameHash.ToString("X8"), "", true);
+
+                if (t.Action == "FindInDictionarySkip")
+                    t.Action = "";
 
                 if (t.Action == "MoveBinDataChunk")
                 {
@@ -139,12 +145,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                 if (t.Action == "ReadListFiles")
                 {
-                    WriteListFiles(fields, node, fieldNameHash, "ResId");
+                    WriteListFiles(fields, node, fieldNameHash);
                 }
 
                 if (t.Action == "ReadListHashes")
                 {
-                    WriteListHashes(fields, node, fieldNameHash, "TypeId");
+                    WriteListHashes(fields, node, fieldNameHash);
                 }
 
                 if (t.Action == "ShapePoints")
@@ -170,15 +176,15 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     {
                         MemoryStream ms = new MemoryStream();
 
-                        var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
-                        rez.Root = Gibbed.Dunia2.ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("hidDescriptor"));
+                        var rez = new XmlResourceFile();
+                        rez.Root = ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("*[1]")); //.SelectSingleNode("hidDescriptor")
                         rez.Serialize(ms);
 
                         node.Fields.Add(fieldNameHash, ms.ToArray());
                     }
                     else
                     {
-                        string hidDescriptor = fields.Current.SelectSingleNode("hidDescriptor").OuterXml;
+                        string hidDescriptor = fields.Current.InnerXml;
                         byte[] bytes = FieldTypeSerializers.Serialize(FieldType.String, hidDescriptor);
                         node.Fields.Add(fieldNameHash, bytes);
                     }
@@ -188,7 +194,20 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     if (fieldName == "buffer")
                     {
-                        string buffer = fields.Current.SelectSingleNode("buffer").InnerXml;
+                        XPathNavigator buffer = fields.Current.SelectSingleNode("buffer").SelectSingleNode("object");
+
+                        var root = new BinaryObject();
+                        ReadNode(root, new BinaryObject[0], basePath, buffer, defLoader, null);
+
+                        var bof = new BinaryObjectFile();
+                        bof.Root = root;
+
+                        MemoryStream ms = new();
+                        bof.Serialize(ms);
+
+                        node.Fields.Add(fieldNameHash, ms.ToArray());
+
+                        /*
                         File.WriteAllText(Program.m_Path + "\\tmp", buffer);
                         Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
 
@@ -196,15 +215,22 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         node.Fields.Add(fieldNameHash, bytes);
 
                         File.Delete(Program.m_Path + "\\tmp");
-                        File.Delete(Program.m_Path + "\\tmpc");
+                        File.Delete(Program.m_Path + "\\tmpc");*/
                     }
                     else
                     {
-                        string CNH_CompressedData = fields.Current.SelectSingleNode("CNH_CompressedData").InnerXml;
-                        File.WriteAllText(Program.m_Path + "\\tmp", CNH_CompressedData);
-                        Program.ConvertXML(Program.m_Path + "\\tmp", Program.m_Path + "\\tmpc");
+                        XPathNavigator CNH_CompressedData = fields.Current.SelectSingleNode("CNH_CompressedData").SelectSingleNode("object");
 
-                        byte[] bytes = File.ReadAllBytes(Program.m_Path + "\\tmpc");
+                        var root = new BinaryObject();
+                        ReadNode(root, new BinaryObject[0], basePath, CNH_CompressedData, defLoader, null);
+
+                        var bof = new BinaryObjectFile();
+                        bof.Root = root;
+
+                        MemoryStream ms = new();
+                        bof.Serialize(ms);
+
+                        byte[] bytes = ms.ToArray();
 
                         string compressionType = fields.Current.SelectSingleNode("CNH_CompressedData").GetAttribute("CompressionType", "");
 
@@ -236,13 +262,10 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         node.Fields.Add(CRC32.Hash("CNH_UncompressedSize"), BitConverter.GetBytes(bytes.Length));
                         node.Fields.Add(CRC32.Hash("CNH_CompressedSize"), BitConverter.GetBytes(compressedBytes.Length));
-
-                        File.Delete(Program.m_Path + "\\tmp");
-                        File.Delete(Program.m_Path + "\\tmpc");
                     }
                 }
 
-                if (t.Action == "SectorData")
+                if (t.Action == "InstancesSectorData")
                 {
                     MemoryStream ms = new();
                     ms.WriteValueU32(0);
@@ -260,12 +283,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         string[] rot = objects.Current.GetAttribute("Rotation", "").Split(',');
 
                         ms.WriteValueU64(ulong.Parse(objects.Current.GetAttribute("ID", "")));
-                        ms.WriteValueF32(float.Parse(pos[0]));
-                        ms.WriteValueF32(float.Parse(pos[1]));
-                        ms.WriteValueF32(float.Parse(pos[2]));
-                        ms.WriteValueF32(float.Parse(rot[0]));
-                        ms.WriteValueF32(float.Parse(rot[1]));
-                        ms.WriteValueF32(float.Parse(rot[2]));
+                        ms.WriteValueF32(float.Parse(pos[0], CultureInfo.InvariantCulture));
+                        ms.WriteValueF32(float.Parse(pos[1], CultureInfo.InvariantCulture));
+                        ms.WriteValueF32(float.Parse(pos[2], CultureInfo.InvariantCulture));
+                        ms.WriteValueF32(float.Parse(rot[0], CultureInfo.InvariantCulture));
+                        ms.WriteValueF32(float.Parse(rot[1], CultureInfo.InvariantCulture));
+                        ms.WriteValueF32(float.Parse(rot[2], CultureInfo.InvariantCulture));
                         ms.WriteValueU64(ulong.Parse(objects.Current.GetAttribute("ArkID", "")));
                         ms.WriteStringZ(objects.Current.GetAttribute("Name", ""));
 
@@ -288,7 +311,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     node.Fields.Add(fieldNameHash, data);
                 }
 
-                if (t.Action == "")
+                if (t.Action == null || t.Action == "")
                 {
                     FieldType fieldType;
                     var fieldTypeName = fields.Current.GetAttribute("type", "");
@@ -324,12 +347,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             while (children.MoveNext() == true)
             {
                 var child = new BinaryObject();
-                LoadChildNode(child, chain, basePath, children.Current);
+                LoadChildNode(child, chain, basePath, children.Current, defLoader, defObject);
                 node.Children.Add(child);
             }
         }
 
-        private void HandleChildNode(BinaryObject node,
+        /*private static void HandleChildNode(BinaryObject node,
                                      IEnumerable<BinaryObject> chain,
                                      string basePath,
                                      XPathNavigator nav)
@@ -343,17 +366,20 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             return;
 
             throw new InvalidOperationException();
-        }
+        }*/
 
-        private void LoadChildNode(BinaryObject node,
+        private static void LoadChildNode(BinaryObject node,
                                    IEnumerable<BinaryObject> chain,
                                    string basePath,
-                                   XPathNavigator nav)
+                                   XPathNavigator nav,
+                                   DefinitionsLoader defLoader,
+                                   DefObject defObject)
         {
             var external = nav.GetAttribute("external", "");
             if (string.IsNullOrWhiteSpace(external) == true)
             {
-                HandleChildNode(node, chain, basePath, nav);
+                ReadNode(node, chain, basePath, nav, defLoader, defObject);
+                //HandleChildNode(node, chain, basePath, nav);
                 return;
             }
 
@@ -369,53 +395,9 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     throw new InvalidOperationException();
                 }
 
-                HandleChildNode(node, chain, Path.GetDirectoryName(inputPath), root);
+                ReadNode(node, chain, Path.GetDirectoryName(inputPath), root, defLoader, null);
+                //HandleChildNode(node, chain, Path.GetDirectoryName(inputPath), root);
             }
-        }
-
-        private static uint? GetClassDefinitionByField(string classFieldName, uint? classFieldHash, XPathNavigator nav)
-        {
-            uint? hash = null;
-
-            if (string.IsNullOrEmpty(classFieldName) == false)
-            {
-                var fieldByName = nav.SelectSingleNode("field[@name=\"" + classFieldName + "\"]");
-                if (fieldByName != null)
-                {
-                    uint temp;
-                    if (uint.TryParse(fieldByName.Value,
-                                      NumberStyles.AllowHexSpecifier,
-                                      CultureInfo.InvariantCulture,
-                                      out temp) == false)
-                    {
-                        throw new InvalidOperationException();
-                    }
-                    hash = temp;
-                }
-            }
-
-            if (hash.HasValue == false &&
-                classFieldHash.HasValue == true)
-            {
-                var fieldByHash =
-                    nav.SelectSingleNode("field[@hash=\"" +
-                                         classFieldHash.Value.ToString("X8", CultureInfo.InvariantCulture) +
-                                         "\"]");
-                if (fieldByHash != null)
-                {
-                    uint temp;
-                    if (uint.TryParse(fieldByHash.Value,
-                                      NumberStyles.AllowHexSpecifier,
-                                      CultureInfo.InvariantCulture,
-                                      out temp) == false)
-                    {
-                        throw new InvalidOperationException();
-                    }
-                    hash = temp;
-                }
-            }
-
-            return hash;
         }
 
         private static void LoadNameAndHash(XPathNavigator nav, out string name, out uint hash)
@@ -433,11 +415,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             hash = name != null ? CRC32.Hash(name) : uint.Parse(hashAttribute, NumberStyles.AllowHexSpecifier);
         }
 
-        private static void WriteListFiles(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash, string nodeName)
+        private static void WriteListFiles(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash)
         {
             List<byte[]> resIdsBytes = new List<byte[]>();
 
-            var resIds = fields.Current.Select(nodeName);
+            var resIds = fields.Current.Select("Resource");
             while (resIds.MoveNext() == true)
             {
                 if (Program.isFC2)
@@ -455,11 +437,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
             node.Fields.Add(fieldNameHash, resIdsBytes.SelectMany(byteArr => byteArr).ToArray());
         }
 
-        private static void WriteListHashes(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash, string nodeName)
+        private static void WriteListHashes(XPathNodeIterator fields, BinaryObject node, uint fieldNameHash)
         {
             List<byte[]> resIdsBytes = new List<byte[]>();
 
-            var resIds = fields.Current.Select(nodeName);
+            var resIds = fields.Current.Select("Resource");
             while (resIds.MoveNext() == true)
             {
                 var value = Program.listStringsDict.FirstOrDefault(a => a.Value == resIds.Current.GetAttribute("ID", "")).Key;
