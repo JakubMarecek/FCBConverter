@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Globalization;
 
 namespace Gibbed.Dunia2.FileFormats
 {
@@ -32,10 +33,7 @@ namespace Gibbed.Dunia2.FileFormats
 
         public override string ToString()
         {
-            return string.Format("{0},{1},{2}",
-                                 this.X,
-                                 this.Y,
-                                 this.Z);
+            return $"{X.ToString(CultureInfo.InvariantCulture)},{Y.ToString(CultureInfo.InvariantCulture)},{Z.ToString(CultureInfo.InvariantCulture)}";
         }
 
         public override bool Equals(object obj)
