@@ -42,6 +42,32 @@ namespace FCBConverterGUI
         int hideFacesSelSkel = 0;
         int hideFacesSelMat = 0;
 
+        private void SetItemChecked(string item)
+        {
+            int index = GetItemIndex(item);
+
+            if (index < 0) return;
+
+            checkedListBox1.SetItemChecked(index, true);
+        }
+
+        private int GetItemIndex(string item)
+        {
+            int index = 0;
+
+            foreach (object o in checkedListBox1.Items)
+            {
+                if (item == o.ToString())
+                {
+                    return index;
+                }
+
+                index++;
+            }
+
+            return -1;
+        }
+
         struct HideFacesStruct
         {
             public ulong id;
@@ -67,6 +93,7 @@ namespace FCBConverterGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            radioButton8.Checked = true;
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -201,7 +228,10 @@ namespace FCBConverterGUI
             try
             {
                 listView1.Items.Clear();
-                listView2.Items.Clear();
+                foreach (int i in checkedListBox1.CheckedIndices)
+                {
+                    checkedListBox1.SetItemCheckState(i, CheckState.Unchecked);
+                }
 
                 Process process = new Process();
                 process.StartInfo.FileName = "FCBConverter.exe";
@@ -230,7 +260,7 @@ namespace FCBConverterGUI
                                 foreach (string valsV in valsData)
                                 {
                                     if (valsV != "" && valsV != "0")
-                                        listView2.Items.Add(GetMeshParts()[valsV]);
+                                        SetItemChecked(GetMeshParts()[valsV]);
                                 }
                             }
 
@@ -378,24 +408,6 @@ namespace FCBConverterGUI
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            Form1 form1 = new Form1();
-            form1.MeshParts = GetMeshParts();
-            if (form1.ShowDialog() == DialogResult.OK)
-            {
-                listView2.Items.Add(form1.SelectedValue);
-            }
-        }
-
-        private void button7_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem eachItem in listView2.SelectedItems)
-            {
-                listView2.Items.Remove(eachItem);
-            }
-        }
-
         private void button14_Click(object sender, EventArgs e)
         {
             Form2 form2 = new Form2();
@@ -445,9 +457,9 @@ namespace FCBConverterGUI
             }
 
             outParamVal += "|MESHPARTHIDE;";
-            for (int i = 0; i < listView2.Items.Count; i++)
+            for (int i = 0; i < checkedListBox1.CheckedItems.Count; i++)
             {
-                string meshID = GetMeshParts().FirstOrDefault(x => x.Value == listView2.Items[i].Text).Key;
+                string meshID = GetMeshParts().FirstOrDefault(x => x.Value == checkedListBox1.CheckedItems[i].ToString()).Key;
                 outParamVal += (i > 0 ? "," : "") + meshID;
             }
 
@@ -635,6 +647,20 @@ namespace FCBConverterGUI
             }
 
             sourceXbgSkelHideFacesFP[hideFacesSelSkel][hideFacesSelMat] = hideFacesStructsNew;
+        }
+
+        private void radioButton9_CheckedChanged(object sender, EventArgs e)
+        {
+            checkedListBox1.Items.Clear();
+            foreach (KeyValuePair<string, string> pair in MeshParts.meshPartsNewDawn)
+                checkedListBox1.Items.Add(pair.Value);
+        }
+
+        private void radioButton8_CheckedChanged(object sender, EventArgs e)
+        {
+            checkedListBox1.Items.Clear();
+            foreach (KeyValuePair<string, string> pair in MeshParts.meshPartsFC5)
+                checkedListBox1.Items.Add(pair.Value);
         }
     }
 }

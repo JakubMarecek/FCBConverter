@@ -52,6 +52,7 @@ namespace FCBConverterGUI
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton12 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
@@ -76,6 +77,7 @@ namespace FCBConverterGUI
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.radioButton8 = new System.Windows.Forms.RadioButton();
             this.radioButton9 = new System.Windows.Forms.RadioButton();
@@ -85,8 +87,6 @@ namespace FCBConverterGUI
             this.button17 = new System.Windows.Forms.Button();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label20 = new System.Windows.Forms.Label();
-            this.listView2 = new System.Windows.Forms.ListView();
-            this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
             this.button15 = new System.Windows.Forms.Button();
             this.textBox10 = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
@@ -97,10 +97,8 @@ namespace FCBConverterGUI
             this.label16 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.button8 = new System.Windows.Forms.Button();
-            this.button7 = new System.Windows.Forms.Button();
             this.button18 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.button22 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -120,7 +118,6 @@ namespace FCBConverterGUI
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.radioButton12 = new System.Windows.Forms.RadioButton();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -441,6 +438,19 @@ namespace FCBConverterGUI
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Choose Far Cry Game";
             // 
+            // radioButton12
+            // 
+            this.radioButton12.AutoSize = true;
+            this.radioButton12.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.radioButton12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioButton12.Location = new System.Drawing.Point(330, 19);
+            this.radioButton12.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton12.Name = "radioButton12";
+            this.radioButton12.Size = new System.Drawing.Size(37, 18);
+            this.radioButton12.TabIndex = 11;
+            this.radioButton12.Text = "6";
+            this.radioButton12.UseVisualStyleBackColor = true;
+            // 
             // radioButton3
             // 
             this.radioButton3.AutoSize = true;
@@ -478,6 +488,7 @@ namespace FCBConverterGUI
             this.radioButton5.Name = "radioButton5";
             this.radioButton5.Size = new System.Drawing.Size(59, 18);
             this.radioButton5.TabIndex = 10;
+            this.radioButton5.TabStop = true;
             this.radioButton5.Text = "5, ND";
             this.radioButton5.UseVisualStyleBackColor = true;
             // 
@@ -713,6 +724,7 @@ namespace FCBConverterGUI
             // tabPage3
             // 
             this.tabPage3.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage3.Controls.Add(this.checkedListBox1);
             this.tabPage3.Controls.Add(this.groupBox4);
             this.tabPage3.Controls.Add(this.numericUpDown2);
             this.tabPage3.Controls.Add(this.label22);
@@ -720,7 +732,6 @@ namespace FCBConverterGUI
             this.tabPage3.Controls.Add(this.button17);
             this.tabPage3.Controls.Add(this.numericUpDown1);
             this.tabPage3.Controls.Add(this.label20);
-            this.tabPage3.Controls.Add(this.listView2);
             this.tabPage3.Controls.Add(this.button15);
             this.tabPage3.Controls.Add(this.textBox10);
             this.tabPage3.Controls.Add(this.label19);
@@ -728,10 +739,8 @@ namespace FCBConverterGUI
             this.tabPage3.Controls.Add(this.label16);
             this.tabPage3.Controls.Add(this.label10);
             this.tabPage3.Controls.Add(this.button8);
-            this.tabPage3.Controls.Add(this.button7);
             this.tabPage3.Controls.Add(this.button18);
             this.tabPage3.Controls.Add(this.button14);
-            this.tabPage3.Controls.Add(this.button4);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage3.Name = "tabPage3";
@@ -739,6 +748,15 @@ namespace FCBConverterGUI
             this.tabPage3.Size = new System.Drawing.Size(934, 374);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Fix XBG for FP";
+            // 
+            // checkedListBox1
+            // 
+            this.checkedListBox1.CheckOnClick = true;
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.Location = new System.Drawing.Point(4, 132);
+            this.checkedListBox1.Name = "checkedListBox1";
+            this.checkedListBox1.Size = new System.Drawing.Size(438, 229);
+            this.checkedListBox1.TabIndex = 70;
             // 
             // groupBox4
             // 
@@ -757,7 +775,6 @@ namespace FCBConverterGUI
             // radioButton8
             // 
             this.radioButton8.AutoSize = true;
-            this.radioButton8.Checked = true;
             this.radioButton8.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioButton8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.radioButton8.Location = new System.Drawing.Point(20, 22);
@@ -765,9 +782,9 @@ namespace FCBConverterGUI
             this.radioButton8.Name = "radioButton8";
             this.radioButton8.Size = new System.Drawing.Size(73, 18);
             this.radioButton8.TabIndex = 8;
-            this.radioButton8.TabStop = true;
             this.radioButton8.Text = "Far Cry 5";
             this.radioButton8.UseVisualStyleBackColor = true;
+            this.radioButton8.CheckedChanged += new System.EventHandler(this.radioButton8_CheckedChanged);
             // 
             // radioButton9
             // 
@@ -781,6 +798,7 @@ namespace FCBConverterGUI
             this.radioButton9.TabIndex = 9;
             this.radioButton9.Text = "Far Cry New Dawn";
             this.radioButton9.UseVisualStyleBackColor = true;
+            this.radioButton9.CheckedChanged += new System.EventHandler(this.radioButton9_CheckedChanged);
             // 
             // numericUpDown2
             // 
@@ -860,27 +878,6 @@ namespace FCBConverterGUI
             this.label20.TabIndex = 62;
             this.label20.Text = "Select skeleton ID to write edits";
             // 
-            // listView2
-            // 
-            this.listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader4});
-            this.listView2.FullRowSelect = true;
-            this.listView2.GridLines = true;
-            this.listView2.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(4, 132);
-            this.listView2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(438, 199);
-            this.listView2.TabIndex = 61;
-            this.listView2.UseCompatibleStateImageBehavior = false;
-            this.listView2.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "Mesh name";
-            this.columnHeader4.Width = 404;
-            // 
             // button15
             // 
             this.button15.FlatStyle = System.Windows.Forms.FlatStyle.System;
@@ -923,7 +920,6 @@ namespace FCBConverterGUI
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(450, 132);
             this.listView1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView1.Name = "listView1";
@@ -983,19 +979,6 @@ namespace FCBConverterGUI
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
-            // button7
-            // 
-            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button7.Location = new System.Drawing.Point(325, 337);
-            this.button7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(117, 29);
-            this.button7.TabIndex = 54;
-            this.button7.Text = "Remove";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
-            // 
             // button18
             // 
             this.button18.Enabled = false;
@@ -1022,19 +1005,6 @@ namespace FCBConverterGUI
             this.button14.Text = "Add";
             this.button14.UseVisualStyleBackColor = true;
             this.button14.Click += new System.EventHandler(this.button14_Click);
-            // 
-            // button4
-            // 
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button4.Location = new System.Drawing.Point(4, 337);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(117, 29);
-            this.button4.TabIndex = 54;
-            this.button4.Text = "Add";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // tabPage4
             // 
@@ -1271,19 +1241,6 @@ namespace FCBConverterGUI
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
             // 
-            // radioButton12
-            // 
-            this.radioButton12.AutoSize = true;
-            this.radioButton12.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.radioButton12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioButton12.Location = new System.Drawing.Point(330, 19);
-            this.radioButton12.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.radioButton12.Name = "radioButton12";
-            this.radioButton12.Size = new System.Drawing.Size(37, 18);
-            this.radioButton12.TabIndex = 11;
-            this.radioButton12.Text = "6";
-            this.radioButton12.UseVisualStyleBackColor = true;
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1369,8 +1326,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader columnHeader1;
@@ -1378,8 +1333,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button14;
-        private System.Windows.Forms.ListView listView2;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.Button button15;
         private System.Windows.Forms.TextBox textBox10;
         private System.Windows.Forms.Label label19;
@@ -1415,5 +1368,6 @@ namespace FCBConverterGUI
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.RadioButton radioButton12;
+        private System.Windows.Forms.CheckedListBox checkedListBox1;
     }
 }
