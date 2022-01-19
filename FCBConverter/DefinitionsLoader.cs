@@ -134,12 +134,7 @@ namespace FCBConverter
                 defObject.Objects = new();
 
                 defObject.Fields.AddRange(ParseFields(xObject));
-
-                IEnumerable<XElement> xObjectsChild = xObject.Elements("object");
-                foreach (XElement xObjectChild in xObjectsChild)
-                {
-                    defObject.Objects.AddRange(ParseObjects(xObjectChild));
-                }
+                defObject.Objects.AddRange(ParseObjects(xObject));
 
                 objects.Add(defObject);
             }
