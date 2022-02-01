@@ -121,10 +121,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     Directory.CreateDirectory(fld);
 
                 string fileName;
-                if (node.Fields.ContainsKey(CRC32.Hash("Name")))
+                if (node.Fields.ContainsKey(CRC32.Hash(to.FieldForName)))
                 {
-                    byte[] nameBytes = node.Fields[CRC32.Hash("Name")];
+                    byte[] nameBytes = node.Fields[CRC32.Hash(to.FieldForName)];
                     fileName = Encoding.ASCII.GetString(nameBytes, 0, nameBytes.Length - 1);
+                    fileName = fileName.Replace(":", "_");
                 }
                 else
                 {

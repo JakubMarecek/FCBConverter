@@ -130,6 +130,7 @@ namespace FCBConverter
                 defObject.Name = xObject.Attribute("name").Value;
                 defObject.Hash = xObject.Attribute("hash").Value;
                 defObject.Action = xObject.Attribute("action")?.Value;
+                defObject.FieldForName = xObject.Attribute("FieldForName")?.Value;
                 defObject.Fields = new();
                 defObject.Objects = new();
 
@@ -248,6 +249,7 @@ namespace FCBConverter
                 {
                     defReturnVal.Action = defObject.Action;
                     defReturnVal.CurrentObject = defObject;
+                    defReturnVal.FieldForName = defObject.FieldForName;
                     return defReturnVal;
                 }
             }
@@ -352,6 +354,8 @@ namespace FCBConverter
 
         public string Comment { get; set; }
 
+        public string FieldForName { get; set; }
+
         public DefObject CurrentObject { get; set; }
     }
 
@@ -371,6 +375,8 @@ namespace FCBConverter
         public string Name { get; set; }
 
         public string Action { get; set; }
+
+        public string FieldForName { get; set; }
 
         public List<DefField> Fields { get; set; }
 
