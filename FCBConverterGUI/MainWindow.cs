@@ -260,7 +260,11 @@ namespace FCBConverterGUI
                                 foreach (string valsV in valsData)
                                 {
                                     if (valsV != "" && valsV != "0")
-                                        SetItemChecked(GetMeshParts()[valsV]);
+                                    {
+                                        var mp = GetMeshParts();
+                                        if (mp.ContainsKey(valsV))
+                                            SetItemChecked(mp[valsV]);
+                                    }
                                 }
                             }
 
@@ -619,8 +623,13 @@ namespace FCBConverterGUI
 
             foreach (HideFacesStruct hideFacesStruct in hideFacesStructs.Values)
             {
+                var mp = GetMeshParts();
+                string mps = mp.ElementAt(0).Value;
+                if (mp.ContainsKey(hideFacesStruct.id.ToString()))
+                    mps = mp[hideFacesStruct.id.ToString()];
+
                 ListViewItem listViewItem = new ListViewItem();
-                listViewItem.Text = GetMeshParts()[hideFacesStruct.id.ToString()];
+                listViewItem.Text = mps;
                 listViewItem.SubItems.Add(hideFacesStruct.start.ToString());
                 listViewItem.SubItems.Add(hideFacesStruct.count.ToString());
                 listView1.Items.Add(listViewItem);
