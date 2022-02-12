@@ -118,6 +118,17 @@ namespace FCBConverterGUI
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox9 = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.textBox13 = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.textBox14 = new System.Windows.Forms.TextBox();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button16 = new System.Windows.Forms.Button();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -135,6 +146,17 @@ namespace FCBConverterGUI
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage2.Controls.Add(this.button7);
+            this.tabPage2.Controls.Add(this.button16);
+            this.tabPage2.Controls.Add(this.label32);
+            this.tabPage2.Controls.Add(this.textBox14);
+            this.tabPage2.Controls.Add(this.label31);
+            this.tabPage2.Controls.Add(this.textBox13);
+            this.tabPage2.Controls.Add(this.label30);
+            this.tabPage2.Controls.Add(this.button3);
+            this.tabPage2.Controls.Add(this.label1);
+            this.tabPage2.Controls.Add(this.textBox9);
+            this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Controls.Add(this.checkBox3);
             this.tabPage2.Controls.Add(this.checkBox2);
             this.tabPage2.Controls.Add(this.checkBox1);
@@ -164,7 +186,7 @@ namespace FCBConverterGUI
             this.checkBox3.AutoSize = true;
             this.checkBox3.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkBox3.Location = new System.Drawing.Point(174, 237);
+            this.checkBox3.Location = new System.Drawing.Point(174, 173);
             this.checkBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -178,7 +200,7 @@ namespace FCBConverterGUI
             this.checkBox2.AutoSize = true;
             this.checkBox2.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkBox2.Location = new System.Drawing.Point(357, 107);
+            this.checkBox2.Location = new System.Drawing.Point(357, 79);
             this.checkBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -192,7 +214,7 @@ namespace FCBConverterGUI
             this.checkBox1.AutoSize = true;
             this.checkBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkBox1.Location = new System.Drawing.Point(174, 107);
+            this.checkBox1.Location = new System.Drawing.Point(174, 79);
             this.checkBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -205,7 +227,7 @@ namespace FCBConverterGUI
             // 
             this.button13.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button13.Location = new System.Drawing.Point(765, 200);
+            this.button13.Location = new System.Drawing.Point(765, 147);
             this.button13.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(29, 20);
@@ -218,7 +240,7 @@ namespace FCBConverterGUI
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(16, 75);
+            this.label9.Location = new System.Drawing.Point(16, 56);
             this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(96, 13);
@@ -228,7 +250,7 @@ namespace FCBConverterGUI
             // textBox8
             // 
             this.textBox8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox8.Location = new System.Drawing.Point(174, 72);
+            this.textBox8.Location = new System.Drawing.Point(174, 53);
             this.textBox8.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox8.Name = "textBox8";
             this.textBox8.Size = new System.Drawing.Size(583, 20);
@@ -239,7 +261,7 @@ namespace FCBConverterGUI
             // 
             this.button12.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button12.Location = new System.Drawing.Point(765, 46);
+            this.button12.Location = new System.Drawing.Point(765, 27);
             this.button12.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(29, 20);
@@ -252,7 +274,7 @@ namespace FCBConverterGUI
             // 
             this.label18.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label18.Location = new System.Drawing.Point(0, 150);
+            this.label18.Location = new System.Drawing.Point(0, 110);
             this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(1080, 1);
@@ -262,7 +284,7 @@ namespace FCBConverterGUI
             // textBox6
             // 
             this.textBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox6.Location = new System.Drawing.Point(174, 200);
+            this.textBox6.Location = new System.Drawing.Point(174, 147);
             this.textBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(583, 20);
@@ -272,7 +294,7 @@ namespace FCBConverterGUI
             // textBox5
             // 
             this.textBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox5.Location = new System.Drawing.Point(174, 46);
+            this.textBox5.Location = new System.Drawing.Point(174, 27);
             this.textBox5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(583, 20);
@@ -283,7 +305,7 @@ namespace FCBConverterGUI
             // 
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button6.Location = new System.Drawing.Point(802, 200);
+            this.button6.Location = new System.Drawing.Point(802, 147);
             this.button6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(108, 20);
@@ -296,7 +318,7 @@ namespace FCBConverterGUI
             // 
             this.label17.AutoSize = true;
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label17.Location = new System.Drawing.Point(410, 166);
+            this.label17.Location = new System.Drawing.Point(410, 131);
             this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(94, 13);
@@ -307,7 +329,7 @@ namespace FCBConverterGUI
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label15.Location = new System.Drawing.Point(16, 203);
+            this.label15.Location = new System.Drawing.Point(16, 150);
             this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(57, 13);
@@ -329,7 +351,7 @@ namespace FCBConverterGUI
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label13.Location = new System.Drawing.Point(16, 50);
+            this.label13.Location = new System.Drawing.Point(16, 31);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(70, 13);
@@ -340,7 +362,7 @@ namespace FCBConverterGUI
             // 
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button5.Location = new System.Drawing.Point(802, 46);
+            this.button5.Location = new System.Drawing.Point(802, 27);
             this.button5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(108, 20);
@@ -1241,6 +1263,129 @@ namespace FCBConverterGUI
             this.pictureBox1.TabIndex = 28;
             this.pictureBox1.TabStop = false;
             // 
+            // button3
+            // 
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button3.Location = new System.Drawing.Point(765, 268);
+            this.button3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(29, 20);
+            this.button3.TabIndex = 60;
+            this.button3.Text = "...";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // label1
+            // 
+            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(0, 205);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(1080, 1);
+            this.label1.TabIndex = 59;
+            this.label1.Text = "Separator2";
+            // 
+            // textBox9
+            // 
+            this.textBox9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textBox9.Location = new System.Drawing.Point(174, 242);
+            this.textBox9.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox9.Name = "textBox9";
+            this.textBox9.Size = new System.Drawing.Size(583, 20);
+            this.textBox9.TabIndex = 58;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label7.Location = new System.Drawing.Point(410, 226);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(94, 13);
+            this.label7.TabIndex = 56;
+            this.label7.Text = "Specific Converter";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label30.Location = new System.Drawing.Point(16, 245);
+            this.label30.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(85, 13);
+            this.label30.TabIndex = 62;
+            this.label30.Text = "Filename in DAT";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label31.Location = new System.Drawing.Point(16, 271);
+            this.label31.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(64, 13);
+            this.label31.TabIndex = 64;
+            this.label31.Text = "Path to FAT";
+            // 
+            // textBox13
+            // 
+            this.textBox13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textBox13.Location = new System.Drawing.Point(174, 268);
+            this.textBox13.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox13.Name = "textBox13";
+            this.textBox13.Size = new System.Drawing.Size(583, 20);
+            this.textBox13.TabIndex = 63;
+            this.textBox13.Text = "C:\\Path\\to\\archive.fat";
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label32.Location = new System.Drawing.Point(16, 297);
+            this.label32.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(70, 13);
+            this.label32.TabIndex = 66;
+            this.label32.Text = "Path to folder";
+            // 
+            // textBox14
+            // 
+            this.textBox14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textBox14.Location = new System.Drawing.Point(174, 294);
+            this.textBox14.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox14.Name = "textBox14";
+            this.textBox14.Size = new System.Drawing.Size(583, 20);
+            this.textBox14.TabIndex = 65;
+            this.textBox14.Text = "E:\\Path\\to\\folder";
+            // 
+            // button7
+            // 
+            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button7.Location = new System.Drawing.Point(765, 294);
+            this.button7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(29, 20);
+            this.button7.TabIndex = 68;
+            this.button7.Text = "...";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // button16
+            // 
+            this.button16.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button16.Location = new System.Drawing.Point(802, 294);
+            this.button16.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(108, 20);
+            this.button16.TabIndex = 67;
+            this.button16.Text = "Unpack";
+            this.button16.UseVisualStyleBackColor = true;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1369,5 +1514,16 @@ namespace FCBConverterGUI
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.RadioButton radioButton12;
         private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox9;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.TextBox textBox13;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.TextBox textBox14;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button button16;
     }
 }

@@ -114,7 +114,8 @@ namespace FCBConverterGUI
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
             {
                 SelectedPath = textBox2.Text,
-                Description = "Selected folder should be empty."
+                Description = "Selected folder should be empty.",
+                AutoUpgradeEnabled = false
             };
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
@@ -132,7 +133,8 @@ namespace FCBConverterGUI
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
             {
                 SelectedPath = textBox4.Text,
-                Description = ""
+                Description = "",
+                AutoUpgradeEnabled = false
             };
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
@@ -165,7 +167,8 @@ namespace FCBConverterGUI
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
             {
                 SelectedPath = textBox5.Text,
-                Description = "All files in selected folder with given mask will be converted."
+                Description = "All files in selected folder with given mask will be converted.",
+                AutoUpgradeEnabled = false
             };
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
@@ -670,6 +673,38 @@ namespace FCBConverterGUI
             checkedListBox1.Items.Clear();
             foreach (KeyValuePair<string, string> pair in MeshParts.meshPartsFC5)
                 checkedListBox1.Items.Add(pair.Value);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "FAT files|*.fat",
+                FileName = textBox13.Text
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox13.Text = openFileDialog.FileName;
+            }
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            CallFCBConverter("\"" + textBox13.Text + "\" \"" + textBox14.Text + "\" \"" + textBox9.Text + "\"");
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
+            {
+                SelectedPath = textBox14.Text,
+                Description = "Selected folder should be empty.",
+                AutoUpgradeEnabled = false
+            };
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox14.Text = folderBrowserDialog.SelectedPath;
+            }
         }
     }
 }
