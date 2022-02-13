@@ -3,8 +3,10 @@ using Gibbed.Dunia2.FileFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace FCBConverter
 {
@@ -61,7 +63,8 @@ namespace FCBConverter
 
             foreach (DefFile defFile1 in Files)
             {
-                if (defFile1.Name == "" || file.Contains(defFile1.Name))
+                //if (defFile1.Name == "" || file.Contains(defFile1.Name))
+                if (defFile1.Name == "" || Regex.IsMatch(file, defFile1.Name))
                 {
                     Objects.AddRange(defFile1.Objects);
                     Globals.Add(defFile1.Global);
@@ -162,7 +165,8 @@ namespace FCBConverter
                     if (n != "")
                         defPrimaryKey.Hash = CRC32.Hash(n);
 
-                    defPrimaryKey.Value = Helpers.StringToByteArray(xPrimaryKey.Attribute("value")?.Value);
+                    defPrimaryKey.ValueBinHex = Helpers.StringToByteArray(xPrimaryKey.Attribute("valueBinHex").Value);
+                    defPrimaryKey.ValueR = xPrimaryKey.Attribute("valueR").Value;
                     defObject.PrimaryKeys.Add(defPrimaryKey);
                 }
 
@@ -175,21 +179,43 @@ namespace FCBConverter
 
 
 
-        public DefReturnVal Process(DefObject pntDefObject, string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists, bool pkNot)
+        public DefReturnVal Process(DefObject pntDefObject, string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists)
         {
             DefReturnVal defReturnVal = new DefReturnVal();
             defReturnVal.Type = FieldType.BinHex;
 
-            if (pkNot)
+            if (pntDefObject != null)
             {
-                if (pntDefObject != null)
+                if (
+                    (pntDefObject.Name != "" && pntDefObject.Name == objectName) ||
+                    (pntDefObject.Hash != "" && pntDefObject.Hash == objectHash)
+                    )
+                {
+                    foreach (DefField defField in pntDefObject.Fields)
+                    {
+                        if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
+                        {
+                            defReturnVal.Type = defField.Type;
+                            defReturnVal.Action = defField.Action;
+                            defReturnVal.Comment = defField.Comment;
+                            defReturnVal.ArrayItemType = defField.ArrayItemType;
+                            defReturnVal.ArrayItemName = defField.ArrayItemName;
+                            return defReturnVal;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (DefObject defObject in Objects)
                 {
                     if (
-                        (pntDefObject.Name != "" && pntDefObject.Name == objectName) ||
-                        (pntDefObject.Hash != "" && pntDefObject.Hash == objectHash)
+                        ((defObject.Name != "" && defObject.Name == objectName) ||
+                        (defObject.Hash != "" && defObject.Hash == objectHash)) &&
+                        defObject.PrimaryKeys == null
                         )
                     {
-                        foreach (DefField defField in pntDefObject.Fields)
+                        foreach (DefField defField in defObject.Fields)
                         {
                             if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
                             {
@@ -199,30 +225,6 @@ namespace FCBConverter
                                 defReturnVal.ArrayItemType = defField.ArrayItemType;
                                 defReturnVal.ArrayItemName = defField.ArrayItemName;
                                 return defReturnVal;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (DefObject defObject in Objects)
-                    {
-                        if (
-                            (defObject.Name != "" && defObject.Name == objectName) ||
-                            (defObject.Hash != "" && defObject.Hash == objectHash)
-                            )
-                        {
-                            foreach (DefField defField in defObject.Fields)
-                            {
-                                if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
-                                {
-                                    defReturnVal.Type = defField.Type;
-                                    defReturnVal.Action = defField.Action;
-                                    defReturnVal.Comment = defField.Comment;
-                                    defReturnVal.ArrayItemType = defField.ArrayItemType;
-                                    defReturnVal.ArrayItemName = defField.ArrayItemName;
-                                    return defReturnVal;
-                                }
                             }
                         }
                     }
@@ -264,7 +266,7 @@ namespace FCBConverter
             return defReturnVal;
         }
 
-        public DefReturnVal ProcessObject(DefObject pntDefObject, string objectName, string objectHash)
+        public DefReturnVal ProcessObject(DefObject pntDefObject, string objectName, string objectHash, Dictionary<uint, byte[]> fields, XPathNavigator nav)
         {
             DefReturnVal defReturnVal = new DefReturnVal();
             defReturnVal.Type = FieldType.BinHex;
@@ -275,7 +277,7 @@ namespace FCBConverter
                 defObjectsToProcess = pntDefObject.Objects;
             else
                 defObjectsToProcess = Objects;
-
+            
             foreach (DefObject defObject in defObjectsToProcess)
             {
                 if (
@@ -283,6 +285,43 @@ namespace FCBConverter
                     (defObject.Hash != "" && defObject.Hash == objectHash)
                     )
                 {
+                    if (fields != null || nav != null)
+                    {
+                        if (defObject.PrimaryKeys != null)
+                        {
+                            bool pkNot = false;
+                            foreach (var pk in defObject.PrimaryKeys)
+                            {
+                                if (fields != null)
+                                {
+                                    foreach (var kv in fields)
+                                    {
+                                        if (kv.Key == pk.Hash && kv.Value.SequenceEqual(pk.ValueBinHex))
+                                        {
+                                            pkNot = true;
+                                        }
+                                    }
+                                }
+
+                                if (nav != null)
+                                {
+                                    var fi = nav.Select("field");
+                                    while (fi.MoveNext() == true)
+                                    {
+                                        LoadNameAndHash(fi.Current, out _, out uint fieldNameHash);
+
+                                        if (fieldNameHash == pk.Hash && (fi.Current.Value.ToLower() == Helpers.ByteArrayToString(pk.ValueBinHex) || fi.Current.Value == pk.ValueR))
+                                        {
+                                            pkNot = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!pkNot) continue;
+                        }
+                    }
+
                     defReturnVal.Action = defObject.Action;
                     defReturnVal.CurrentObject = defObject;
                     defReturnVal.FieldForName = defObject.FieldForName;
@@ -380,6 +419,21 @@ namespace FCBConverter
             }
 
             return tempCond;
+        }
+
+        private static void LoadNameAndHash(XPathNavigator nav, out string name, out uint hash)
+        {
+            var nameAttribute = nav.GetAttribute("name", "");
+            var hashAttribute = nav.GetAttribute("hash", "");
+
+            if (string.IsNullOrWhiteSpace(nameAttribute) == true &&
+                string.IsNullOrWhiteSpace(hashAttribute) == true)
+            {
+                throw new FormatException();
+            }
+
+            name = string.IsNullOrWhiteSpace(nameAttribute) == false ? nameAttribute : null;
+            hash = name != null ? CRC32.Hash(name) : uint.Parse(hashAttribute, NumberStyles.AllowHexSpecifier);
         }
     }
 
@@ -489,6 +543,8 @@ namespace FCBConverter
     {
         public uint Hash { get; set; }
 
-        public byte[] Value { get; set; }
+        public byte[] ValueBinHex { get; set; }
+
+        public string ValueR { get; set; }
     }
 }

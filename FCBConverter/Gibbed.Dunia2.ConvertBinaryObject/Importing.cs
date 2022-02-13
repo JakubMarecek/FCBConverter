@@ -79,7 +79,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             string nodeName = nav.GetAttribute("name", "");
 
-            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"));
+            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"), null, nav);
 
             if (to.CurrentObject != null)
                 defObject = to.CurrentObject;
@@ -130,7 +130,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
 
 
-                DefReturnVal t = defLoader.Process(defObject, nodeName, fieldNameHash.ToString("X8"), "", fieldName ?? "", node.NameHash.ToString("X8"), "", true, false);
+                DefReturnVal t = defLoader.Process(defObject, nodeName, fieldNameHash.ToString("X8"), "", fieldName ?? "", node.NameHash.ToString("X8"), "", true);
 
                 if (t.Action == "FindInDictionarySkip")
                     t.Action = "";
@@ -152,14 +152,14 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     WriteListHashes(fields, node, fieldNameHash);
                 }
 
-                if (t.Action == "ShapePoints")
+                if (t.Action == "Array")
                 {
                     List<byte[]> resIdsBytes = new List<byte[]>();
 
-                    var resIds = fields.Current.Select("Point");
+                    var resIds = fields.Current.Select(t.ArrayItemName);
                     while (resIds.MoveNext() == true)
                     {
-                        var data = FieldTypeSerializers.Serialize(FieldType.Vector3, FieldType.Invalid, resIds.Current);
+                        var data = FieldTypeSerializers.Serialize(t.ArrayItemType, FieldType.Invalid, resIds.Current);
                         resIdsBytes.Add(data);
                     }
 

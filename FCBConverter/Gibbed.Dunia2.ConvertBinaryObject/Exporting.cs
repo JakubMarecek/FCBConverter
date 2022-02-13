@@ -108,7 +108,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
             writer.WriteStartElement("object");
 
-            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"));
+            var to = defLoader.ProcessObject(defObject, nodeName, node.NameHash.ToString("X8"), node.Fields, null);
 
             if (to.CurrentObject != null)
                 defObject = to.CurrentObject;
@@ -231,22 +231,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     string prevNodeVal = "";
 
-                    bool pkNot = true;
-                    if (to.PrimaryKeys != null)
-                    {
-                        pkNot = false;
-                        foreach (var pk in to.PrimaryKeys)
-                        {
-                            foreach (var kv in node.Fields)
-                            {
-                                if (kv.Key == pk.Hash && kv.Value.SequenceEqual(pk.Value))
-                                {
-                                    pkNot = true;
-                                }
-                            }
-                        }
-                    }
-
                     foreach (var kv in node.Fields)
                     {
                         string prefix = "value-";
@@ -293,7 +277,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else
                         {
-                            var t = defLoader.Process(defObject, nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true, pkNot);
+                            var t = defLoader.Process(defObject, nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true);
                             fieldType = t.Type;
 
                             if (t.Comment != null & t.Comment != "")
