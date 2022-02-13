@@ -231,6 +231,22 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 {
                     string prevNodeVal = "";
 
+                    bool pkNot = true;
+                    if (to.PrimaryKeys != null)
+                    {
+                        pkNot = false;
+                        foreach (var pk in to.PrimaryKeys)
+                        {
+                            foreach (var kv in node.Fields)
+                            {
+                                if (kv.Key == pk.Hash && kv.Value.SequenceEqual(pk.Value))
+                                {
+                                    pkNot = true;
+                                }
+                            }
+                        }
+                    }
+
                     foreach (var kv in node.Fields)
                     {
                         string prefix = "value-";
@@ -277,7 +293,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         }
                         else
                         {
-                            var t = defLoader.Process(defObject, nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true);
+                            var t = defLoader.Process(defObject, nodeName, kv.Key.ToString("X8"), binaryHex, name, node.NameHash.ToString("X8"), str, true, pkNot);
                             fieldType = t.Type;
 
                             if (t.Comment != null & t.Comment != "")
@@ -347,26 +363,63 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 ReadListFiles(kv.Value, writer);
                             }
 
-                            if (t.Action == "ShapePoints")
+                            if (t.Action == "Array")
                             {
-                                byte[] trimmed = kv.Value.Skip(4).ToArray();
-                                List<byte[]> unpA = Helpers.UnpackArraySize(trimmed, 12);
-
-                                foreach (byte[] pnt in unpA)
+                                if (t.ArrayItemType == FieldType.Vector2)
                                 {
-                                    byte[] vecX = pnt.Skip(0).Take(4).ToArray();
-                                    byte[] vecY = pnt.Skip(4).Take(4).ToArray();
-                                    byte[] vecZ = pnt.Skip(8).Take(4).ToArray();
+                                    List<byte[]> unpA = Helpers.UnpackArraySize(kv.Value.Skip(4).ToArray(), 8);
 
-                                    float vecfX = BitConverter.ToSingle(vecX, 0);
-                                    float vecfY = BitConverter.ToSingle(vecY, 0);
-                                    float vecfZ = BitConverter.ToSingle(vecZ, 0);
+                                    foreach (byte[] pnt in unpA)
+                                    {
+                                        writer.WriteStartElement(t.ArrayItemName);
+                                        writer.WriteString(
+                                            BitConverter.ToSingle(pnt.Skip(0).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(4).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture)
+                                            );
+                                        writer.WriteEndElement();
+                                    }
+                                }
+                                if (t.ArrayItemType == FieldType.Vector3)
+                                {
+                                    List<byte[]> unpA = Helpers.UnpackArraySize(kv.Value.Skip(4).ToArray(), 12);
 
-                                    writer.WriteStartElement("Point");
-                                    writer.WriteString(vecfX.ToString(CultureInfo.InvariantCulture) + "," +
-                                        vecfY.ToString(CultureInfo.InvariantCulture) + "," +
-                                        vecfZ.ToString(CultureInfo.InvariantCulture));
-                                    writer.WriteEndElement();
+                                    foreach (byte[] pnt in unpA)
+                                    {
+                                        writer.WriteStartElement(t.ArrayItemName);
+                                        writer.WriteString(
+                                            BitConverter.ToSingle(pnt.Skip(0).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(4).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(8).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture)
+                                            );
+                                        writer.WriteEndElement();
+                                    }
+                                }
+                                if (t.ArrayItemType == FieldType.Vector4)
+                                {
+                                    List<byte[]> unpA = Helpers.UnpackArraySize(kv.Value.Skip(4).ToArray(), 16);
+
+                                    foreach (byte[] pnt in unpA)
+                                    {
+                                        writer.WriteStartElement(t.ArrayItemName);
+                                        writer.WriteString(
+                                            BitConverter.ToSingle(pnt.Skip(0).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(4).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(8).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture) + "," +
+                                            BitConverter.ToSingle(pnt.Skip(12).Take(4).ToArray(), 0).ToString(CultureInfo.InvariantCulture)
+                                            );
+                                        writer.WriteEndElement();
+                                    }
+                                }
+                                if (t.ArrayItemType == FieldType.Int32)
+                                {
+                                    List<byte[]> unpA = Helpers.UnpackArraySize(kv.Value.Skip(4).ToArray(), sizeof(int));
+
+                                    foreach (byte[] pnt in unpA)
+                                    {
+                                        writer.WriteStartElement(t.ArrayItemName);
+                                        writer.WriteString(BitConverter.ToInt32(pnt).ToString());
+                                        writer.WriteEndElement();
+                                    }
                                 }
                             }
 

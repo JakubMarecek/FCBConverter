@@ -130,7 +130,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                 }
 
 
-                DefReturnVal t = defLoader.Process(defObject, nodeName, fieldNameHash.ToString("X8"), "", fieldName ?? "", node.NameHash.ToString("X8"), "", true);
+                DefReturnVal t = defLoader.Process(defObject, nodeName, fieldNameHash.ToString("X8"), "", fieldName ?? "", node.NameHash.ToString("X8"), "", true, false);
 
                 if (t.Action == "FindInDictionarySkip")
                     t.Action = "";

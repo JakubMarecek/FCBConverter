@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"d:\\Documents\\fc4_fc5_tools\\FCBConverter\\bin_debug\\net6.0-windows\\9015182595416027.ark.fcb\""
+      "commandLineArgs": "\"C:\\Users\\jakub\\Desktop\\grassam-m-20160526143323.material.bin\""
     }
   }
 }

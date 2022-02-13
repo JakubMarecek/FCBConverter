@@ -1,6 +1,8 @@
 ﻿using Gibbed.Dunia2.BinaryObjectInfo;
+using Gibbed.Dunia2.FileFormats;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -105,6 +107,13 @@ namespace FCBConverter
                 string t = xField.Attribute("type").Value;
                 _ = Enum.TryParse(t, out FieldType fieldType);
 
+                FieldType ft = FieldType.Invalid;
+                string arrItemType = xField.Attribute("ArrayItemType")?.Value;
+                if (arrItemType != null)
+                {
+                    _ = Enum.TryParse(arrItemType, out ft);
+                }
+
                 DefField defField = new DefField();
                 defField.Hash = xField.Attribute("hash").Value;
                 defField.Name = xField.Attribute("name").Value;
@@ -113,6 +122,8 @@ namespace FCBConverter
                 defField.Action = xField.Attribute("action").Value;
                 defField.ListFromParent = xField.Attribute("listFromParent")?.Value;
                 defField.Comment = xField.Attribute("comment")?.Value;
+                defField.ArrayItemType = ft;
+                defField.ArrayItemName = xField.Attribute("ArrayItemName")?.Value;
                 fields.Add(defField);
             }
 
@@ -133,9 +144,27 @@ namespace FCBConverter
                 defObject.FieldForName = xObject.Attribute("FieldForName")?.Value;
                 defObject.Fields = new();
                 defObject.Objects = new();
+                defObject.PrimaryKeys = new();
 
                 defObject.Fields.AddRange(ParseFields(xObject));
                 defObject.Objects.AddRange(ParseObjects(xObject));
+
+                IEnumerable<XElement> xPrimaryKeys = xObject.Elements("primaryKey");
+                foreach (XElement xPrimaryKey in xPrimaryKeys)
+                {
+                    DefPrimaryKey defPrimaryKey = new DefPrimaryKey();
+
+                    string h = xPrimaryKey.Attribute("hash").Value;
+                    if (h != "")
+                        defPrimaryKey.Hash = uint.Parse(h, NumberStyles.AllowHexSpecifier);
+
+                    string n = xPrimaryKey.Attribute("name").Value;
+                    if (n != "")
+                        defPrimaryKey.Hash = CRC32.Hash(n);
+
+                    defPrimaryKey.Value = Helpers.StringToByteArray(xPrimaryKey.Attribute("value")?.Value);
+                    defObject.PrimaryKeys.Add(defPrimaryKey);
+                }
 
                 objects.Add(defObject);
             }
@@ -146,47 +175,54 @@ namespace FCBConverter
 
 
 
-        public DefReturnVal Process(DefObject pntDefObject, string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists)
+        public DefReturnVal Process(DefObject pntDefObject, string objectName, string fieldHash, string binaryHex, string fieldName, string objectHash, string str, bool useLists, bool pkNot)
         {
             DefReturnVal defReturnVal = new DefReturnVal();
             defReturnVal.Type = FieldType.BinHex;
 
-            if (pntDefObject != null)
+            if (pkNot)
             {
-                if (
-                    (pntDefObject.Name != "" && pntDefObject.Name == objectName) ||
-                    (pntDefObject.Hash != "" && pntDefObject.Hash == objectHash)
-                    )
-                {
-                    foreach (DefField defField in pntDefObject.Fields)
-                    {
-                        if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
-                        {
-                            defReturnVal.Type = defField.Type;
-                            defReturnVal.Action = defField.Action;
-                            defReturnVal.Comment = defField.Comment;
-                            return defReturnVal;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (DefObject defObject in Objects)
+                if (pntDefObject != null)
                 {
                     if (
-                        (defObject.Name != "" && defObject.Name == objectName) ||
-                        (defObject.Hash != "" && defObject.Hash == objectHash)
+                        (pntDefObject.Name != "" && pntDefObject.Name == objectName) ||
+                        (pntDefObject.Hash != "" && pntDefObject.Hash == objectHash)
                         )
                     {
-                        foreach (DefField defField in defObject.Fields)
+                        foreach (DefField defField in pntDefObject.Fields)
                         {
                             if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
                             {
                                 defReturnVal.Type = defField.Type;
                                 defReturnVal.Action = defField.Action;
                                 defReturnVal.Comment = defField.Comment;
+                                defReturnVal.ArrayItemType = defField.ArrayItemType;
+                                defReturnVal.ArrayItemName = defField.ArrayItemName;
                                 return defReturnVal;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (DefObject defObject in Objects)
+                    {
+                        if (
+                            (defObject.Name != "" && defObject.Name == objectName) ||
+                            (defObject.Hash != "" && defObject.Hash == objectHash)
+                            )
+                        {
+                            foreach (DefField defField in defObject.Fields)
+                            {
+                                if ((fieldHash != "" && defField.Hash == fieldHash) || (fieldName != "" && defField.Name == fieldName))
+                                {
+                                    defReturnVal.Type = defField.Type;
+                                    defReturnVal.Action = defField.Action;
+                                    defReturnVal.Comment = defField.Comment;
+                                    defReturnVal.ArrayItemType = defField.ArrayItemType;
+                                    defReturnVal.ArrayItemName = defField.ArrayItemName;
+                                    return defReturnVal;
+                                }
                             }
                         }
                     }
@@ -250,6 +286,7 @@ namespace FCBConverter
                     defReturnVal.Action = defObject.Action;
                     defReturnVal.CurrentObject = defObject;
                     defReturnVal.FieldForName = defObject.FieldForName;
+                    defReturnVal.PrimaryKeys = defObject.PrimaryKeys;
                     return defReturnVal;
                 }
             }
@@ -357,6 +394,12 @@ namespace FCBConverter
         public string FieldForName { get; set; }
 
         public DefObject CurrentObject { get; set; }
+
+        public string ArrayItemName { get; set; }
+
+        public FieldType ArrayItemType { get; set; }
+
+        public List<DefPrimaryKey> PrimaryKeys { get; set; }
     }
 
     public class DefFile
@@ -381,6 +424,8 @@ namespace FCBConverter
         public List<DefField> Fields { get; set; }
 
         public List<DefObject> Objects { get; set; }
+
+        public List<DefPrimaryKey> PrimaryKeys { get; set; }
     }
 
     public class DefGlobal
@@ -405,6 +450,10 @@ namespace FCBConverter
         public string Comment { get; set; }
 
         public string ListFromParent { get; set; }
+
+        public string ArrayItemName { get; set; }
+
+        public FieldType ArrayItemType { get; set; }
     }
 
     public class DefList
@@ -434,5 +483,12 @@ namespace FCBConverter
         public List<DefCondition> Conditions { get; set; }
 
         public List<DefConditionArray> Arrays { get; set; }
+    }
+
+    public class DefPrimaryKey
+    {
+        public uint Hash { get; set; }
+
+        public byte[] Value { get; set; }
     }
 }
