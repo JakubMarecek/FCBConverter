@@ -56,7 +56,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20220213-1800";
+        public static string version = "20220615-0000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1781,13 +1781,11 @@ dwOffset = 176762
                     string Unknown2 = Event.Attribute("Unknown2").Value;
                     output.WriteValueU32(uint.Parse(Unknown2), 0);
 
-                    XElement Streams = Event.Element("Streams");
-                    if (Streams != null)
+                    IEnumerable<XElement> Streams = Event.Element("Streams")?.Elements("Stream");
+                    output.WriteValueU32((uint)(Streams != null ? Streams.Count() : 0), 0);
+                    if (Streams != null && Streams.Count() > 0)
                     {
-                        IEnumerable<XElement> Stream = Streams.Elements("Stream");
-                        output.WriteValueU32((uint)Stream.Count(), 0);
-
-                        foreach (XElement Str in Stream)
+                        foreach (XElement Str in Streams)
                         {
                             output.WriteValueU64(GetFileHash(Str.Value), 0);
                         }
