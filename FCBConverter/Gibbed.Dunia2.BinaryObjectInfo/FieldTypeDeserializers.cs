@@ -222,7 +222,7 @@ namespace Gibbed.Dunia2.BinaryObjectInfo
                     }
 
                     int length, o;
-                    for (length = 0, o = offset; data[o] != 0 && o < data.Length; length++, o++)
+                    for (length = 0, o = offset; (data[o] != 0 && data[o] != 10) && o < data.Length; length++, o++)
                     {
                     }
 
@@ -231,12 +231,12 @@ namespace Gibbed.Dunia2.BinaryObjectInfo
                         throw new FormatException("invalid trailing byte value for field type String");
                     }
 
-                    /*
-                    if (data[data.Length - 1] != 0)
+                    
+                    if (data[data.Length - 1] != 0 && data[data.Length - 1] != 10)
                     {
                         throw new FormatException("invalid trailing byte value for field type String");
                     }
-                    */
+                    
 
                     read = length + 1;
                     return Encoding.UTF8.GetString(data, offset, length);

@@ -287,7 +287,7 @@ namespace FCBConverter
                 {
                     if (fields != null || nav != null)
                     {
-                        if (defObject.PrimaryKeys != null)
+                        if (defObject.PrimaryKeys != null && defObject.PrimaryKeys.Any())
                         {
                             bool pkNot = false;
                             foreach (var pk in defObject.PrimaryKeys)

@@ -951,6 +951,7 @@ dwOffset = 176762
             }
             else if (file.EndsWith("soundinfo.bin"))
             {
+                LoadFile(isFC2 ? 5 : 10);
                 SoundInfoConvertBin(file);
                 FIN();
                 return;
@@ -1744,6 +1745,19 @@ dwOffset = 176762
             output.WriteValueU32((uint)InitSoundBanks.Count(), 0);
             output.WriteValueU32((uint)SoundBanks.Count(), 0);
 
+            IEnumerable<XElement> MemoryNodeAssociations = null;
+            IEnumerable<XElement> MemoryNodeAssociations2 = null;
+            if (version == "14")
+            {
+                MemoryNodeAssociations = root.Element("MemoryNodeAssociations").Elements("MemoryNodeAssociation");
+                MemoryNodeAssociations2 = root.Element("MemoryNodeAssociations2").Elements("MemoryNodeAssociation");
+                string SoundChangeList = root.Attribute("SoundChangeList").Value;
+
+                output.WriteValueU32((uint)MemoryNodeAssociations.Count(), 0);
+                output.WriteValueU32(uint.Parse(SoundChangeList), 0);
+                output.WriteValueU32((uint)MemoryNodeAssociations2.Count(), 0);
+            }
+
             foreach (XElement Event in Events)
             {
                 string ShortID = Event.Attribute("ShortID").Value;
@@ -1761,6 +1775,24 @@ dwOffset = 176762
                 output.WriteByte((byte)int.Parse(MaxRadius));
                 output.WriteByte((byte)int.Parse(Unknown));
                 output.WriteValueF32(float.Parse(Duration, CultureInfo.InvariantCulture), 0);
+
+                if (version == "14")
+                {
+                    string Unknown2 = Event.Attribute("Unknown2").Value;
+                    output.WriteValueU32(uint.Parse(Unknown2), 0);
+
+                    XElement Streams = Event.Element("Streams");
+                    if (Streams != null)
+                    {
+                        IEnumerable<XElement> Stream = Streams.Elements("Stream");
+                        output.WriteValueU32((uint)Stream.Count(), 0);
+
+                        foreach (XElement Str in Stream)
+                        {
+                            output.WriteValueU64(GetFileHash(Str.Value), 0);
+                        }
+                    }
+                }
             }
 
             foreach (XElement InitSoundBank in InitSoundBanks)
@@ -1778,6 +1810,29 @@ dwOffset = 176762
                 output.WriteValueU32(uint.Parse(ShortID), 0);
                 output.WriteValueU32(uint.Parse(Unknown), 0);
                 output.WriteValueU64(GetFileHash(bnkFileName), 0);
+            }
+
+            if (version == "14")
+            {
+                foreach (XElement MemoryNodeAssociation in MemoryNodeAssociations)
+                {
+                    string SoundBankID = MemoryNodeAssociation.Attribute("SoundBankID").Value;
+                    string MemoryNodeID = MemoryNodeAssociation.Attribute("MemoryNodeID").Value;
+                    output.WriteValueU32(uint.Parse(SoundBankID), 0);
+                    output.WriteValueU32(uint.Parse(MemoryNodeID), 0);
+                }
+
+                output.WriteBytes(new byte[MemoryNodeAssociations.Count() * 8]);
+
+                foreach (XElement MemoryNodeAssociation in MemoryNodeAssociations2)
+                {
+                    string SoundBankID = MemoryNodeAssociation.Attribute("SoundBankID").Value;
+                    string MemoryNodeID = MemoryNodeAssociation.Attribute("MemoryNodeID").Value;
+                    output.WriteValueU32(uint.Parse(SoundBankID), 0);
+                    output.WriteValueU32(uint.Parse(MemoryNodeID), 0);
+                }
+
+                output.WriteBytes(new byte[MemoryNodeAssociations2.Count() * 8]);
             }
 
             output.Close();
@@ -1806,6 +1861,21 @@ dwOffset = 176762
             uint EventsCount = SoundInfoReader.ReadUInt32();
             uint InitSoundBanksCount = SoundInfoReader.ReadUInt32();
             uint SoundBanksCount = SoundInfoReader.ReadUInt32();
+
+            bool ver14 = Version == 14;
+            uint MemoryNodeAssociationsCount = 0;
+            uint SoundChangeList = 0;
+            uint MemoryNodeAssociations2Count = 0;
+            if (ver14)
+            {
+                MemoryNodeAssociationsCount = SoundInfoReader.ReadUInt32();
+                SoundChangeList = SoundInfoReader.ReadUInt32();
+                MemoryNodeAssociations2Count = SoundInfoReader.ReadUInt32();
+
+                XmlAttribute rootNodeAttributeSoundChangeList = xmlDoc.CreateAttribute("SoundChangeList");
+                rootNodeAttributeSoundChangeList.Value = SoundChangeList.ToString();
+                rootNode.Attributes.Append(rootNodeAttributeSoundChangeList);
+            }
 
             XmlAttribute rootNodeAttributeVersion = xmlDoc.CreateAttribute("Version");
             rootNodeAttributeVersion.Value = Version.ToString();
@@ -1854,6 +1924,31 @@ dwOffset = 176762
                 XmlAttribute EventNodeAttributeDuration = xmlDoc.CreateAttribute("Duration");
                 EventNodeAttributeDuration.Value = Duration.ToString(CultureInfo.InvariantCulture);
                 EventNode.Attributes.Append(EventNodeAttributeDuration);
+
+                if (ver14)
+                {
+                    uint unknown2 = SoundInfoReader.ReadUInt32();
+                    uint StreamsCount = SoundInfoReader.ReadUInt32();
+
+                    XmlAttribute EventNodeAttributeUnknown2 = xmlDoc.CreateAttribute("Unknown2");
+                    EventNodeAttributeUnknown2.Value = unknown2.ToString();
+                    EventNode.Attributes.Append(EventNodeAttributeUnknown2);
+
+                    if (StreamsCount > 0)
+                    {
+                        XmlNode StreamsNode = xmlDoc.CreateElement("Streams");
+                        EventNode.AppendChild(StreamsNode);
+
+                        for (int j = 0; j < StreamsCount; j++)
+                        {
+                            ulong StreamFileNameHash = SoundInfoReader.ReadUInt64();
+
+                            XmlNode StreamNode = xmlDoc.CreateElement("Stream");
+                            StreamNode.InnerText = listFilesDict.ContainsKey(StreamFileNameHash) ? listFilesDict[StreamFileNameHash] : "__Unknown\\" + StreamFileNameHash.ToString("X16");
+                            StreamsNode.AppendChild(StreamNode);
+                        }
+                    }
+                }
             }
 
             XmlNode InitSoundBanksNode = xmlDoc.CreateElement("InitSoundBanks");
@@ -1894,6 +1989,53 @@ dwOffset = 176762
                 XmlAttribute BankNodeAttributebnkFileName = xmlDoc.CreateAttribute("bnkFileName");
                 BankNodeAttributebnkFileName.Value = "soundbinary\\" + ShortID.ToString() + ".bnk";
                 BankNode.Attributes.Append(BankNodeAttributebnkFileName);
+            }
+
+            if (ver14)
+            {
+                XmlNode MemoryNodeAssociationsNode = xmlDoc.CreateElement("MemoryNodeAssociations");
+                rootNode.AppendChild(MemoryNodeAssociationsNode);
+
+                for (int i = 0; i < MemoryNodeAssociationsCount; i++)
+                {
+                    uint SoundBankID = SoundInfoReader.ReadUInt32();
+                    uint MemoryNodeID = SoundInfoReader.ReadUInt32();
+
+                    XmlNode MemoryNodeAssociationNode = xmlDoc.CreateElement("MemoryNodeAssociation");
+                    MemoryNodeAssociationsNode.AppendChild(MemoryNodeAssociationNode);
+
+                    XmlAttribute BankNodeAttributeSoundBankID = xmlDoc.CreateAttribute("SoundBankID");
+                    BankNodeAttributeSoundBankID.Value = SoundBankID.ToString();
+                    MemoryNodeAssociationNode.Attributes.Append(BankNodeAttributeSoundBankID);
+
+                    XmlAttribute BankNodeAttributeMemoryNodeID = xmlDoc.CreateAttribute("MemoryNodeID");
+                    BankNodeAttributeMemoryNodeID.Value = MemoryNodeID.ToString();
+                    MemoryNodeAssociationNode.Attributes.Append(BankNodeAttributeMemoryNodeID);
+                }
+
+                SoundInfoReader.ReadBytes((int)MemoryNodeAssociationsCount * 8);
+
+                XmlNode MemoryNodeAssociations2Node = xmlDoc.CreateElement("MemoryNodeAssociations2");
+                rootNode.AppendChild(MemoryNodeAssociations2Node);
+
+                for (int i = 0; i < MemoryNodeAssociations2Count; i++)
+                {
+                    uint SoundBankID = SoundInfoReader.ReadUInt32();
+                    uint MemoryNodeID = SoundInfoReader.ReadUInt32();
+
+                    XmlNode MemoryNodeAssociationNode = xmlDoc.CreateElement("MemoryNodeAssociation");
+                    MemoryNodeAssociations2Node.AppendChild(MemoryNodeAssociationNode);
+
+                    XmlAttribute BankNodeAttributeSoundBankID = xmlDoc.CreateAttribute("SoundBankID");
+                    BankNodeAttributeSoundBankID.Value = SoundBankID.ToString();
+                    MemoryNodeAssociationNode.Attributes.Append(BankNodeAttributeSoundBankID);
+
+                    XmlAttribute BankNodeAttributeMemoryNodeID = xmlDoc.CreateAttribute("MemoryNodeID");
+                    BankNodeAttributeMemoryNodeID.Value = MemoryNodeID.ToString();
+                    MemoryNodeAssociationNode.Attributes.Append(BankNodeAttributeMemoryNodeID);
+                }
+
+                SoundInfoReader.ReadBytes((int)MemoryNodeAssociations2Count * 8);
             }
 
             SoundInfoReader.Dispose();
