@@ -17,6 +17,7 @@
  */
 
 using Gibbed.IO;
+using K4os.Compression.LZ4;
 using LZ4Sharp;
 using System;
 using System.Collections.Generic;
@@ -2855,6 +2856,21 @@ dwOffset = 176762
                 }
                 else if (fatEntry.CompressionScheme == CompressionScheme.LZ4)
                 {
+                    // for primal
+                    /*TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
+
+                    TDATStream.ReadByte(); // extra byte at begin
+
+                    byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
+                    pDstBuffer = new byte[fatEntry.UncompressedSize];
+
+                    TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
+
+                    LZ4Decompressor64E TLZ4Decompressor64 = new LZ4Decompressor64E();
+                    TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);*/
+
+
+
                     TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
 
                     byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
@@ -2862,8 +2878,7 @@ dwOffset = 176762
 
                     TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
 
-                    LZ4Decompressor64 TLZ4Decompressor64 = new LZ4Decompressor64();
-                    TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);
+                    LZ4Codec.Decode(pSrcBuffer, pDstBuffer);
                 }
                 else
                 {
@@ -3358,6 +3373,16 @@ dwOffset = 176762
                 dwOffset |= (dwCompressedSize & 0xC0000000u) >> 30;
                 dwCompressedSize = (uint)((dwCompressedSize & 0x3FFFFFFFul) >> 0);
                 dwUncompressedSize = (dwUncompressedSize & 0xFFFFFFFCu) >> 2;
+
+                /*dwUncompressedSize = ((dwUncompressedSize >> 2) & 0x3FFFFFFFu);
+                dwFlag = (byte)((dwUncompressedSize >> 0) & 0x3u);
+                dwOffset = ((ulong)(dwUnresolvedOffset << 2) | ((dwCompressedSize >> 30) & 0x3u));
+                dwCompressedSize = (uint)((dwCompressedSize >> 0) & 0x3FFFFFFFul);*/
+
+                /*dwFlag = dwUncompressedSize & 3;
+                dwUncompressedSize = dwUncompressedSize >> 2;
+                dwOffset = (ulong)(dwUnresolvedOffset * 4L) + (dwCompressedSize >> 30);
+                dwCompressedSize = dwCompressedSize & 0x3FFFFFFF;*/
             }
             if (dwVersion == 5)
             {
