@@ -2856,21 +2856,6 @@ dwOffset = 176762
                 }
                 else if (fatEntry.CompressionScheme == CompressionScheme.LZ4)
                 {
-                    // for primal
-                    /*TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
-
-                    TDATStream.ReadByte(); // extra byte at begin
-
-                    byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
-                    pDstBuffer = new byte[fatEntry.UncompressedSize];
-
-                    TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
-
-                    LZ4Decompressor64E TLZ4Decompressor64 = new LZ4Decompressor64E();
-                    TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);*/
-
-
-
                     TDATStream.Seek(fatEntry.Offset, SeekOrigin.Begin);
 
                     byte[] pSrcBuffer = new byte[fatEntry.CompressedSize];
@@ -2878,7 +2863,16 @@ dwOffset = 176762
 
                     TDATStream.Read(pSrcBuffer, 0, (int)fatEntry.CompressedSize);
 
-                    LZ4Codec.Decode(pSrcBuffer, pDstBuffer);
+                    if (dwVersion == 9)
+                    {
+                        LZ4Decompressor64 TLZ4Decompressor64 = new LZ4Decompressor64();
+                        TLZ4Decompressor64.Different = true;
+                        TLZ4Decompressor64.Decompress(pSrcBuffer, pDstBuffer);
+                    }
+                    if (dwVersion > 9)
+                    {
+                        LZ4Codec.Decode(pSrcBuffer, pDstBuffer);
+                    }
                 }
                 else
                 {
