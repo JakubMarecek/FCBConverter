@@ -342,3 +342,5 @@ healthchecksdb
 /FCBConverter/FCBConverterStrings.list
 /bin_debug
 /bin_arm/net5.0-windows/linux-arm
+/Publish.bat
+/PublishSign.bat

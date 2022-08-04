@@ -410,7 +410,7 @@ namespace FCBConverter
                         stream.CopyTo(memoryStream);
                         byte[] array = memoryStream.ToArray();
                         int num3 = array.Length;
-                        compressedValues.CompressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(array);
+                        compressedValues.CompressedBytes = null; // new LZ4Sharp.LZ4Compressor64().Compress(array);
                         int num4 = compressedValues.CompressedSize = compressedValues.CompressedBytes.Length;
                         compressedValues.DecompressedSize = num3;
                         compressedValues.LastSortedCRC = item.SortedEnums[item.SortedEnums.Count - 1];

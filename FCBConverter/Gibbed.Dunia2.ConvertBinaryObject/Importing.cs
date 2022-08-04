@@ -42,6 +42,7 @@ using FCBConverter;
 using Gibbed.Dunia2.BinaryObjectInfo;
 using Gibbed.Dunia2.FileFormats;
 using Gibbed.IO;
+using K4os.Compression.LZ4;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -236,7 +237,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                         byte[] compressedBytes = null;
 
                         if (compressionType == "LZ4")
-                            compressedBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+                        {
+                            byte[] tmp = new byte[LZ4Codec.MaximumOutputSize(bytes.Length)];
+                            int compressedSize = LZ4Codec.Encode(bytes, tmp, LZ4Level.L00_FAST);
+                            compressedBytes = new byte[compressedSize];
+                            Array.Copy(tmp, compressedBytes, compressedSize);
+                        }
 
                         if (compressionType == "LZO")
                         {

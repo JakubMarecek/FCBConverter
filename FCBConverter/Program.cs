@@ -57,7 +57,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20220616-1700";
+        public static string version = "20220804-1800";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -196,7 +196,7 @@ dwOffset = 176762
                 Console.WriteLine("    FCBConverter <input folder> <fat file> <FAT version>");
                 Console.WriteLine("    input folder - input folder path with files");
                 Console.WriteLine("    fat file - path to the new fat file");
-                Console.WriteLine("    FAT version - can be -v9 (FC4, FC3, FC3BD) or -v5 (FC2) or -v11 (FC6), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
+                Console.WriteLine("    FAT version - can be -v9 (FCP, FC4, FC3, FC3BD) or -v5 (FC2) or -v11 (FC6), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
@@ -1422,7 +1422,8 @@ dwOffset = 176762
             bof.Serialize(output);
             output.Close();
         }
-       
+
+        /*
         public static void WriteOSNode(XmlWriter writer, OasisstringsCompressedFile.Node node)
         {
             writer.WriteStartElement(node.Name);
@@ -1490,6 +1491,7 @@ dwOffset = 176762
 
             return node;
         }
+        */
 
         public static ulong GetFileHash(string fileName, int dwVersion = 10)
         {
@@ -2777,8 +2779,11 @@ dwOffset = 176762
             bool oneFileFound = false;
             ulong oneFileHash = GetFileHash(oneFile);
 
+            int cnt = 0;
             foreach (KeyValuePair<ulong, FatEntry> pair in Entries)
             {
+                cnt++;
+
                 FatEntry fatEntry = pair.Value;
 
                 if (oneFile != "")
@@ -2807,7 +2812,7 @@ dwOffset = 176762
 
                 string m_FullPath = m_DstFolder + @"\" + fileName;
 
-                Console.WriteLine("[Unpacking]: {0}", fileName);
+                Console.WriteLine($"[Unpacking {cnt} / {Entries.Count}]: {fileName}");
 
                 byte[] pDstBuffer = new byte[] { };
 
@@ -3087,8 +3092,11 @@ dwOffset = 176762
             var outputDat = File.Open(datFile, FileMode.OpenOrCreate);
             outputDat.SetLength(0);
 
+            int cnt = 0;
             foreach (string file in allFiles)
             {
+                cnt++;
+
                 string fatFileName = file.Replace(sourceDir + "\\", "");
                 string extension = Path.GetExtension(fatFileName);
 
@@ -3102,7 +3110,10 @@ dwOffset = 176762
 
                 if (isCompressEnabled && !notCompress.Contains(extension))
                 {
-                    outputBytes = new LZ4Sharp.LZ4Compressor64().Compress(bytes);
+                    byte[] tmp = new byte[LZ4Codec.MaximumOutputSize(bytes.Length)];
+                    int compressedSize = LZ4Codec.Encode(bytes, tmp, LZ4Level.L00_FAST);
+                    outputBytes = new byte[compressedSize];
+                    Array.Copy(tmp, outputBytes, compressedSize);
 
                     entry.CompressionScheme = CompressionScheme.LZ4;
                     entry.UncompressedSize = (uint)bytes.Length;
@@ -3127,7 +3138,7 @@ dwOffset = 176762
                 outputDat.Write(outputBytes, 0, outputBytes.Length);
                 outputDat.Seek(outputDat.Position.Align(16), SeekOrigin.Begin);
 
-                Console.WriteLine("[Packing]: " + fatFileName);
+                Console.WriteLine($"[Packing {cnt} / {allFiles.Length}]: {fatFileName}");
             }
 
             outputDat.Flush();
