@@ -30,6 +30,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using UnluacNET;
 
 namespace FCBConverter
 {
@@ -57,10 +58,11 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20220804-1800";
+        public static string version = "20220812-2100";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
+        public static string xmlheaderlua = "Converted using UnluacNET by Fireboyd78";
         public static string xmlheaderfcb = "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.";
         public static string xmlheaderthanks = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed, xBaebsae, id-daemon, Ganic, legendhavoc175, miru, eprilx";
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
@@ -299,10 +301,9 @@ dwOffset = 176762
                 Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("<<<For *.lua to *.luac files>>>");
+                Console.WriteLine("<<<For compiled LUAQ *.lua to decompiled *.lua files>>>");
                 Console.ResetColor();
-                Console.WriteLine("Converts a lua script file to a lua file with LUAC header.");
-                Console.WriteLine("This is only one way converter.");
+                Console.WriteLine("Decompiles a LUAQ lua file. If a lua contains LUAC data, it will be converted into two separate files - lua and xml.");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
@@ -312,6 +313,24 @@ dwOffset = 176762
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
                 Console.WriteLine("    FCBConverter D:\\script.lua");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("==========================================================================");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("<<<For *.lua/*.xml to *.luac files>>>");
+                Console.ResetColor();
+                Console.WriteLine("Converts a lua script file to a lua file with LUAC header.");
+                Console.WriteLine("Requires a xml file with LUAC definitions.");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[Usage]");
+                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    source file - *.xml file");
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[Examples]");
+                Console.WriteLine("    FCBConverter D:\\script.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -918,24 +937,62 @@ dwOffset = 176762
 
             if (file.EndsWith(".lua"))
             {
-                string newLuaFile = file.Replace(".lua", "_luac.lua");
+                byte[] luaBytesLuaq = Array.Empty<byte>();
 
-                string luaScript = File.ReadAllText(file);
+                FileStream luaFile = File.OpenRead(file);
+                uint luaType = luaFile.ReadValueU32();
 
-                string[] splitedScriptFile = luaScript.Split(new string[] { "<DominoMetadata" }, StringSplitOptions.None);
+                if (luaType == 0x4341554C)
+                {
+                    int luaLen = luaFile.ReadValueS32();
+                    luaBytesLuaq = luaFile.ReadBytes(luaLen);
+                    byte[] luaBytesLuac = luaFile.ReadBytes((int)(luaFile.Length - luaLen - (sizeof(int) * 2)));
 
-                string dominoMetadata = "<DominoMetadata" + splitedScriptFile[1];
+                    File.WriteAllBytes(file + ".converted.xml", luaBytesLuac);
+                }
 
-                splitedScriptFile[0] = "-- Converted by FCBConverter by ArmanIII" + Environment.NewLine + splitedScriptFile[0];
+                if (luaType == 0x61754C1B)
+                {
+                    luaFile.Seek(0, SeekOrigin.Begin);
+                    luaBytesLuaq = luaFile.ReadBytes((int)luaFile.Length);
+                }
+
+                luaFile.Close();
+
+                MemoryStream luaMS = new(luaBytesLuaq);
+                var header = new BHeader(luaMS);
+                LFunction lMain = header.Function.Parse(luaMS, header);
+
+                var d = new Decompiler(lMain);
+                d.Decompile();
+                var writer = new StreamWriter(file + ".converted.lua", false, new UTF8Encoding(false));
+                writer.WriteLine("--" + xmlheader);
+                writer.WriteLine("--" + xmlheaderlua);
+                writer.WriteLine("");
+                d.Print(new Output(writer));
+                writer.Flush();
+
+                FIN();
+                return;
+            }
+
+            if (file.EndsWith(".lua.converted.xml"))
+            {
+                string newLuaFile = file.Replace(".lua.converted.xml", "_new.lua");
+
+                string luaLuaq = File.ReadAllText(file.Replace(".lua.converted.xml", ".lua.converted.lua"));
+                string luaLuac = File.ReadAllText(file);
+
+                luaLuaq = "--" + xmlheader + Environment.NewLine + luaLuaq;
 
                 if (File.Exists(newLuaFile))
                     File.Delete(newLuaFile);
 
                 FileStream bin = new FileStream(newLuaFile, FileMode.Create);
                 bin.Write(BitConverter.GetBytes(0x4341554c), 0, 4);
-                bin.Write(BitConverter.GetBytes(splitedScriptFile[0].Length), 0, sizeof(int));
-                bin.Write(Encoding.UTF8.GetBytes(splitedScriptFile[0]), 0, splitedScriptFile[0].Length);
-                bin.Write(Encoding.UTF8.GetBytes(dominoMetadata), 0, dominoMetadata.Length);
+                bin.Write(BitConverter.GetBytes(luaLuaq.Length), 0, sizeof(int));
+                bin.Write(Encoding.UTF8.GetBytes(luaLuaq), 0, luaLuaq.Length);
+                bin.Write(Encoding.UTF8.GetBytes(luaLuac), 0, luaLuac.Length);
                 bin.Close();
 
                 FIN();

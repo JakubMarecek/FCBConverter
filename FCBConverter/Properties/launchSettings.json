@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"c:\\Users\\jakub\\Desktop\\common.fat\""
+      "commandLineArgs": "fc5_gamestart.gamestart.lua"
     }
   }
 }
