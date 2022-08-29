@@ -245,6 +245,8 @@ namespace FCBConverter
                                 defReturnVal.Type = defField.Type;
                                 defReturnVal.Action = defField.Action;
                                 defReturnVal.Comment = defField.Comment;
+                                defReturnVal.ArrayItemType = defField.ArrayItemType;
+                                defReturnVal.ArrayItemName = defField.ArrayItemName;
                                 return defReturnVal;
                             }
                         }

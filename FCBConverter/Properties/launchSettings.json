@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "fc5_gamestart.gamestart.lua"
+      "commandLineArgs": "d:\\Documents\\fc4_fc5_tools\\FCBConverter\\bin_debug\\net6.0-windows\\worldsector_-443983632.data_new.fcb"
     }
   }
 }
