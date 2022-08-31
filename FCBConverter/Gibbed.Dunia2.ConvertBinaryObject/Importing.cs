@@ -190,6 +190,21 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     }
                 }
 
+                if (t.Action == "FCBRML")
+                {
+                    MemoryStream ms = new MemoryStream();
+                    ms.WriteValueU32(0);
+
+                    var rez = new XmlResourceFile();
+                    rez.Root = ConvertXml.Program.ReadNode(fields.Current.SelectSingleNode("*[1]")); //.SelectSingleNode("hidDescriptor")
+                    rez.Serialize(ms);
+
+                    ms.Seek(0, SeekOrigin.Begin);
+                    ms.WriteValueU32((uint)(ms.Length - sizeof(uint)));
+
+                    node.Fields.Add(fieldNameHash, ms.ToArray());
+                }
+
                 if (t.Action == "CompressedFCB")
                 {
                     if (fieldName == "buffer")

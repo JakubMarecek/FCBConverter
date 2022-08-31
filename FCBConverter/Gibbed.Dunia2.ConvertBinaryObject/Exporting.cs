@@ -331,6 +331,18 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 }
                             }
 
+                            if (t.Action == "FCBRML")
+                            {
+                                // legacy, RML format
+                                MemoryStream ms = new MemoryStream(kv.Value);
+                                ms.ReadValueU32(); //length
+
+                                var rez = new XmlResourceFile();
+                                rez.Deserialize(ms);
+
+                                ConvertXml.Program.WriteNode(writer, rez.Root);
+                            }
+
                             if (t.Action == "MoveBinDataChunk")
                             {
                                 var moveBinDataChunk = new FCBConverter.CombinedMoveFile.MoveBinDataChunk(Program.isNewDawn);
