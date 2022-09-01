@@ -1,24 +1,10 @@
 # FCBConverter
 
-For converting most binary files in Far Cry 5 and New Dawn. Based on Gibbed's Dunia Tools.
+For converting most binary files in Far Cry games. Based on Gibbed's Dunia Tools.
 
 
-For usage and more info see [here](https://www.nexusmods.com/farcry5/mods/97).
+For usage and more info see [here](https://downloads.fcmodding.com/others/fcbconverter/).
 
-
-## Usage
-
-```
-FCBConverter D:\path\to\file.extension
-```
-
-Some extensions require more specific params, please see FCBConverter output for more info.
-
-
-## Authors
-
-* Gibbed - original author of FCB conversion tools, Dunia Tools
-* id-daemon - author of Unreal Engine to XBG conversion tool ([link](https://zenhax.com/viewtopic.php?f=5&t=12842))
 
 
 ## License
