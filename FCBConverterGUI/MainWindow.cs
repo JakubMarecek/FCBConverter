@@ -216,7 +216,7 @@ namespace FCBConverterGUI
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "Far Cry 5 / New Dawn Mesh File|*.xbg",
+                Filter = "Far Cry 5 / New Dawn / 6 Mesh File|*.xbg",
                 FileName = textBox10.Text
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -602,6 +602,9 @@ namespace FCBConverterGUI
             if (radioButton9.Checked)
                 return MeshParts.meshPartsNewDawn;
 
+            if (radioButton13.Checked)
+                return MeshParts.meshPartsFC6;
+
             return null;
         }
 
@@ -705,6 +708,13 @@ namespace FCBConverterGUI
             {
                 textBox14.Text = folderBrowserDialog.SelectedPath;
             }
+        }
+
+        private void radioButton13_CheckedChanged(object sender, EventArgs e)
+        {
+            checkedListBox1.Items.Clear();
+            foreach (KeyValuePair<string, string> pair in MeshParts.meshPartsFC6)
+                checkedListBox1.Items.Add(pair.Value);
         }
     }
 }

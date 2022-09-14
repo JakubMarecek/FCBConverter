@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"g:\\fc5 sources\\a_common\\databases\\generic\\loottable_new.ndb\""
+      "commandLineArgs": "-xbgData \"d:\\Desktop\\Nová složka (2)\\fct_wst_plr_hamiltonwatch_01_f.xbg\""
     }
   }
 }

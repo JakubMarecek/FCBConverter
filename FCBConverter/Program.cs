@@ -58,7 +58,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20220831-2330";
+        public static string version = "20220914-2330";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -4766,13 +4766,18 @@ dwOffset = 176762
             ushort majorVer = XBGEditStream.ReadValueU16();
             ushort minorVer = XBGEditStream.ReadValueU16();
 
+            int ver = 0;
+
             if (editHdr != 0x4D455348) // HSEM
             {
                 Console.WriteLine(editXbg + " is not a valid XBG file.");
                 return;
             }
 
-            if (majorVer != 0x47 || minorVer != 0x0D)
+            if (majorVer == 0x47 && minorVer == 0x0D) ver = 1;
+            if (majorVer == 0x49 && minorVer == 0x13) ver = 2;
+
+            if (ver == 0)
             {
                 Console.WriteLine(editXbg + " is wrong version.");
                 return;
@@ -4860,7 +4865,8 @@ dwOffset = 176762
 
                                     for (int l = 0; l < sourceXbgSkelHideFacesFP[k].Count; l++)
                                     {
-                                        XBGEditStream.Seek(XBGEditStream.Position + 524, SeekOrigin.Begin);
+                                        if (ver == 1) XBGEditStream.Seek(XBGEditStream.Position + 524, SeekOrigin.Begin);
+                                        if (ver == 2) XBGEditStream.Seek(XBGEditStream.Position + 676, SeekOrigin.Begin);
 
                                         int amnt = 0;
                                         for (int m = 0; m < sourceXbgSkelHideFacesFP[k][l].Count; m++)
@@ -4956,13 +4962,18 @@ dwOffset = 176762
             ushort majorVer = XBGSourceStream.ReadValueU16();
             ushort minorVer = XBGSourceStream.ReadValueU16();
 
+            int ver = 0;
+
             if (editHdr != 0x4D455348) // HSEM
             {
                 Console.WriteLine(sourceXbg + " is not a valid XBG file.");
                 return;
             }
 
-            if (majorVer != 0x47 || minorVer != 0x0D)
+            if (majorVer == 0x47 && minorVer == 0x0D) ver = 1;
+            if (majorVer == 0x49 && minorVer == 0x13) ver = 2;
+
+            if (ver == 0)
             {
                 Console.WriteLine(sourceXbg + " is wrong version.");
                 return;
@@ -5012,10 +5023,11 @@ dwOffset = 176762
                                     XBGSourceStream.ReadValueU16();
                                     ushort facesCount = XBGSourceStream.ReadValueU16();
                                     XBGSourceStream.ReadValueU16();
-                                    XBGSourceStream.ReadValueU16();
+                                    if (ver == 1) XBGSourceStream.ReadValueU16();
                                     ushort vertsCount = XBGSourceStream.ReadValueU16();
 
-                                    XBGSourceStream.Seek(514, SeekOrigin.Current);
+                                    if (ver == 1) XBGSourceStream.Seek(514, SeekOrigin.Current);
+                                    if (ver == 2) XBGSourceStream.Seek(668, SeekOrigin.Current);
                                     long smidd = XBGSourceStream.Position;
                                     XBGSourceStream.Seek(516, SeekOrigin.Current);
                                     uint cnt = XBGSourceStream.ReadValueU32();
