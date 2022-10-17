@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"d:\\Desktop\\w\\wpn_cellphone_memento_default.png\""
+      "commandLineArgs": "\"c:\\Users\\jakub\\Desktop\\wpn_cellphone_memento_default.png\""
     }
   }
 }

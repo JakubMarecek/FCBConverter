@@ -25,7 +25,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -4655,6 +4657,52 @@ dwOffset = 176762
             xmlDoc.Save(file + ".converted.xml");
         }
 
+        static (byte[], XElement, uint) ReadXBTXMLHeader(string xmlName, string customMips = "", int customMipsCount = -1)
+        {
+            XDocument xDoc = XDocument.Load(xmlName);
+            XElement xRoot = xDoc.Element("XBTInfo");
+
+            uint version = uint.Parse(xRoot.Element("Version").Value);
+            string mipsName = version <= 112 ? "Param6" : "MipsFileMipsCount";
+
+            MemoryStream memoryStream = new();
+            memoryStream.WriteValueU32(0x00584254);
+            memoryStream.WriteValueU32(version);
+            memoryStream.WriteValueU32(0);
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param1").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param2").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param3").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param4").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param5").Value));
+            memoryStream.WriteByte(customMipsCount != -1 ? (byte)customMipsCount : byte.Parse(xRoot.Element(mipsName).Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param7").Value));
+            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param8").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID1").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID2").Value));
+            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID3").Value));
+
+            if (customMips != "")
+            {
+                memoryStream.WriteBytes(Encoding.Default.GetBytes(customMips));
+            }
+            else
+            {
+                string mipsFile = xRoot.Element("MipsFileName").Value;
+                if (mipsFile != "")
+                {
+                    memoryStream.WriteBytes(Encoding.Default.GetBytes(mipsFile));
+                }
+            }
+
+            memoryStream.WriteByte(0);
+
+            long pad = (memoryStream.Position + (4 - (memoryStream.Position % 4)) % 4) - 1;
+            memoryStream.Seek(pad, SeekOrigin.Begin);
+            memoryStream.WriteByte(0);
+
+            return (memoryStream.ToArray(), xRoot, version);
+        }
+
         static void ConvertDDS(string file)
         {
             string newFileName = "";
@@ -4680,45 +4728,11 @@ dwOffset = 176762
                 nonMipsXml += ".xbt.converted.xml";
             }
 
-            XDocument xDoc = XDocument.Load(xmlName);
-            XElement xRoot = xDoc.Element("XBTInfo");
-
-            uint version = uint.Parse(xRoot.Element("Version").Value);
-            string mipsName = version <= 112 ? "Param6" : "MipsFileMipsCount";
-
-            MemoryStream memoryStream = new();
-            memoryStream.WriteValueU32(0x00584254);
-            memoryStream.WriteValueU32(version);
-            memoryStream.WriteValueU32(0);
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param1").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param2").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param3").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param4").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param5").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element(mipsName).Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param7").Value));
-            memoryStream.WriteByte(byte.Parse(xRoot.Element("Param8").Value));
-            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID1").Value));
-            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID2").Value));
-            memoryStream.WriteValueU32(uint.Parse(xRoot.Element("UnknownID3").Value));
-
-            string mipsFile = xRoot.Element("MipsFileName").Value;
-            if (mipsFile != "")
-            {
-                memoryStream.WriteBytes(Encoding.Default.GetBytes(mipsFile));
-            }
-
-            memoryStream.WriteByte(0);
-
-            long pad = (memoryStream.Position + (4 - (memoryStream.Position % 4)) % 4) - 1;
-            memoryStream.Seek(pad, SeekOrigin.Begin);
-            memoryStream.WriteByte(0);
-
-            byte[] header = memoryStream.ToArray();
+            var xbtHdr = ReadXBTXMLHeader(xmlName);
 
             byte[] dds = File.ReadAllBytes(ddsName);
 
-            if (nonMipsXml != "" && version >= 116)
+            if (nonMipsXml != "" && xbtHdr.Item3 >= 116)
             {
                 if (!File.Exists(nonMipsXml))
                 {
@@ -4736,13 +4750,13 @@ dwOffset = 176762
             }
 
             FileStream XBTStream = File.Create(newFileName);
-            XBTStream.WriteBytes(header);
+            XBTStream.WriteBytes(xbtHdr.Item1);
             XBTStream.Seek(sizeof(uint) * 2, SeekOrigin.Begin);
-            XBTStream.WriteValueU32((uint)header.Length);
-            XBTStream.Seek(header.Length, SeekOrigin.Begin);
+            XBTStream.WriteValueU32((uint)xbtHdr.Item1.Length);
+            XBTStream.Seek(xbtHdr.Item1.Length, SeekOrigin.Begin);
             XBTStream.WriteBytes(dds);
 
-            XElement xbts = xRoot.Element("XBTSData");
+            XElement xbts = xbtHdr.Item2.Element("XBTSData");
             if (xbts != null)
             {
                 XBTStream.WriteBytes(Helpers.StringToByteArray(xbts.Value));
@@ -5186,15 +5200,21 @@ dwOffset = 176762
             ue4.Convert(uePath, sourceXbg, type);
         }
 
-        static void ConvertPNG2XBT(string file)
+        static void ConvertPNG2XBT(string file, string baseRes, string mipsRes, string mipsHDRes, string mipsPath)
         {
-            // todo skip if set in params
+            string maxBaseResStr = baseRes;
+            string maxMipsResStr = mipsRes;
+            string maxMipsHDResStr = mipsHDRes;
+            string mipsPathStr = mipsPath;
 
-            Console.WriteLine("Write resolution of base (NON-MIPS) texture (for example resolution 512x256 or 512x512):");
-            string maxBaseResStr = Console.ReadLine();
-            Console.WriteLine("");
+            if (baseRes == "")
+            {
+                Console.WriteLine("Write resolution of base (NON-MIPS) texture (for example resolution 512x256 or 512x512):");
+                maxBaseResStr = Console.ReadLine();
+                Console.WriteLine("");
+            }
 
-            if (!maxBaseResStr.Contains("x"))
+            if (!maxBaseResStr.Contains('x'))
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
@@ -5203,29 +5223,45 @@ dwOffset = 176762
 
             string[] resBaseSplit = maxBaseResStr.Split('x');
 
-            // todo set res
-            Console.WriteLine("Write maximum size of MIPS texture (for example for texture with resolution 2048x1024 it will be 2048):");
-            string maxMipsResStr = Console.ReadLine();
-            Console.WriteLine("");
+            if (mipsRes == "")
+            {
+                Console.WriteLine("Write resolution of MIPS texture (for example resolution 2048x1024 or 2048x2048):");
+                maxMipsResStr = Console.ReadLine();
+                Console.WriteLine("");
+            }
 
-            if (!int.TryParse(maxMipsResStr, out int maxMipsRes))
+            if (!maxMipsResStr.Contains('x'))
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
                 return;
             }
 
-            // todo set res
-            Console.WriteLine("Write maximum size of HD MIPS texture (for example for texture with resolution 4096x2048 it will be 4096):");
-            Console.WriteLine("Note: if you don't have HD, then type 0");
-            string maxMipsHDResStr = Console.ReadLine();
-            Console.WriteLine("");
+            string[] resMipsSplit = maxMipsResStr.Split('x');
 
-            if (!int.TryParse(maxMipsHDResStr, out int maxMipsHDRes))
+            if (mipsHDRes == "")
+            {
+                Console.WriteLine("Write resolution of HD MIPS texture (for example resolution 4096x2048 or 4096x4096):");
+                Console.WriteLine("Note: if you don't have HD, then type 0");
+                maxMipsHDResStr = Console.ReadLine();
+                Console.WriteLine("");
+            }
+
+            if (!maxMipsHDResStr.Contains('x') && maxMipsHDResStr != "0")
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
                 return;
+            }
+            if (maxMipsHDResStr == "0") maxMipsHDResStr = "0x0";
+
+            string[] resMipsHDSplit = maxMipsHDResStr.Split('x');
+
+            if (mipsPath == "")
+            {
+                Console.WriteLine("Write path to folder where will be textures placed (it means path inside DAT FAT, ending with \\, for example ):");
+                mipsPathStr = Console.ReadLine();
+                Console.WriteLine("");
             }
 
             BinaryReader br = new BinaryReader(File.OpenRead(file));
@@ -5238,6 +5274,8 @@ dwOffset = 176762
             int pngHeight = BitConverter.ToInt32(heightbytes, 0);
 
             int pngMaxResVal = Math.Max(pngWidth, pngHeight);
+            int maxMipsRes = Math.Max(int.Parse(resMipsSplit[0]), int.Parse(resMipsSplit[1]));
+            int maxMipsHDRes = Math.Max(int.Parse(resMipsHDSplit[0]), int.Parse(resMipsHDSplit[1]));
 
             if (pngMaxResVal != maxMipsHDRes && maxMipsHDRes > 0)
             {
@@ -5284,7 +5322,7 @@ dwOffset = 176762
 
             if (mipsHDCount > 0)
             {
-                info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSMips}\" -y");
+                info = new ProcessStartInfo("texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 -w {resMipsSplit[0]} -h {resMipsSplit[1]} -if FANT_DITHER \"{newDDSMips}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
@@ -5323,7 +5361,39 @@ dwOffset = 176762
                 File.Delete(newDDSMipsHD);
             }
 
-            // todo dds to xbt
+            string newXBTBase = newDDSBase.Replace(".png", ".xbt");
+            string newXBTMips = newDDSMips.Replace(".png", ".xbt");
+            string newXBTBaseHD = newDDSBaseHD.Replace(".png", ".xbt");
+            string newXBTMipsHD = newDDSMipsHD.Replace(".png", ".xbt");
+
+            newDDSBase = newDDSBase.Replace(".png", ".dds");
+            newDDSMips = newDDSMips.Replace(".png", ".dds");
+            newDDSBaseHD = newDDSBaseHD.Replace(".png", ".dds");
+            newDDSMipsHD = newDDSMipsHD.Replace(".png", ".dds");
+
+
+
+
+
+
+            var xbtHdr = ReadXBTXMLHeader("", mipsPathStr + baseFileName + "_mips.xbt", mipsCount);
+
+            FileStream XBTStream = File.Create(newXBTBase);
+            XBTStream.WriteBytes(xbtHdr.Item1);
+            XBTStream.Seek(sizeof(uint) * 2, SeekOrigin.Begin);
+            XBTStream.WriteValueU32((uint)xbtHdr.Item1.Length);
+            XBTStream.Seek(xbtHdr.Item1.Length, SeekOrigin.Begin);
+            XBTStream.WriteBytes(File.ReadAllBytes(newDDSBase));
+            XBTStream.Dispose();
+            XBTStream.Close();
+            File.Delete(newDDSBase);
+
+
+
+
+
+
+
 
             Console.ReadKey();
         }
