@@ -139,7 +139,7 @@ dwOffset = 176762
 
             return;*/
 
-            ConvertPNG2XBT(args[0]);
+            ConvertPNG2XBT(args[0], "", "", "", "", "");
 
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
@@ -4657,17 +4657,19 @@ dwOffset = 176762
             xmlDoc.Save(file + ".converted.xml");
         }
 
-        static (byte[], XElement, uint) ReadXBTXMLHeader(string xmlName, string customMips = "", int customMipsCount = -1)
+        static (byte[], XElement, uint) ReadXBTXMLHeader(string xmlName, uint version = 0, string customMips = "", int customMipsCount = -1)
         {
             XDocument xDoc = XDocument.Load(xmlName);
             XElement xRoot = xDoc.Element("XBTInfo");
 
-            uint version = uint.Parse(xRoot.Element("Version").Value);
-            string mipsName = version <= 112 ? "Param6" : "MipsFileMipsCount";
+            uint ver = uint.Parse(xRoot.Element("Version").Value);
+            if (version > 0) ver = version;
+
+            string mipsName = ver <= 112 ? "Param6" : "MipsFileMipsCount";
 
             MemoryStream memoryStream = new();
             memoryStream.WriteValueU32(0x00584254);
-            memoryStream.WriteValueU32(version);
+            memoryStream.WriteValueU32(ver);
             memoryStream.WriteValueU32(0);
             memoryStream.WriteByte(byte.Parse(xRoot.Element("Param1").Value));
             memoryStream.WriteByte(byte.Parse(xRoot.Element("Param2").Value));
@@ -4700,7 +4702,7 @@ dwOffset = 176762
             memoryStream.Seek(pad, SeekOrigin.Begin);
             memoryStream.WriteByte(0);
 
-            return (memoryStream.ToArray(), xRoot, version);
+            return (memoryStream.ToArray(), xRoot, ver);
         }
 
         static void ConvertDDS(string file)
@@ -5200,12 +5202,22 @@ dwOffset = 176762
             ue4.Convert(uePath, sourceXbg, type);
         }
 
-        static void ConvertPNG2XBT(string file, string baseRes, string mipsRes, string mipsHDRes, string mipsPath)
+        static void ConvertPNG2XBT(string file, string game, string baseRes, string mipsRes, string mipsHDRes, string mipsPath)
         {
+            string gameStr = game;
             string maxBaseResStr = baseRes;
             string maxMipsResStr = mipsRes;
             string maxMipsHDResStr = mipsHDRes;
             string mipsPathStr = mipsPath;
+
+            if (game == "")
+            {
+                Console.WriteLine("For which game you want to make XBT?:");
+                Console.WriteLine("  5 = FC5 / ND");
+                Console.WriteLine("  6 = FC6");
+                gameStr = Console.ReadLine();
+                Console.WriteLine("");
+            }
 
             if (baseRes == "")
             {
@@ -5371,31 +5383,35 @@ dwOffset = 176762
             newDDSBaseHD = newDDSBaseHD.Replace(".png", ".dds");
             newDDSMipsHD = newDDSMipsHD.Replace(".png", ".dds");
 
+            void convert(string dds, string xbt, string mips, int mipscnt)
+            {
+                uint ver = 0;
+                if (gameStr == "5") ver = 116;
+                if (gameStr == "6") ver = 119;
 
+                var xbtHdr = ReadXBTXMLHeader("XBTTemplate.xml", ver, mips, mipscnt);
 
+                FileStream XBTStream = File.Create(xbt);
+                XBTStream.WriteBytes(xbtHdr.Item1);
+                XBTStream.Seek(sizeof(uint) * 2, SeekOrigin.Begin);
+                XBTStream.WriteValueU32((uint)xbtHdr.Item1.Length);
+                XBTStream.Seek(xbtHdr.Item1.Length, SeekOrigin.Begin);
+                XBTStream.WriteBytes(File.ReadAllBytes(dds));
+                XBTStream.Dispose();
+                XBTStream.Close();
+                File.Delete(dds);
+            }
 
+            convert(newDDSBase, newXBTBase, mipsPathStr + baseFileName + "_mips.xbt", mipsCount);
+            convert(newDDSMips, newXBTMips, "", 0);
 
+            if (mipsHDCount > 0)
+            {
+                convert(newDDSBaseHD, newXBTBaseHD, mipsPathStr + baseFileName + "_mips.xbt", mipsHDCount);
+                convert(newDDSMipsHD, newXBTMipsHD, "", 0);
+            }
 
-            var xbtHdr = ReadXBTXMLHeader("", mipsPathStr + baseFileName + "_mips.xbt", mipsCount);
-
-            FileStream XBTStream = File.Create(newXBTBase);
-            XBTStream.WriteBytes(xbtHdr.Item1);
-            XBTStream.Seek(sizeof(uint) * 2, SeekOrigin.Begin);
-            XBTStream.WriteValueU32((uint)xbtHdr.Item1.Length);
-            XBTStream.Seek(xbtHdr.Item1.Length, SeekOrigin.Begin);
-            XBTStream.WriteBytes(File.ReadAllBytes(newDDSBase));
-            XBTStream.Dispose();
-            XBTStream.Close();
-            File.Delete(newDDSBase);
-
-
-
-
-
-
-
-
-            Console.ReadKey();
+            Console.WriteLine("XBT files were successfully created.");
         }
     }
 }
