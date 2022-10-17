@@ -22,6 +22,7 @@ using LZ4Sharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -135,6 +136,8 @@ dwOffset = 176762
             a |= (dwCompressedSize & 0x1FFFFFFF);
 
             return;*/
+
+            ConvertPNG2XBT(args[0]);
 
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
@@ -5181,6 +5184,148 @@ dwOffset = 176762
             }
 
             ue4.Convert(uePath, sourceXbg, type);
+        }
+
+        static void ConvertPNG2XBT(string file)
+        {
+            // todo skip if set in params
+
+            Console.WriteLine("Write resolution of base (NON-MIPS) texture (for example resolution 512x256 or 512x512):");
+            string maxBaseResStr = Console.ReadLine();
+            Console.WriteLine("");
+
+            if (!maxBaseResStr.Contains("x"))
+            {
+                Console.WriteLine("Wrong value! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            string[] resBaseSplit = maxBaseResStr.Split('x');
+
+            // todo set res
+            Console.WriteLine("Write maximum size of MIPS texture (for example for texture with resolution 2048x1024 it will be 2048):");
+            string maxMipsResStr = Console.ReadLine();
+            Console.WriteLine("");
+
+            if (!int.TryParse(maxMipsResStr, out int maxMipsRes))
+            {
+                Console.WriteLine("Wrong value! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            // todo set res
+            Console.WriteLine("Write maximum size of HD MIPS texture (for example for texture with resolution 4096x2048 it will be 4096):");
+            Console.WriteLine("Note: if you don't have HD, then type 0");
+            string maxMipsHDResStr = Console.ReadLine();
+            Console.WriteLine("");
+
+            if (!int.TryParse(maxMipsHDResStr, out int maxMipsHDRes))
+            {
+                Console.WriteLine("Wrong value! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            BinaryReader br = new BinaryReader(File.OpenRead(file));
+            br.BaseStream.Position = 16;
+            byte[] widthbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int pngWidth = BitConverter.ToInt32(widthbytes, 0);
+            byte[] heightbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int pngHeight = BitConverter.ToInt32(heightbytes, 0);
+
+            int pngMaxResVal = Math.Max(pngWidth, pngHeight);
+
+            if (pngMaxResVal != maxMipsHDRes && maxMipsHDRes > 0)
+            {
+                Console.WriteLine("You set HD MIPS resolution higher than source texture! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            if (pngMaxResVal != maxMipsRes && maxMipsHDRes == 0)
+            {
+                Console.WriteLine("You set MIPS resolution higher than source texture! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            int mipsCount = 0;
+            int mipsHDCount = 0;
+
+            int tmp = Math.Max(int.Parse(resBaseSplit[0]), int.Parse(resBaseSplit[1]));
+
+            for (int i = 1; i < 10; i++)
+            {
+                tmp *= 2;
+                if (tmp == maxMipsRes) mipsCount = i;
+                if (tmp == maxMipsHDRes) mipsHDCount = i;
+            }
+
+            string parentDir = Directory.GetParent(file).FullName;
+            string baseFileName = Path.GetFileNameWithoutExtension(file);
+
+            string newDDSBase = parentDir + "\\" + baseFileName + ".png";
+            string newDDSMips = parentDir + "\\" + baseFileName + "_mips.png";
+            string newDDSBaseHD = parentDir + "\\" + baseFileName + "_hd.png";
+            string newDDSMipsHD = parentDir + "\\" + baseFileName + "_hd_mips.png";
+
+            //File.Copy(file, newDDSBase);
+            File.Copy(file, newDDSMips, true);
+
+            var info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSBase}\" -y");
+            info.WorkingDirectory = parentDir;
+            info.UseShellExecute = false;
+            var proc = Process.Start(info);
+            proc.WaitForExit();
+
+            if (mipsHDCount > 0)
+            {
+                info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSMips}\" -y");
+                info.WorkingDirectory = parentDir;
+                info.UseShellExecute = false;
+                proc = Process.Start(info);
+                proc.WaitForExit();
+            }
+            else
+            {
+                info = new ProcessStartInfo("texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 \"{newDDSMips}\" -y");
+                info.WorkingDirectory = parentDir;
+                info.UseShellExecute = false;
+                proc = Process.Start(info);
+                proc.WaitForExit();
+            }
+
+            //File.Delete(newDDSBase);
+            File.Delete(newDDSMips);
+
+            if (mipsHDCount > 0)
+            {
+                File.Copy(file, newDDSBaseHD, true);
+                File.Copy(file, newDDSMipsHD, true);
+
+                info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSBaseHD}\" -y");
+                info.WorkingDirectory = parentDir;
+                info.UseShellExecute = false;
+                proc = Process.Start(info);
+                proc.WaitForExit();
+
+                info = new ProcessStartInfo("texconv.exe", $"-m {mipsHDCount} -dx10 -f DXT1 \"{newDDSMipsHD}\" -y");
+                info.WorkingDirectory = parentDir;
+                info.UseShellExecute = false;
+                proc = Process.Start(info);
+                proc.WaitForExit();
+
+                File.Delete(newDDSBaseHD);
+                File.Delete(newDDSMipsHD);
+            }
+
+            // todo dds to xbt
+
+            Console.ReadKey();
         }
     }
 }

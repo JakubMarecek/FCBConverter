@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "-xbgData \"d:\\Desktop\\Nová složka (2)\\fct_wst_plr_hamiltonwatch_01_f.xbg\""
+      "commandLineArgs": "\"d:\\Desktop\\w\\wpn_cellphone_memento_default.png\""
     }
   }
 }
