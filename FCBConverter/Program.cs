@@ -522,7 +522,7 @@ dwOffset = 176762
 
             try
             {
-                string source = arguments["source"];
+                string source = arguments["source"] ?? "";
 
                 if (file.EndsWith("_replace.txt"))
                 {
@@ -542,7 +542,7 @@ dwOffset = 176762
                     FIN();
                 }
 
-                else if (Directory.Exists(source) && arguments["fat"].EndsWith(".fat"))
+                else if (Directory.Exists(source) && arguments["fat"] != null && arguments["fat"].EndsWith(".fat"))
                 {
                     int ver = 10;
 
