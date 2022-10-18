@@ -61,7 +61,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20220914-2330";
+        public static string version = "20221018-2000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -139,8 +139,6 @@ dwOffset = 176762
 
             return;*/
 
-            ConvertPNG2XBT(args[0], "", "", "", "", "");
-
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
 
@@ -167,14 +165,14 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <folder> <search pattern> <allow subfolders>");
+                Console.WriteLine("    FCBConverter -source=<folder> -filter=<search pattern> <allow subfolders>");
                 Console.WriteLine("    folder - path for folder, use \\ to run it in the same directory where are you running the exe");
                 Console.WriteLine("    search pattern - *.fcb for example convert all FCB files");
                 Console.WriteLine("    allow subfolders - if you set \"-subfolders\", batch convert will process all found subfolders");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\fcb_files *.fcb -subfolders");
+                Console.WriteLine("    FCBConverter -source=D:\\fcb_files -filter=*.fcb -subfolders");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -184,13 +182,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <fat file> <output dir>");
+                Console.WriteLine("    FCBConverter -source=<fat file> -out=<output dir>");
                 Console.WriteLine("    fat file - path to fat file");
                 Console.WriteLine("    output dir (optional) - output folder path, files will extracted to this newly created folder");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\common.fat D:\\common_unpacked");
+                Console.WriteLine("    FCBConverter -source=D:\\common.fat -out=D:\\common_unpacked");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -200,14 +198,14 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <input folder> <fat file> <FAT version>");
+                Console.WriteLine("    FCBConverter -source=<input folder> -fat=<fat file> <FAT version>");
                 Console.WriteLine("    input folder - input folder path with files");
                 Console.WriteLine("    fat file - path to the new fat file");
                 Console.WriteLine("    FAT version - can be -v9 (FCP, FC4, FC3, FC3BD) or -v5 (FC2) or -v11 (FC6), default version is 10 (FC5, FCND), note that older FAT versions can't be compressed");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\common_unpacked D:\\common.fat");
+                Console.WriteLine("    FCBConverter -source=D:\\common_unpacked -fat=D:\\common.fat");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -217,14 +215,14 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <fat file> <output dir> <desired file>");
+                Console.WriteLine("    FCBConverter -source=<fat file> -out=<output dir> -single=<desired file>");
                 Console.WriteLine("    fat file - path to fat file");
                 Console.WriteLine("    output dir - output folder path, file will extracted to this folder");
                 Console.WriteLine("    desired file - file path inside the FAT file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\common.fat D:\\ common.dbt.fcb");
+                Console.WriteLine("    FCBConverter -source=D:\\common.fat -out=D:\\ -single=common.dbt.fcb");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -234,33 +232,31 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - fcb or xml file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\file.fcb");
-                Console.WriteLine("    FCBConverter D:\\file.fcb.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\file.fcb");
+                Console.WriteLine("    FCBConverter -source=D:\\file.fcb.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<<<For *.oasis.bin files>>>");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("For New Dawn and FC6 FCBConverter will ask to specify the game due to differences in files.");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - oasis file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples FC5]");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin.converted.xml");
-                Console.WriteLine("");
-                Console.WriteLine("[Examples New Dawn]");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin");
-                Console.WriteLine("    FCBConverter D:\\oasisstrings.oasis.bin.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\oasisstrings.oasis.bin");
+                Console.WriteLine("    FCBConverter -source=D:\\oasisstrings.oasis.bin.converted.xml");
                 Console.WriteLine("");
                 Console.WriteLine("[Examples FC4]");
                 Console.WriteLine("    FCBConverter D:\\oasisstrings_compressed.bin");
@@ -276,13 +272,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *_depload.dat file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\patch_depload.dat");
-                Console.WriteLine("    FCBConverter D:\\patch_depload.dat.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\patch_depload.dat");
+                Console.WriteLine("    FCBConverter -source=D:\\patch_depload.dat.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -294,13 +290,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - soundinfo.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\soundinfo.bin");
-                Console.WriteLine("    FCBConverter D:\\soundinfo.bin.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\soundinfo.bin");
+                Console.WriteLine("    FCBConverter -source=D:\\soundinfo.bin.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -312,12 +308,12 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.lua file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\script.lua");
+                Console.WriteLine("    FCBConverter -source=D:\\script.lua");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -330,12 +326,12 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.xml file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\script.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\script.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -347,13 +343,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.xbt file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\texture.xbt");
-                Console.WriteLine("    FCBConverter D:\\texture.dds");
+                Console.WriteLine("    FCBConverter -source=D:\\texture.xbt");
+                Console.WriteLine("    FCBConverter -source=D:\\texture.dds");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -365,13 +361,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.material.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\abc.material.bin");
-                Console.WriteLine("    FCBConverter D:\\abc.material.bin.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\abc.material.bin");
+                Console.WriteLine("    FCBConverter -source=D:\\abc.material.bin.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -381,13 +377,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.move.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\file.move.bin");
-                Console.WriteLine("    FCBConverter D:\\file.move.bin.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\file.move.bin");
+                Console.WriteLine("    FCBConverter -source=D:\\file.move.bin.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -397,13 +393,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - combinedmovefile.bin file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin");
-                Console.WriteLine("    FCBConverter D:\\combinedmovefile.bin.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\combinedmovefile.bin");
+                Console.WriteLine("    FCBConverter -source=D:\\combinedmovefile.bin.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -413,13 +409,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.cseq file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\sequence.cseq");
-                Console.WriteLine("    FCBConverter D:\\sequence.cseq.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\sequence.cseq");
+                Console.WriteLine("    FCBConverter -source=D:\\sequence.cseq.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -429,13 +425,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.feu or *.swf file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\ui.feu");
-                Console.WriteLine("    FCBConverter D:\\ui.swf");
+                Console.WriteLine("    FCBConverter -source=D:\\ui.feu");
+                Console.WriteLine("    FCBConverter -source=D:\\ui.swf");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -445,12 +441,12 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.bdl file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\0003_0005_0000_0000.terrainnode.bdl");
+                Console.WriteLine("    FCBConverter -source=D:\\0003_0005_0000_0000.terrainnode.bdl");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -460,13 +456,13 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter <source file>");
+                Console.WriteLine("    FCBConverter -source=<source file>");
                 Console.WriteLine("    source file - *.bnk or *.wem file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter D:\\3253855986.bnk");
-                Console.WriteLine("    FCBConverter D:\\3253855986.bnk.converted.xml");
+                Console.WriteLine("    FCBConverter -source=D:\\3253855986.bnk");
+                Console.WriteLine("    FCBConverter -source=D:\\3253855986.bnk.converted.xml");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -476,14 +472,14 @@ dwOffset = 176762
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("[Usage]");
-                Console.WriteLine("    FCBConverter -ue=<type> <uasset> <ref_xbg>");
-                Console.WriteLine("    type - type of model - 0 clothes, 1 hairs");
+                Console.WriteLine("    FCBConverter -UE2XBG=<type> -ue=<uasset> -xbg=<ref_xbg>");
+                Console.WriteLine("    type - type of model - 0 clothes, 1 hairs, 2 weapons, 3 vehicles");
                 Console.WriteLine("    uasset - source file from Unreal Engine");
                 Console.WriteLine("    ref_xbg - reference XBG file");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("[Examples]");
-                Console.WriteLine("    FCBConverter -ue=0 handw_avatar_mygloves_aver_mf.uasset handw_avatar_samfisher01_aver_mf.xbg");
+                Console.WriteLine("    FCBConverter -UE2XBG=0 -ue=handw_avatar_mygloves_aver_mf.uasset -xbg=handw_avatar_samfisher01_aver_mf.xbg");
                 Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("==========================================================================");
@@ -491,6 +487,154 @@ dwOffset = 176762
                 return;
             }
 
+            Arguments arguments = new(args);
+
+            string file = args[0];
+
+            Console.Title = "FCBConverter - " + file;
+
+            bool bKeep = false;
+
+            if (LoadSetting("CompressFile") == "false" && arguments["enablecompress"] != "true")
+            {
+                Console.WriteLine("Compression disabled.");
+                Console.WriteLine("");
+                isCompressEnabled = false;
+            }
+
+            excludeFilesFromCompress = arguments["excludeFilesFromCompress"] ?? excludeFilesFromCompress;
+            excludeFilesFromPack = arguments["excludeFilesFromPack"] ?? excludeFilesFromPack;
+
+            if (arguments["disablecompress"] == "true")
+            {
+                Console.WriteLine("Compression disabled via param.");
+                Console.WriteLine("");
+                isCompressEnabled = false;
+            }
+
+            bKeep = arguments["keep"] == "true";
+            isFC2 = arguments["fc2"] == "true";
+
+            if (file.EndsWith("entitylibrarynamestoresid.fcb"))
+                isEntLibNamesStores = true;
+
+            definitionLoader = new DefinitionsLoader(m_Path + defsFile, file);
+
+            try
+            {
+                string source = arguments["source"];
+
+                if (file.EndsWith("_replace.txt"))
+                {
+                    BinaryReplaceValues(file);
+                    FIN();
+                }
+
+                else if (file.EndsWith(".png")) // specific - doesn't use args, for Win Open With
+                {
+                    ConvertPNG2XBT(file);
+                    FIN();
+                }
+
+                else if (source.EndsWith(".png"))
+                {
+                    ConvertPNG2XBT(source);
+                    FIN();
+                }
+
+                else if (Directory.Exists(source) && arguments["fat"].EndsWith(".fat"))
+                {
+                    int ver = 10;
+
+                    if (arguments["v11"] == "true")
+                        ver = 11;
+
+                    if (arguments["v9"] == "true")
+                        ver = 9;
+
+                    if (arguments["v5"] == "true")
+                        ver = 5;
+
+                    LoadFile();
+                    PackBigFile(source, arguments["fat"], ver);
+                    FIN();
+                }
+
+                else if (source.EndsWith(".fat") && arguments["out"] != null && arguments["single"] != null) // excludeFromCompress is used as file name
+                {
+                    UnpackBigFile(source, arguments["out"], arguments["single"]);
+                    FIN();
+                }
+
+                else if (file.EndsWith(".fat")) // specific - doesn't use args, for Win Open With
+                {
+                    UnpackBigFile(file, "");
+                    FIN();
+                }
+
+                else if (source.EndsWith(".fat"))
+                {
+                    UnpackBigFile(source, arguments["out"] ?? "");
+                    FIN();
+                }
+
+                else if (File.Exists(file)) // specific - doesn't use args, for Win Open With
+                {
+                    Proccessing(file, "");
+                }
+
+                else if (File.Exists(source))
+                {
+                    Proccessing(source, arguments["out"] ?? "");
+                }
+
+                else if ((Directory.Exists(source) || source == @"\") && arguments["filter"] != null)
+                {
+                    if (source == @"\")
+                        source = Directory.GetCurrentDirectory();
+
+                    ProcessSubFolders(source, arguments["filter"], arguments["subfolders"] == "true");
+                    Console.WriteLine("Job done!");
+                }
+
+                else if (arguments["xbgFP"] == "true")
+                {
+                    FixXBGForFP(arguments["xbg"], arguments["data"]);
+                }
+
+                else if (arguments["xbgData"] == "true")
+                {
+                    GetDataFromXBG(arguments["xbg"]);
+                }
+
+                else if(arguments["UE2XBG"] != null)
+                {
+                    ConvertUE2XBG(arguments["ue"], arguments["xbg"], int.Parse(arguments["UE2XBG"]));
+                }
+
+                else
+                {
+                    Console.WriteLine("Input file / directory doesn't exist!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Console.WriteLine("");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                Environment.Exit(1);
+            }
+
+            if (bKeep)
+            {
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+            }
+
+            return;
+
+            /*
             string file = args[0];
             string param2 = args.Length > 1 ? args[1] : "";
             string param3 = args.Length > 2 ? args[2] : "";
@@ -662,7 +806,7 @@ dwOffset = 176762
                 Console.ReadKey();
             }
 
-            return;
+            return;*/
         }
 
         static void ProcessSubFolders(string folder, string filter, bool subFolders)
@@ -5202,15 +5346,33 @@ dwOffset = 176762
             ue4.Convert(uePath, sourceXbg, type);
         }
 
-        static void ConvertPNG2XBT(string file, string game, string baseRes, string mipsRes, string mipsHDRes, string mipsPath)
+        static void ConvertPNG2XBT(string file)
         {
-            string gameStr = game;
-            string maxBaseResStr = baseRes;
-            string maxMipsResStr = mipsRes;
-            string maxMipsHDResStr = mipsHDRes;
-            string mipsPathStr = mipsPath;
+            string gameStr = null;
+            string baseResStr = null;
+            string mipsResStr = null;
+            string mipsHDResStr = null;
+            string mipsPathStr = null;
+            string xmlTemplate = m_Path + "\\XBTTemplate.xml";
+            bool hasXML = false;
 
-            if (game == "")
+            string baseFileNameXML = file.Replace(".png", ".xml");
+
+            if (File.Exists(baseFileNameXML))
+            {
+                xmlTemplate = baseFileNameXML;
+                hasXML = true;
+
+                XDocument xDoc = XDocument.Load(baseFileNameXML);
+                XElement xRoot = xDoc.Element("XBTInfo");
+
+                baseResStr = xRoot.Element("FCBConvParamBaseRes")?.Value;
+                mipsResStr = xRoot.Element("FCBConvParamMipsRes")?.Value;
+                mipsHDResStr = xRoot.Element("FCBConvParamMipsHDRes")?.Value;
+                mipsPathStr = xRoot.Element("FCBConvParamMipsPath")?.Value;
+            }
+
+            if (gameStr == null && !hasXML)
             {
                 Console.WriteLine("For which game you want to make XBT?:");
                 Console.WriteLine("  5 = FC5 / ND");
@@ -5219,57 +5381,59 @@ dwOffset = 176762
                 Console.WriteLine("");
             }
 
-            if (baseRes == "")
+            if (baseResStr == null)
             {
                 Console.WriteLine("Write resolution of base (NON-MIPS) texture (for example resolution 512x256 or 512x512):");
-                maxBaseResStr = Console.ReadLine();
+                baseResStr = Console.ReadLine();
                 Console.WriteLine("");
             }
 
-            if (!maxBaseResStr.Contains('x'))
+            if (!baseResStr.Contains('x'))
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
                 return;
             }
 
-            string[] resBaseSplit = maxBaseResStr.Split('x');
+            string[] resBaseSplit = baseResStr.Split('x');
 
-            if (mipsRes == "")
+            if (mipsResStr == null)
             {
                 Console.WriteLine("Write resolution of MIPS texture (for example resolution 2048x1024 or 2048x2048):");
-                maxMipsResStr = Console.ReadLine();
+                Console.WriteLine("Note: if you don't want MIPS, then type 0");
+                mipsResStr = Console.ReadLine();
                 Console.WriteLine("");
             }
 
-            if (!maxMipsResStr.Contains('x'))
+            if (!mipsResStr.Contains('x') && mipsResStr != "0")
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
                 return;
             }
+            if (mipsResStr == "0") mipsResStr = "0x0";
 
-            string[] resMipsSplit = maxMipsResStr.Split('x');
+            string[] resMipsSplit = mipsResStr.Split('x');
 
-            if (mipsHDRes == "")
+            if (mipsHDResStr == null)
             {
                 Console.WriteLine("Write resolution of HD MIPS texture (for example resolution 4096x2048 or 4096x4096):");
                 Console.WriteLine("Note: if you don't have HD, then type 0");
-                maxMipsHDResStr = Console.ReadLine();
+                mipsHDResStr = Console.ReadLine();
                 Console.WriteLine("");
             }
 
-            if (!maxMipsHDResStr.Contains('x') && maxMipsHDResStr != "0")
+            if (!mipsHDResStr.Contains('x') && mipsHDResStr != "0")
             {
                 Console.WriteLine("Wrong value! Exiting...");
                 Console.ReadKey();
                 return;
             }
-            if (maxMipsHDResStr == "0") maxMipsHDResStr = "0x0";
+            if (mipsHDResStr == "0") mipsHDResStr = "0x0";
 
-            string[] resMipsHDSplit = maxMipsHDResStr.Split('x');
+            string[] resMipsHDSplit = mipsHDResStr.Split('x');
 
-            if (mipsPath == "")
+            if (mipsPathStr == null && !hasXML)
             {
                 Console.WriteLine("Write path to folder where will be textures placed (it means path inside DAT FAT, ending with \\, for example ):");
                 mipsPathStr = Console.ReadLine();
@@ -5289,24 +5453,31 @@ dwOffset = 176762
             int maxMipsRes = Math.Max(int.Parse(resMipsSplit[0]), int.Parse(resMipsSplit[1]));
             int maxMipsHDRes = Math.Max(int.Parse(resMipsHDSplit[0]), int.Parse(resMipsHDSplit[1]));
 
-            if (pngMaxResVal != maxMipsHDRes && maxMipsHDRes > 0)
+            int tmp = Math.Max(int.Parse(resBaseSplit[0]), int.Parse(resBaseSplit[1]));
+
+            if (pngMaxResVal != maxMipsHDRes && maxMipsHDRes > 0 && maxMipsRes > 0)
             {
-                Console.WriteLine("You set HD MIPS resolution higher than source texture! Exiting...");
+                Console.WriteLine("You set HD MIPS resolution different than source texture! Exiting...");
                 Console.ReadKey();
                 return;
             }
 
-            if (pngMaxResVal != maxMipsRes && maxMipsHDRes == 0)
+            if (pngMaxResVal != maxMipsRes && maxMipsHDRes == 0 && maxMipsRes > 0)
             {
-                Console.WriteLine("You set MIPS resolution higher than source texture! Exiting...");
+                Console.WriteLine("You set MIPS resolution different than source texture! Exiting...");
+                Console.ReadKey();
+                return;
+            }
+
+            if (pngMaxResVal != tmp && maxMipsHDRes == 0 && maxMipsRes == 0)
+            {
+                Console.WriteLine("You set base resolution different than source texture! Exiting...");
                 Console.ReadKey();
                 return;
             }
 
             int mipsCount = 0;
             int mipsHDCount = 0;
-
-            int tmp = Math.Max(int.Parse(resBaseSplit[0]), int.Parse(resBaseSplit[1]));
 
             for (int i = 1; i < 10; i++)
             {
@@ -5315,73 +5486,85 @@ dwOffset = 176762
                 if (tmp == maxMipsHDRes) mipsHDCount = i;
             }
 
-            string parentDir = Directory.GetParent(file).FullName;
             string baseFileName = Path.GetFileNameWithoutExtension(file);
+            string parentDir = Directory.GetParent(file).FullName;
 
-            string newDDSBase = parentDir + "\\" + baseFileName + ".png";
-            string newDDSMips = parentDir + "\\" + baseFileName + "_mips.png";
-            string newDDSBaseHD = parentDir + "\\" + baseFileName + "_hd.png";
-            string newDDSMipsHD = parentDir + "\\" + baseFileName + "_hd_mips.png";
+            string newPNGBase = parentDir + "\\" + baseFileName + ".png";
+            string newPNGMips = parentDir + "\\" + baseFileName + "_mips.png";
+            string newPNGBaseHD = parentDir + "\\" + baseFileName + "_hd.png";
+            string newPNGMipsHD = parentDir + "\\" + baseFileName + "_hd_mips.png";
 
-            //File.Copy(file, newDDSBase);
-            File.Copy(file, newDDSMips, true);
+            ProcessStartInfo info;
+            Process proc;
 
-            var info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSBase}\" -y");
-            info.WorkingDirectory = parentDir;
-            info.UseShellExecute = false;
-            var proc = Process.Start(info);
-            proc.WaitForExit();
-
-            if (mipsHDCount > 0)
+            if (mipsCount > 0)
             {
-                info = new ProcessStartInfo("texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 -w {resMipsSplit[0]} -h {resMipsSplit[1]} -if FANT_DITHER \"{newDDSMips}\" -y");
+                File.Copy(file, newPNGMips, true);
+
+                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBase}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
                 proc.WaitForExit();
+
+                if (mipsHDCount > 0)
+                {
+                    info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 -w {resMipsSplit[0]} -h {resMipsSplit[1]} -if FANT_DITHER \"{newPNGMips}\" -y");
+                    info.WorkingDirectory = parentDir;
+                    info.UseShellExecute = false;
+                    proc = Process.Start(info);
+                    proc.WaitForExit();
+                }
+                else
+                {
+                    info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 \"{newPNGMips}\" -y");
+                    info.WorkingDirectory = parentDir;
+                    info.UseShellExecute = false;
+                    proc = Process.Start(info);
+                    proc.WaitForExit();
+                }
+
+                File.Delete(newPNGMips);
             }
             else
             {
-                info = new ProcessStartInfo("texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 \"{newDDSMips}\" -y");
+                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 \"{newPNGBase}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
                 proc.WaitForExit();
             }
-
-            //File.Delete(newDDSBase);
-            File.Delete(newDDSMips);
 
             if (mipsHDCount > 0)
             {
-                File.Copy(file, newDDSBaseHD, true);
-                File.Copy(file, newDDSMipsHD, true);
+                File.Copy(file, newPNGBaseHD, true);
+                File.Copy(file, newPNGMipsHD, true);
 
-                info = new ProcessStartInfo("texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newDDSBaseHD}\" -y");
+                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBaseHD}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
                 proc.WaitForExit();
 
-                info = new ProcessStartInfo("texconv.exe", $"-m {mipsHDCount} -dx10 -f DXT1 \"{newDDSMipsHD}\" -y");
+                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsHDCount} -dx10 -f DXT1 \"{newPNGMipsHD}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
                 proc.WaitForExit();
 
-                File.Delete(newDDSBaseHD);
-                File.Delete(newDDSMipsHD);
+                File.Delete(newPNGBaseHD);
+                File.Delete(newPNGMipsHD);
             }
 
-            string newXBTBase = newDDSBase.Replace(".png", ".xbt");
-            string newXBTMips = newDDSMips.Replace(".png", ".xbt");
-            string newXBTBaseHD = newDDSBaseHD.Replace(".png", ".xbt");
-            string newXBTMipsHD = newDDSMipsHD.Replace(".png", ".xbt");
+            string newXBTBase = newPNGBase.Replace(".png", ".xbt");
+            string newXBTMips = newPNGMips.Replace(".png", ".xbt");
+            string newXBTBaseHD = newPNGBaseHD.Replace(".png", ".xbt");
+            string newXBTMipsHD = newPNGMipsHD.Replace(".png", ".xbt");
 
-            newDDSBase = newDDSBase.Replace(".png", ".dds");
-            newDDSMips = newDDSMips.Replace(".png", ".dds");
-            newDDSBaseHD = newDDSBaseHD.Replace(".png", ".dds");
-            newDDSMipsHD = newDDSMipsHD.Replace(".png", ".dds");
+            string newDDSBase = newPNGBase.Replace(".png", ".dds");
+            string newDDSMips = newPNGMips.Replace(".png", ".dds");
+            string newDDSBaseHD = newPNGBaseHD.Replace(".png", ".dds");
+            string newDDSMipsHD = newPNGMipsHD.Replace(".png", ".dds");
 
             void convert(string dds, string xbt, string mips, int mipscnt)
             {
@@ -5389,7 +5572,7 @@ dwOffset = 176762
                 if (gameStr == "5") ver = 116;
                 if (gameStr == "6") ver = 119;
 
-                var xbtHdr = ReadXBTXMLHeader("XBTTemplate.xml", ver, mips, mipscnt);
+                var xbtHdr = ReadXBTXMLHeader(xmlTemplate, ver, mips, mipscnt);
 
                 FileStream XBTStream = File.Create(xbt);
                 XBTStream.WriteBytes(xbtHdr.Item1);
@@ -5402,8 +5585,13 @@ dwOffset = 176762
                 File.Delete(dds);
             }
 
-            convert(newDDSBase, newXBTBase, mipsPathStr + baseFileName + "_mips.xbt", mipsCount);
-            convert(newDDSMips, newXBTMips, "", 0);
+            if (mipsCount > 0)
+            {
+                convert(newDDSBase, newXBTBase, mipsPathStr + baseFileName + "_mips.xbt", mipsCount);
+                convert(newDDSMips, newXBTMips, "", 0);
+            }
+            else
+                convert(newDDSBase, newXBTBase, "", 0);
 
             if (mipsHDCount > 0)
             {

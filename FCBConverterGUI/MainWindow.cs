@@ -125,7 +125,7 @@ namespace FCBConverterGUI
 
         private void button1_Click(object sender, EventArgs e)
         {
-            CallFCBConverter("\"" + textBox1.Text + "\" \"" + textBox2.Text + "\"");
+            CallFCBConverter("-source=\"" + textBox1.Text + "\" -out=\"" + textBox2.Text + "\"");
         }
 
         private void button11_Click(object sender, EventArgs e)
@@ -159,7 +159,7 @@ namespace FCBConverterGUI
 
             string outFile = textBox4.Text + ".fat";
 
-            CallFCBConverter("\"" + textBox4.Text + "\" \"" + outFile + "\" " + fatVer + " " + compress + " " + excludeCompress);
+            CallFCBConverter("-source=\"" + textBox4.Text + "\" -fat=\"" + outFile + "\" " + fatVer + " " + compress + " " + excludeCompress);
         }
 
         private void button12_Click(object sender, EventArgs e)
@@ -186,7 +186,7 @@ namespace FCBConverterGUI
             if (checkBox2.Checked)
                 subf = "-fc2";
 
-            CallFCBConverter("\"" + textBox5.Text + "\" \"" + textBox8.Text + "\" " + subf);
+            CallFCBConverter("-source=\"" + textBox5.Text + "\" -filter=\"" + textBox8.Text + "\" " + subf);
         }
 
         private void button13_Click(object sender, EventArgs e)
@@ -209,7 +209,7 @@ namespace FCBConverterGUI
             if (checkBox3.Checked)
                 addParam = "-fc2";
 
-            CallFCBConverter("\"" + textBox6.Text + "\" " + addParam);
+            CallFCBConverter("-source=\"" + textBox6.Text + "\" " + addParam);
         }
 
         private void button15_Click(object sender, EventArgs e)
@@ -238,7 +238,7 @@ namespace FCBConverterGUI
 
                 Process process = new Process();
                 process.StartInfo.FileName = "FCBConverter.exe";
-                process.StartInfo.Arguments = "-xbgData \"" + file + "\"";
+                process.StartInfo.Arguments = "-xbgData -xbg=\"" + file + "\"";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
@@ -470,7 +470,7 @@ namespace FCBConverterGUI
                 outParamVal += (i > 0 ? "," : "") + meshID;
             }
 
-            CallFCBConverter("-xbgFP \"" + textBox10.Text + "\" \"" + outParamVal + "\"");
+            CallFCBConverter("-xbgFP -xbg=\"" + textBox10.Text + "\" -data=\"" + outParamVal + "\"");
 
             MessageBox.Show("XBG successfully edited.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -559,7 +559,7 @@ namespace FCBConverterGUI
             if (radioButton10.Checked) type = "2";
             if (radioButton11.Checked) type = "3";
 
-            CallFCBConverter("-ue=" + type + " \"" + textBox11.Text + "\" \"" + textBox12.Text + "\"");
+            CallFCBConverter("-UE2XBG=" + type + " -ue=\"" + textBox11.Text + "\" -xbg=\"" + textBox12.Text + "\"");
         }
 
         private void button20_Click(object sender, EventArgs e)
@@ -693,7 +693,7 @@ namespace FCBConverterGUI
 
         private void button16_Click(object sender, EventArgs e)
         {
-            CallFCBConverter("\"" + textBox13.Text + "\" \"" + textBox14.Text + "\" \"" + textBox9.Text + "\"");
+            CallFCBConverter("-source=\"" + textBox13.Text + "\" -out=\"" + textBox14.Text + "\" -single=\"" + textBox9.Text + "\"");
         }
 
         private void button7_Click(object sender, EventArgs e)
