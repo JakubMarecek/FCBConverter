@@ -61,7 +61,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20221018-2000";
+        public static string version = "20221020-2000";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -70,75 +70,8 @@ namespace FCBConverter
         public static string xmlheaderthanks = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed, xBaebsae, id-daemon, Ganic, legendhavoc175, miru, eprilx";
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
-        //public static List<string> aaaa = new List<string>();
-
         static void Main(string[] args)
         {
-            /*dwUnresolvedOffset = dwUnresolvedOffset << 3;
-
-            dwOffset = dwUnresolvedOffset | dwCompressedSize >> 29;
-            dwOffset = dwOffset << 4;
-
-            dwFlag = dwUncompressedSize & 3;
-            dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
-            dwUncompressedSize = (dwUncompressedSize >> 2);
-
-
-            dwUnresolvedOffset = 22095
-dwCompressedSize = 1073856990
-
-8ul * dwUnresolvedOffset = 176760
-dwCompressedSize >> 29 = 2
-
-dwOffset = 176762
-
-
-
-            
-            uint dwUncompressedSize = 3274166;
-            uint dwUnresolvedOffset = 22095;
-            uint dwCompressedSize = 1073856990;
-
-            uint dwUncompressedSize = 818541;
-            uint dwUnresolvedOffset = 2828192;
-            uint dwCompressedSize = 115166;
-
-            */
-            /*
-            uint dwUnresolvedOffset = 22095;
-            uint dwCompressedSize = 1073856990;
-
-            ulong dwOffset = (dwCompressedSize >> 29 | dwUnresolvedOffset << 3) << 4;
-
-            //****************************************************************************
-
-            dwCompressedSize = 115166;
-
-            ulong dwOffsetB = (uint)(((dwOffset >> 4) & 0x7FFFFFFF8) >> 3);
-
-            uint a = 0u;
-            a = (uint)((int)a | (int)((dwOffset >> 4) << 29));
-            a |= (dwCompressedSize & 0x1FFFFFFF);
-
-            return;
-            */
-            /*
-            uint dwUnresolvedOffset = 113593898;
-            uint dwCompressedSize = 536971319;
-
-            ulong dwOffset = (dwCompressedSize >> 29 | (ulong)dwUnresolvedOffset << 3) << 4;
-            dwCompressedSize = (dwCompressedSize & 0x1FFFFFFF);
-
-            //****************************************************************************
-
-            ulong dwOffsetB = (uint)(((dwOffset >> 4) & 0x7FFFFFFF8) >> 3);
-
-            uint a = 0u;
-            a = (uint)((int)a | (int)((dwOffset >> 4) << 29));
-            a |= (dwCompressedSize & 0x1FFFFFFF);
-
-            return;*/
-
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
 
@@ -530,7 +463,7 @@ dwOffset = 176762
                     FIN();
                 }
 
-                else if (file.EndsWith(".png")) // specific - doesn't use args, for Win Open With
+                else if (file.EndsWith(".png") && source == "") // specific - doesn't use args, for Win Open With
                 {
                     ConvertPNG2XBT(file);
                     FIN();
@@ -566,7 +499,7 @@ dwOffset = 176762
                     FIN();
                 }
 
-                else if (file.EndsWith(".fat")) // specific - doesn't use args, for Win Open With
+                else if (file.EndsWith(".fat") && source == "") // specific - doesn't use args, for Win Open With
                 {
                     UnpackBigFile(file, "");
                     FIN();
@@ -578,7 +511,7 @@ dwOffset = 176762
                     FIN();
                 }
 
-                else if (File.Exists(file)) // specific - doesn't use args, for Win Open With
+                else if (File.Exists(file) && source == "") // specific - doesn't use args, for Win Open With
                 {
                     Proccessing(file, "");
                 }
