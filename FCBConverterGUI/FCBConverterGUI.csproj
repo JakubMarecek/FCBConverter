@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
 	  <ApplicationIcon>Dunia_Engine.ico</ApplicationIcon>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <Copyright>Copyright © ArmanIII 2021</Copyright>
     <Company>ArmanIII</Company>
