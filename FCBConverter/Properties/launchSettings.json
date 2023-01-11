@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"g:\\fc5 sources\\a_fctber_disk\\fc6_aslt06.dbt.fcb\""
+      "commandLineArgs": "\"2728749518.bnk.converted.xml\""
     }
   }
 }

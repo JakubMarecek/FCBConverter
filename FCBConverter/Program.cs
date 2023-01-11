@@ -72,6 +72,76 @@ namespace FCBConverter
 
         static void Main(string[] args)
         {
+            /*HashSet<uint> gameProjIDs = new();
+            string[] ff = new string[] { "FC5.xml", "FC6.xml", "ND.xml" };
+            HashSet<string> tw = new();
+
+            foreach (var f in ff)
+            {
+                XDocument docDuniaSoundData = XDocument.Load(f);
+
+                IEnumerable<XElement> Events = docDuniaSoundData.Root.Descendants("Event");
+                foreach (var el in Events)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> SoundBanks = docDuniaSoundData.Root.Descendants("Bank");
+                foreach (var el in SoundBanks)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> RTPCs = docDuniaSoundData.Root.Descendants("RTPC");
+                foreach (var el in RTPCs)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> Effects = docDuniaSoundData.Root.Descendants("Effect");
+                foreach (var el in Effects)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> AuxiliaryBuses = docDuniaSoundData.Root.Descendants("AuxiliaryBus");
+                foreach (var el in AuxiliaryBuses)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> Triggers = docDuniaSoundData.Root.Descendants("Trigger");
+                foreach (var el in Triggers)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> MemoryNodeAssociations = docDuniaSoundData.Root.Descendants("MemoryNodeAssociation");
+                foreach (var el in MemoryNodeAssociations)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ItemId").Value));
+
+                IEnumerable<XElement> Streams = docDuniaSoundData.Root.Descendants("Stream");
+                foreach (var el in Streams)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("Name").Value.Replace(".wem", "")));
+
+                IEnumerable<XElement> StateGroup = docDuniaSoundData.Root.Descendants("StateGroup");
+                foreach (var el in StateGroup)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> State = docDuniaSoundData.Root.Descendants("State");
+                foreach (var el in State)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> SwitchGroup = docDuniaSoundData.Root.Descendants("SwitchGroup");
+                foreach (var el in SwitchGroup)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> Switch = docDuniaSoundData.Root.Descendants("Switch");
+                foreach (var el in Switch)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+
+                IEnumerable<XElement> InitSoundBanks = docDuniaSoundData.Root.Descendants("InitSoundBank");
+                foreach (var el in InitSoundBanks)
+                    gameProjIDs.Add(uint.Parse(el.Attribute("ShortID").Value));
+            }
+
+            foreach (var item in gameProjIDs)
+            {
+                string a = item.ToString();
+                if (!tw.Contains(a))
+                    tw.Add(a);
+            }
+
+            File.WriteAllLines("so.txt", tw.ToArray());*/
+
             using var processModule = Process.GetCurrentProcess().MainModule;
             m_Path = Path.GetDirectoryName(processModule?.FileName);
 
@@ -3549,6 +3619,13 @@ namespace FCBConverter
 
         static void BNKExtract(string file)
         {
+            HashSet<uint> gameProjIDs = new();
+
+            string[] soundsIDs = File.ReadAllLines(m_Path + "\\SoundDataIDs.bin");
+
+            foreach (var id in soundsIDs)
+                gameProjIDs.Add(uint.Parse(id));
+
             // https://wiki.xentax.com/index.php/Wwise_SoundBank_(*.bnk)
 
             List<uint> wemIDs = new List<uint>();
@@ -3607,6 +3684,8 @@ namespace FCBConverter
                         objFile.Add(new XAttribute("Offset", wemOffset.ToString()));
                         objFile.Add(new XAttribute("Length", wemLength.ToString()));
                         xSec.Add(objFile);
+
+                        gameProjIDs.Add(wemID);
                     }
                 }
                 else if (sectionName == 0x41544144) // DATA
@@ -3637,12 +3716,19 @@ namespace FCBConverter
                 {
                     uint objectsCount = BNKStream.ReadValueU32();
 
+                    List<Tuple<string, uint, byte[]>> data = new();
+
                     for (int i = 0; i < objectsCount; i++)
                     {
                         byte type = (byte)BNKStream.ReadByte();
                         uint objectLength = BNKStream.ReadValueU32() - 4;
                         uint objectID = BNKStream.ReadValueU32();
 
+                        data.Add(new(BNKGetKnownName(type, BNKNames.hircObjects, "Object"), objectID, BNKStream.ReadBytes((int)objectLength)));
+
+                        gameProjIDs.Add(objectID);
+
+                        /*
                         XElement xObj = new(BNKGetKnownName(type, BNKNames.hircObjects, "Object"));
                         xObj.Add(new XAttribute("ObjectID", objectID.ToString()));
 
@@ -3858,7 +3944,7 @@ namespace FCBConverter
                                     usrDfnAuxSnds.Add(new XElement("AuxiliaryBus4", auxBus4.ToString()));
                                     xObj.Add(usrDfnAuxSnds);
                                 }
-                            }*/
+                            }*
 
                             byte playbackSettings = (byte)BNKStream.ReadByte();
                             byte onRetPhysVoice = (byte)BNKStream.ReadByte();
@@ -4104,6 +4190,34 @@ namespace FCBConverter
                             xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
                         }
 
+                        xSec.Add(xObj);*/
+                    }
+                    
+                    foreach (var d in data)
+                    {
+                        XElement xObj = new(d.Item1);
+                        xObj.Add(new XAttribute("ObjectID", d.Item2.ToString()));
+
+                        byte[] objData = d.Item3;
+
+                        xObj.Add(new XElement("Binary", Helpers.ByteArrayToString(objData).ToUpper()));
+
+                        List<uint> added = new();
+
+                        XElement pv = new("PossibleIDs");
+                        for (int j = 0; j < objData.Length - 3; j++)
+                        {
+                            byte[] arr = new byte[4];
+                            Buffer.BlockCopy(objData, j, arr, 0, 4);
+                            uint possibleVal = BitConverter.ToUInt32(arr, 0);
+                            if (gameProjIDs.Contains(possibleVal) && !added.Contains(possibleVal))
+                            {
+                                pv.Add(new XElement("ID", new XAttribute("OrigHex", Helpers.ByteArrayToString(arr)), new XAttribute("UInt32", possibleVal.ToString())));
+                                added.Add(possibleVal);
+                            }
+                        }
+                        xObj.Add(pv);
+
                         xSec.Add(xObj);
                     }
                 }
@@ -4222,7 +4336,7 @@ namespace FCBConverter
                         BNKStream.WriteValueU32(0); // will be changed later
                         BNKStream.WriteValueU32(uint.Parse(obj.Attribute("ObjectID").Value));
 
-                        if (type == 0x01) // 1 Settings
+                        /*if (type == 0x01) // 1 Settings
                         {
                             IEnumerable<XElement> settings = obj.Elements();
 
@@ -4517,9 +4631,27 @@ namespace FCBConverter
                                 BNKStream.WriteValueU32(uint.Parse(eventsID.Value));
                             }
                         }
-                        else
+                        else*/
                         {
-                            BNKStream.WriteBytes(Helpers.StringToByteArray(obj.Element("Binary").Value));
+                            byte[] binaryData = Helpers.StringToByteArray(obj.Element("Binary").Value);
+                            MemoryStream bdStr = new(binaryData);
+
+                            foreach (var id in obj.Element("PossibleIDs").Elements("ID"))
+                            {
+                                byte[] search = Helpers.StringToByteArray(id.Attribute("OrigHex").Value);
+                                uint replace = uint.Parse(id.Attribute("UInt32").Value);
+                                
+                                int[] poses = Helpers.SearchBytesMultiple(binaryData, search);
+        
+                                foreach (int pos in poses)
+                                {
+                                    bdStr.Position = pos;
+                                    bdStr.WriteValueU32(replace);
+                                }
+                            }
+
+                            binaryData = bdStr.ToArray();
+                            BNKStream.WriteBytes(binaryData);
                         }
 
                         long currObjPos = BNKStream.Position;
