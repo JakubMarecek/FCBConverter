@@ -3353,17 +3353,32 @@ namespace FCBConverter
             outputDat.Flush();
             outputDat.Close();
 
+            // versions
+            // 11 - FC6
+            // 10 - FC5, FCND
+            // 9 - FC3, FC3BD, FC4
+            // 5 - FC2
+
             var output = File.Create(fatFile);
             output.WriteValueU32(0x46415432, 0);
             output.WriteValueS32(dwVersion, 0);
 
             output.WriteByte(1);
-            output.WriteByte(0);
-            //output.WriteByte(3);
+
+            if (dwVersion >= 10)
+                output.WriteByte(0);
+
+            if (dwVersion <= 9)
+                output.WriteByte(3);
+
             output.WriteValueU16(0);
 
-            output.WriteValueS32(0, 0); // sub FATs are hard to edit, so they aren't supported by packing process
-            output.WriteValueS32(0, 0);
+            if (dwVersion >= 9)
+            {
+                output.WriteValueS32(0, 0); // dwSubfatTotalEntryCount
+                output.WriteValueS32(0, 0); // dwSubfatCount
+            }
+
             output.WriteValueS32(Entries.Count, 0);
 
             foreach (ulong entryE in Entries.Keys)
