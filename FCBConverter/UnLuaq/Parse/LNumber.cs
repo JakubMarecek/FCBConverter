@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -46,7 +47,7 @@ namespace UnluacNET
             if (Number == (float)Math.Round(Number))
                 return ((int)Number).ToString();
             else
-                return Number.ToString();
+                return Number.ToString(CultureInfo.InvariantCulture);
         }
 
         public LFloatNumber(float number)
@@ -77,7 +78,7 @@ namespace UnluacNET
             if (Number == Math.Round(Number))
                 return ((long)Number).ToString();
             else
-                return Number.ToString();
+                return Number.ToString(CultureInfo.InvariantCulture);
         }
 
         public LDoubleNumber(double number)
