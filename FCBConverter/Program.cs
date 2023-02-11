@@ -62,7 +62,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20230128-2230";
+        public static string version = "20230212-0030";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -72,7 +72,7 @@ namespace FCBConverter
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
         [DllImport("luac51", EntryPoint = "Process", CallingConvention = CallingConvention.Cdecl)]
-        static extern void LuacLibProcess(string str);
+        static extern void LuacLibProcess(string inPath, string outPath);
 
         static void Main(string[] args)
         {
@@ -1145,8 +1145,8 @@ namespace FCBConverter
 
                 if (LoadSetting("UseLuaBytecode") == "true")
                 {
-                    LuacLibProcess(luaFile);
-                    string luac = Path.GetDirectoryName(file) + "\\luac.out";
+                    string luac = luaFile + ".tmp";
+                    LuacLibProcess(luaFile, luac);
                     byte[] dominoLuaBytecode = File.ReadAllBytes(luac);
                     File.Delete(luac);
 

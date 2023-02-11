@@ -29,9 +29,9 @@
 
 //static int listing=0;			/* list bytecodes? */
 //static int dumping=1;			/* dump bytecodes? */
-static int stripping=0;			/* strip debug information? */
-static char Output[]={ OUTPUT };	/* default output file name */
-static const char* output=Output;	/* actual output file name */
+//static int stripping=0;			/* strip debug information? */
+//static char Output[]={ OUTPUT };	/* default output file name */
+//static const char* output=Output;	/* actual output file name */
 //static const char* progname=PROGNAME;	/* actual program name */
 /*
 static void fatal(const char* message)
@@ -207,20 +207,20 @@ static int writer(lua_State* L, const void* p, size_t size, void* u)
 	return (fwrite(p, size, 1, (FILE*)u) != 1) && (size != 0);
 }
 
-int __declspec(dllexport) Process(const char* path)
+int __declspec(dllexport) Process(const char* inPath, const char* outPath)
 {
 	lua_State* L;
 	L = lua_open();
 
 	const Proto* f;
 
-	luaL_loadfile(L, path);
+	luaL_loadfile(L, inPath);
 
 	f = combine(L, 1);
 
-	FILE* D = fopen(output, "wb");
+	FILE* D = fopen(outPath, "wb");
 	lua_lock(L);
-	luaU_dump(L, f, writer, D, stripping);
+	luaU_dump(L, f, writer, D, 0);
 	lua_unlock(L);
 	fclose(D);
 
