@@ -28,6 +28,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -69,6 +70,9 @@ namespace FCBConverter
         public static string xmlheaderfcb = "Please remember that types are calculated and they may not be exactly the same as they are. Take care about this.";
         public static string xmlheaderthanks = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed, xBaebsae, id-daemon, Ganic, legendhavoc175, miru, eprilx";
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
+
+        [DllImport("luac51", EntryPoint = "Process", CallingConvention = CallingConvention.Cdecl)]
+        static extern void LuacLibProcess(string str);
 
         static void Main(string[] args)
         {
@@ -1132,20 +1136,40 @@ namespace FCBConverter
             {
                 string newLuaFile = file.Replace(".lua.converted.xml", "_new.lua");
 
-                string luaLuaq = File.ReadAllText(file.Replace(".lua.converted.xml", ".lua.converted.lua"));
-                string luaLuac = File.ReadAllText(file);
+                string luaFile = file.Replace(".lua.converted.xml", ".lua.converted.lua");
 
-                luaLuaq = "--" + xmlheader + Environment.NewLine + luaLuaq;
+                string dominoMetadata = File.ReadAllText(file);
 
                 if (File.Exists(newLuaFile))
                     File.Delete(newLuaFile);
 
-                FileStream bin = new FileStream(newLuaFile, FileMode.Create);
-                bin.Write(BitConverter.GetBytes(0x4341554c), 0, 4);
-                bin.Write(BitConverter.GetBytes(luaLuaq.Length), 0, sizeof(int));
-                bin.Write(Encoding.UTF8.GetBytes(luaLuaq), 0, luaLuaq.Length);
-                bin.Write(Encoding.UTF8.GetBytes(luaLuac), 0, luaLuac.Length);
-                bin.Close();
+                if (LoadSetting("UseLuaBytecode") == "true")
+                {
+                    LuacLibProcess(luaFile);
+                    string luac = Path.GetDirectoryName(file) + "\\luac.out";
+                    byte[] dominoLuaBytecode = File.ReadAllBytes(luac);
+                    File.Delete(luac);
+
+                    FileStream bin = new FileStream(newLuaFile, FileMode.Create);
+                    bin.Write(BitConverter.GetBytes(0x4341554c), 0, 4);
+                    bin.Write(BitConverter.GetBytes(dominoLuaBytecode.Length), 0, sizeof(int));
+                    bin.Write(dominoLuaBytecode, 0, dominoLuaBytecode.Length);
+                    bin.Write(Encoding.UTF8.GetBytes(dominoMetadata), 0, dominoMetadata.Length);
+                    bin.Close();
+                }
+                else
+                {
+                    string dominoLuaData = File.ReadAllText(luaFile);
+
+                    dominoLuaData = "--" + xmlheader + Environment.NewLine + dominoLuaData;
+
+                    FileStream bin = new FileStream(newLuaFile, FileMode.Create);
+                    bin.Write(BitConverter.GetBytes(0x4341554c), 0, 4);
+                    bin.Write(BitConverter.GetBytes(dominoLuaData.Length), 0, sizeof(int));
+                    bin.Write(Encoding.UTF8.GetBytes(dominoLuaData), 0, dominoLuaData.Length);
+                    bin.Write(Encoding.UTF8.GetBytes(dominoMetadata), 0, dominoMetadata.Length);
+                    bin.Close();
+                }
 
                 FIN();
                 return;
