@@ -62,7 +62,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20230212-0030";
+        public static string version = "20230212-2330";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1090,6 +1090,15 @@ namespace FCBConverter
             }
 
             // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".decompiled.lua"))
+            {
+                string luac = file.Replace(".decompiled.lua", ".lua");
+                LuacLibProcess(file, luac);
+
+                FIN();
+                return;
+            }
 
             if (file.EndsWith(".lua"))
             {
