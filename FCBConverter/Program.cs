@@ -72,7 +72,13 @@ namespace FCBConverter
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
         [DllImport("luac51", EntryPoint = "Process", CallingConvention = CallingConvention.Cdecl)]
-        static extern void LuacLibProcess(string inPath, string outPath);
+        static extern void LuacLibProcess(string inPath, string outPath, string bytecodePath);
+
+        [DllImport("luac51", EntryPoint = "ProcessBytes", CallingConvention = CallingConvention.Cdecl)]
+        static extern void LuacLibProcessBytes(byte[] inBuffer, int inSize, out IntPtr outBuffer, out int outSize, string bytecodePath);
+
+        [DllImport("luac51", EntryPoint = "FreeMem", CallingConvention = CallingConvention.Cdecl)]
+        static extern void LuacLibFreeMem(IntPtr obj);
 
         static void Main(string[] args)
         {
@@ -1094,7 +1100,7 @@ namespace FCBConverter
             if (file.EndsWith(".decompiled.lua"))
             {
                 string luac = file.Replace(".decompiled.lua", ".lua");
-                LuacLibProcess(file, luac);
+                LuacLibProcess(file, luac, luac);
 
                 FIN();
                 return;
@@ -1154,10 +1160,16 @@ namespace FCBConverter
 
                 if (LoadSetting("UseLuaBytecode") == "true")
                 {
-                    string luac = luaFile + ".tmp";
-                    LuacLibProcess(luaFile, luac);
-                    byte[] dominoLuaBytecode = File.ReadAllBytes(luac);
-                    File.Delete(luac);
+                    byte[] bts = File.ReadAllBytes(luaFile);
+
+                    byte[] dominoLuaBytecode;
+
+                    LuacLibProcessBytes(bts, bts.Length, out nint buffer, out int bufferLength, luaFile);
+
+                    dominoLuaBytecode = new byte[bufferLength];
+                    Marshal.Copy(buffer, dominoLuaBytecode, 0, bufferLength);
+
+                    LuacLibFreeMem(buffer);
 
                     FileStream bin = new FileStream(newLuaFile, FileMode.Create);
                     bin.Write(BitConverter.GetBytes(0x4341554c), 0, 4);

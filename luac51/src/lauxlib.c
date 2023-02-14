@@ -549,7 +549,7 @@ static int errfile (lua_State *L, const char *what, int fnameindex) {
 }
 
 
-LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
+LUALIB_API int luaL_loadfile (lua_State *L, const char *filename, const char* bytecodePath) {
   LoadF lf;
   int status, readstatus;
   int c;
@@ -560,7 +560,7 @@ LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
     lf.f = stdin;
   }
   else {
-    lua_pushfstring(L, "@%s", filename);
+    lua_pushfstring(L, "@%s", bytecodePath ? bytecodePath : filename);
     lf.f = fopen(filename, "r");
     if (lf.f == NULL) return errfile(L, "open", fnameindex);
   }

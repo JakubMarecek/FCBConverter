@@ -25,7 +25,7 @@
 #include "lundump.h"
 
 #define PROGNAME	"luac"		/* default program name */
-#define	OUTPUT		PROGNAME ".out"	/* default output file */
+//#define	OUTPUT		PROGNAME ".out"	/* default output file */
 
 //static int listing=0;			/* list bytecodes? */
 //static int dumping=1;			/* dump bytecodes? */
@@ -207,14 +207,14 @@ static int writer(lua_State* L, const void* p, size_t size, void* u)
 	return (fwrite(p, size, 1, (FILE*)u) != 1) && (size != 0);
 }
 
-int __declspec(dllexport) Process(const char* inPath, const char* outPath)
+int __declspec(dllexport) Process(const char* inPath, const char* outPath, const char* bytecodePath)
 {
 	lua_State* L;
 	L = lua_open();
 
 	const Proto* f;
 
-	luaL_loadfile(L, inPath);
+	luaL_loadfile(L, inPath, bytecodePath);
 
 	f = combine(L, 1);
 
@@ -227,4 +227,44 @@ int __declspec(dllexport) Process(const char* inPath, const char* outPath)
 	lua_close(L);
 
 	return 0;
+}
+
+int __declspec(dllexport) ProcessBytes(char* inBuffer, int inSize, char** outBuffer, int* outSize, const char* bytecodePath)
+{
+	FILE* fileptr;
+
+	char name[40];
+	const char* tmpFile = tmpnam(NULL);
+
+	fileptr = fopen(tmpFile, "wb");
+	fwrite(inBuffer, 1, inSize, fileptr);
+	fclose(fileptr);
+
+	Process(tmpFile, tmpFile, bytecodePath);
+
+	char* buffer;
+	long filelen;
+
+	fileptr = fopen(tmpFile, "rb");  // Open the file in binary mode
+	fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
+	filelen = ftell(fileptr);             // Get the current byte offset in the file
+	rewind(fileptr);                      // Jump back to the beginning of the file
+
+	buffer = (char*)malloc(filelen * sizeof(char)); // Enough memory for the file
+	fread(buffer, filelen, 1, fileptr); // Read in the entire file
+	fclose(fileptr); // Close the file
+
+	*outSize = (int)filelen;
+
+	*outBuffer = (char*)malloc(filelen * sizeof(char));
+	memcpy(*outBuffer, buffer, filelen);
+
+	remove(tmpFile);
+
+	return 0;
+}
+
+void __declspec(dllexport) FreeMem(char *obj)
+{
+	free(obj);
 }
