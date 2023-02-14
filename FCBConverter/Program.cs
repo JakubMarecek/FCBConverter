@@ -22,12 +22,9 @@ using LZ4Sharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -72,10 +69,10 @@ namespace FCBConverter
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
         [DllImport("luac51", EntryPoint = "Process", CallingConvention = CallingConvention.Cdecl)]
-        static extern void LuacLibProcess(string inPath, string outPath, string bytecodePath);
+        static extern int LuacLibProcess(string inPath, string outPath, string bytecodePath, out IntPtr error);
 
         [DllImport("luac51", EntryPoint = "ProcessBytes", CallingConvention = CallingConvention.Cdecl)]
-        static extern void LuacLibProcessBytes(byte[] inBuffer, int inSize, out IntPtr outBuffer, out int outSize, string bytecodePath);
+        static extern int LuacLibProcessBytes(byte[] inBuffer, int inSize, out IntPtr outBuffer, out int outSize, string bytecodePath, out IntPtr error);
 
         [DllImport("luac51", EntryPoint = "FreeMem", CallingConvention = CallingConvention.Cdecl)]
         static extern void LuacLibFreeMem(IntPtr obj);
@@ -1100,7 +1097,12 @@ namespace FCBConverter
             if (file.EndsWith(".decompiled.lua"))
             {
                 string luac = file.Replace(".decompiled.lua", ".lua");
-                LuacLibProcess(file, luac, luac);
+                int ret = LuacLibProcess(file, luac, luac, out IntPtr error);
+                if (ret != 0)
+                {
+                    string str = Marshal.PtrToStringAnsi(error);
+                    Console.WriteLine("Error during parsing Lua: " + str);
+                }
 
                 FIN();
                 return;
@@ -1164,7 +1166,13 @@ namespace FCBConverter
 
                     byte[] dominoLuaBytecode;
 
-                    LuacLibProcessBytes(bts, bts.Length, out nint buffer, out int bufferLength, luaFile);
+                    int ret = LuacLibProcessBytes(bts, bts.Length, out nint buffer, out int bufferLength, luaFile, out IntPtr error);
+                    if (ret != 0)
+                    {
+                        string str = Marshal.PtrToStringAnsi(error);
+                        Console.WriteLine("Error during parsing Lua: " + str);
+                        return;
+                    }
 
                     dominoLuaBytecode = new byte[bufferLength];
                     Marshal.Copy(buffer, dominoLuaBytecode, 0, bufferLength);

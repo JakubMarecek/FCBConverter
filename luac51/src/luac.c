@@ -173,50 +173,26 @@ int main(int argc, char* argv[])
 
 #define toproto(L,i) (clvalue(L->top+(i))->l.p)
 
-static const Proto* combine(lua_State* L, int n)
-{
-	if (n == 1)
-		return toproto(L, -1);
-	else
-	{
-		int i, pc;
-		Proto* f = luaF_newproto(L);
-		setptvalue2s(L, L->top, f); incr_top(L);
-		f->source = luaS_newliteral(L, "=(" PROGNAME ")");
-		f->maxstacksize = 1;
-		pc = 2 * n + 1;
-		f->code = luaM_newvector(L, pc, Instruction);
-		f->sizecode = pc;
-		f->p = luaM_newvector(L, n, Proto*);
-		f->sizep = n;
-		pc = 0;
-		for (i = 0; i < n; i++)
-		{
-			f->p[i] = toproto(L, i - n - 1);
-			f->code[pc++] = CREATE_ABx(OP_CLOSURE, 0, i);
-			f->code[pc++] = CREATE_ABC(OP_CALL, 0, 1, 1);
-		}
-		f->code[pc++] = CREATE_ABC(OP_RETURN, 0, 1, 0);
-		return f;
-	}
-}
-
 static int writer(lua_State* L, const void* p, size_t size, void* u)
 {
 	UNUSED(L);
 	return (fwrite(p, size, 1, (FILE*)u) != 1) && (size != 0);
 }
 
-int __declspec(dllexport) Process(const char* inPath, const char* outPath, const char* bytecodePath)
+int __declspec(dllexport) Process(const char* inPath, const char* outPath, const char* bytecodePath, const char** error)
 {
 	lua_State* L;
 	L = lua_open();
 
 	const Proto* f;
 
-	luaL_loadfile(L, inPath, bytecodePath);
+	if (luaL_loadfile(L, inPath, bytecodePath) != 0)
+	{
+		*error = lua_tostring(L, -1);
+		return 1;
+	}
 
-	f = combine(L, 1);
+	f = toproto(L, -1);
 
 	FILE* D = fopen(outPath, "wb");
 	lua_lock(L);
@@ -229,18 +205,18 @@ int __declspec(dllexport) Process(const char* inPath, const char* outPath, const
 	return 0;
 }
 
-int __declspec(dllexport) ProcessBytes(char* inBuffer, int inSize, char** outBuffer, int* outSize, const char* bytecodePath)
+int __declspec(dllexport) ProcessBytes(char* inBuffer, int inSize, char** outBuffer, int* outSize, const char* bytecodePath, const char** error)
 {
 	FILE* fileptr;
 
-	char name[40];
 	const char* tmpFile = tmpnam(NULL);
 
 	fileptr = fopen(tmpFile, "wb");
 	fwrite(inBuffer, 1, inSize, fileptr);
 	fclose(fileptr);
 
-	Process(tmpFile, tmpFile, bytecodePath);
+	if (Process(tmpFile, tmpFile, bytecodePath, error) != 0)
+		return 1;
 
 	char* buffer;
 	long filelen;
