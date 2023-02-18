@@ -68,6 +68,8 @@ namespace FCBConverter
         public static string xmlheaderthanks = "Based on Gibbed's Dunia Tools. Special thanks to: Fireboyd78 (FCBastard), Ekey (FC5 Unpacker), Gibbed, xBaebsae, id-daemon, Ganic, legendhavoc175, miru, eprilx";
         public static string xmlheaderbnk = $"Adding new WEM files is possible. DIDX will be calculated automatically, only required is WEMFile entry in DATA.{Environment.NewLine}Since not all binary data are converted into readable format, you can use Wwise to create your own SoundBank and then use FCBConverter to edit IDs inside the SoundBank.";
 
+        public const string convGuessedPrefix = "value-"; //GuessedTypeAndVal-
+
         [DllImport("luac51", EntryPoint = "Process", CallingConvention = CallingConvention.Cdecl)]
         static extern int LuacLibProcess(string inPath, string outPath, string bytecodePath, out IntPtr error);
 

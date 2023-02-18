@@ -233,8 +233,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                     foreach (var kv in node.Fields)
                     {
-                        string prefix = "value-";
-
                         string name = "";
                         if (Program.listStringsDict.ContainsKey(kv.Key))
                         {
@@ -269,11 +267,11 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                         if (isHash32)
                         {
-                            writer.WriteAttributeString(prefix + "ComputeHash32", prevNodeVal);
+                            writer.WriteAttributeString(Program.convGuessedPrefix + "ComputeHash32", prevNodeVal);
                         }
                         else if (isHash64)
                         {
-                            writer.WriteAttributeString(prefix + "ComputeHash64", prevNodeVal);
+                            writer.WriteAttributeString(Program.convGuessedPrefix + "ComputeHash64", prevNodeVal);
                         }
                         else
                         {
@@ -291,7 +289,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 uint v = BitConverter.ToUInt32(kv.Value, 0);
                                 if (Program.listStringsDict.ContainsKey(v))
                                 {
-                                    writer.WriteAttributeString("value-" + t.Type, Program.listStringsDict[v]);
+                                    writer.WriteAttributeString(Program.convGuessedPrefix + t.Type, Program.listStringsDict[v]);
                                     skipValue = false;
                                     fieldType = FieldType.BinHex;
                                 }
@@ -542,7 +540,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 else
                                     dataVal = data.ToString();
 
-                                writer.WriteAttributeString(prefix + fieldType.ToString(), dataVal);
+                                writer.WriteAttributeString(Program.convGuessedPrefix + fieldType.ToString(), dataVal);
 
                                 if (fieldType == FieldType.String)
                                 {
