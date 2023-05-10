@@ -526,6 +526,9 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                             if (t.Action == "CollectionZoneData")
                             {
+                                byte[] aa = File.ReadAllBytes("a.bin");
+                                uint aaa = CRC32.Hash(aa, 0, aa.Length);
+
                                 MemoryStream ms = new(kv.Value);
                                 int len = ms.ReadValueS32();
                                 byte[] bytes = ms.ReadBytes(len);
@@ -535,13 +538,14 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 uint childCount = ms.ReadValueU32();
                                 for (int i = 0; i < childCount; i++)
                                 {
-                                    uint hash = ms.ReadValueU32();
+                                    uint unk0 = ms.ReadValueU32();
                                     uint unk1 = ms.ReadValueU32(); //zero
                                     uint areaCount = ms.ReadValueU32();
                                     uint childsAllCount = ms.ReadValueU32();
 
                                     writer.WriteStartElement("block");
-                                    writer.WriteAttributeString("Unk1", unk1.ToString());
+                                    writer.WriteAttributeString("Unk1", unk0.ToString());
+                                    writer.WriteAttributeString("Unk2", unk1.ToString());
 
                                     for (int j = 0; j < areaCount; j++)
                                     {
@@ -557,17 +561,29 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                         writer.WriteStartElement("area");
                                         writer.WriteAttributeString("BoxMin", $"{minX.ToString(CultureInfo.InvariantCulture)},{minY.ToString(CultureInfo.InvariantCulture)},{minZ.ToString(CultureInfo.InvariantCulture)}");
                                         writer.WriteAttributeString("BoxMax", $"{maxX.ToString(CultureInfo.InvariantCulture)},{maxY.ToString(CultureInfo.InvariantCulture)},{maxZ.ToString(CultureInfo.InvariantCulture)}");
-                                        writer.WriteAttributeString("Unk1", unk2.ToString());
+                                        writer.WriteAttributeString("Unk1", unk2.ToString(CultureInfo.InvariantCulture));
 
                                         for (int k = 0; k < childs; k++)
                                         {
-                                            ulong id = ms.ReadValueU64();
+                                            float test = ms.ReadValueF32();
+                                            float test2 = ms.ReadValueF32();
+
+                                            ulong id = 0;
 
                                             bool a = false;
-                                            if (id > 2207931252102224551)
+                                            //if (id > 2207931252102224551)
+                                            if (
+                                                ((test < 6000 && test > 0.01) || (test > -6000 && test < -0.01)) &&
+                                                ((test2 < 6000 && test2 > 0.01) || (test2 > -6000 && test2 < -0.01))
+                                                )
                                             {
                                                 a = true;
                                                 ms.Seek(-8, SeekOrigin.Current);
+                                            }
+                                            else
+                                            {
+                                                ms.Seek(-8, SeekOrigin.Current);
+                                                id = ms.ReadValueU64();
                                             }
 
                                             float posX = ms.ReadValueF32();
@@ -576,6 +592,13 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                             float rotX = ms.ReadValueF32();
                                             float rotY = ms.ReadValueF32();
                                             float rotZ = ms.ReadValueF32();
+
+                                            float unPosX = 0;
+                                            float unPosY = 0;
+                                            float unPosZ = 0;
+                                            float unRotX = 0;
+                                            float unRotY = 0;
+                                            float unRotZ = 0;
 
                                             uint unk3 = 0;
                                             uint unk4 = 0;
@@ -586,12 +609,12 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                                     maxX == float.MinValue && maxY == float.MinValue && maxZ == float.MinValue
                                                     )
                                                 {
-                                                    ms.ReadValueU32();
-                                                    ms.ReadValueU32();
-                                                    ms.ReadValueU32();
-                                                    ms.ReadValueU32();
-                                                    ms.ReadValueU32();
-                                                    ms.ReadValueU32();
+                                                    unPosX = ms.ReadValueF32();
+                                                    unPosY = ms.ReadValueF32();
+                                                    unPosZ = ms.ReadValueF32();
+                                                    unRotX = ms.ReadValueF32();
+                                                    unRotY = ms.ReadValueF32();
+                                                    unRotZ = ms.ReadValueF32();
                                                 }
 
                                                 unk3 = ms.ReadValueU32(); //zero
@@ -599,9 +622,18 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                             }
 
                                             writer.WriteStartElement("object");
-                                            writer.WriteAttributeString("ID", id.ToString());
+
+                                            if (!a)
+                                                writer.WriteAttributeString("ID", id.ToString());
+
                                             writer.WriteAttributeString("Position", $"{posX.ToString(CultureInfo.InvariantCulture)},{posY.ToString(CultureInfo.InvariantCulture)},{posZ.ToString(CultureInfo.InvariantCulture)}");
                                             writer.WriteAttributeString("Rotation", $"{rotX.ToString(CultureInfo.InvariantCulture)},{rotY.ToString(CultureInfo.InvariantCulture)},{rotZ.ToString(CultureInfo.InvariantCulture)}");
+
+                                            if (unPosX > 0)
+                                            {
+                                                writer.WriteAttributeString("UnknownPosition", $"{unPosX.ToString(CultureInfo.InvariantCulture)},{unPosY.ToString(CultureInfo.InvariantCulture)},{unPosZ.ToString(CultureInfo.InvariantCulture)}");
+                                                writer.WriteAttributeString("UnknownRotation", $"{unRotX.ToString(CultureInfo.InvariantCulture)},{unRotY.ToString(CultureInfo.InvariantCulture)},{unRotZ.ToString(CultureInfo.InvariantCulture)}");
+                                            }
 
                                             if (!a)
                                             {

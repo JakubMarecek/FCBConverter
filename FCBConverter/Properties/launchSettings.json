@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "d:\\Desktop\\sel\\aworldsector_21702.data.fcb"
+      "commandLineArgs": "\"Z:\\home_cloud_private\\Nová složka\\aworldsector_21702.data.fcb\""
     }
   }
 }
