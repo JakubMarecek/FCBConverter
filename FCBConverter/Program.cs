@@ -1168,7 +1168,8 @@ namespace FCBConverter
 
                     byte[] dominoLuaBytecode;
 
-                    int ret = LuacLibProcessBytes(bts, bts.Length, out nint buffer, out int bufferLength, luaFile, out IntPtr error);
+                    var a = LoadSetting("LuaBytecodePath");
+                    int ret = LuacLibProcessBytes(bts, bts.Length, out nint buffer, out int bufferLength, a != "" ? a : luaFile, out IntPtr error);
                     if (ret != 0)
                     {
                         string str = Marshal.PtrToStringAnsi(error);

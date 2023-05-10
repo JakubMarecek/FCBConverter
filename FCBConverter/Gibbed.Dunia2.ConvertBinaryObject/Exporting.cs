@@ -524,6 +524,103 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                                 ms.Close();
                             }
 
+                            if (t.Action == "CollectionZoneData")
+                            {
+                                MemoryStream ms = new(kv.Value);
+                                int len = ms.ReadValueS32();
+                                byte[] bytes = ms.ReadBytes(len);
+                                ms.Close();
+
+                                ms = new(bytes);
+                                uint childCount = ms.ReadValueU32();
+                                for (int i = 0; i < childCount; i++)
+                                {
+                                    uint hash = ms.ReadValueU32();
+                                    uint unk1 = ms.ReadValueU32(); //zero
+                                    uint areaCount = ms.ReadValueU32();
+                                    uint childsAllCount = ms.ReadValueU32();
+
+                                    writer.WriteStartElement("block");
+                                    writer.WriteAttributeString("Unk1", unk1.ToString());
+
+                                    for (int j = 0; j < areaCount; j++)
+                                    {
+                                        float minX = ms.ReadValueF32();
+                                        float minY = ms.ReadValueF32();
+                                        float minZ = ms.ReadValueF32();
+                                        float maxX = ms.ReadValueF32();
+                                        float maxY = ms.ReadValueF32();
+                                        float maxZ = ms.ReadValueF32();
+                                        float unk2 = ms.ReadValueF32();
+                                        uint childs = ms.ReadValueU32();
+
+                                        writer.WriteStartElement("area");
+                                        writer.WriteAttributeString("BoxMin", $"{minX.ToString(CultureInfo.InvariantCulture)},{minY.ToString(CultureInfo.InvariantCulture)},{minZ.ToString(CultureInfo.InvariantCulture)}");
+                                        writer.WriteAttributeString("BoxMax", $"{maxX.ToString(CultureInfo.InvariantCulture)},{maxY.ToString(CultureInfo.InvariantCulture)},{maxZ.ToString(CultureInfo.InvariantCulture)}");
+                                        writer.WriteAttributeString("Unk1", unk2.ToString());
+
+                                        for (int k = 0; k < childs; k++)
+                                        {
+                                            ulong id = ms.ReadValueU64();
+
+                                            bool a = false;
+                                            if (id > 2207931252102224551)
+                                            {
+                                                a = true;
+                                                ms.Seek(-8, SeekOrigin.Current);
+                                            }
+
+                                            float posX = ms.ReadValueF32();
+                                            float posY = ms.ReadValueF32();
+                                            float posZ = ms.ReadValueF32();
+                                            float rotX = ms.ReadValueF32();
+                                            float rotY = ms.ReadValueF32();
+                                            float rotZ = ms.ReadValueF32();
+
+                                            uint unk3 = 0;
+                                            uint unk4 = 0;
+                                            if (!a)
+                                            {
+                                                if (
+                                                    minX == float.MaxValue && minY == float.MaxValue && minZ == float.MaxValue &&
+                                                    maxX == float.MinValue && maxY == float.MinValue && maxZ == float.MinValue
+                                                    )
+                                                {
+                                                    ms.ReadValueU32();
+                                                    ms.ReadValueU32();
+                                                    ms.ReadValueU32();
+                                                    ms.ReadValueU32();
+                                                    ms.ReadValueU32();
+                                                    ms.ReadValueU32();
+                                                }
+
+                                                unk3 = ms.ReadValueU32(); //zero
+                                                unk4 = ms.ReadValueU32();
+                                            }
+
+                                            writer.WriteStartElement("object");
+                                            writer.WriteAttributeString("ID", id.ToString());
+                                            writer.WriteAttributeString("Position", $"{posX.ToString(CultureInfo.InvariantCulture)},{posY.ToString(CultureInfo.InvariantCulture)},{posZ.ToString(CultureInfo.InvariantCulture)}");
+                                            writer.WriteAttributeString("Rotation", $"{rotX.ToString(CultureInfo.InvariantCulture)},{rotY.ToString(CultureInfo.InvariantCulture)},{rotZ.ToString(CultureInfo.InvariantCulture)}");
+
+                                            if (!a)
+                                            {
+                                                writer.WriteAttributeString("Unk1", unk3.ToString());
+                                                writer.WriteAttributeString("Unk2", unk4.ToString());
+                                            }
+                                            
+                                            writer.WriteEndElement();
+                                        }
+
+                                        writer.WriteEndElement();
+                                    }
+
+                                    writer.WriteEndElement();
+                                    writer.Flush();
+                                }
+                                ms.Close();
+                            }
+
 
 
 

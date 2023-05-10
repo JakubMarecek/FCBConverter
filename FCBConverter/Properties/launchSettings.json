@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "d:\\Desktop\\lib_ambush.brick_ambush_resources_v2.lua.converted.xml"
+      "commandLineArgs": "d:\\Desktop\\sel\\aworldsector_21702.data.fcb"
     }
   }
 }

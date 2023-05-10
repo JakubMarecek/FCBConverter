@@ -3,4 +3,5 @@
   <CompressFile>false</CompressFile>
   <CompressExcludeFiles>.png</CompressExcludeFiles>
   <UseLuaBytecode>true</UseLuaBytecode>
+  <LuaBytecodePath></LuaBytecodePath>
 </FCBConverter>
