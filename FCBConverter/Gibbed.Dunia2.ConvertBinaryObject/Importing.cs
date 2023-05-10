@@ -331,7 +331,122 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     node.Fields.Add(fieldNameHash, data);
                 }
 
-                if (t.Action == null || t.Action == "")
+                if (t.Action == "CollectionZoneData")
+                {
+                    MemoryStream ms = new();
+                    ms.WriteValueU32(0);
+
+                    uint cnt = 0;
+
+                    var blocks = fields.Current.Select("block");
+                    while (blocks.MoveNext() == true)
+                    {
+                        ms.WriteValueU32(uint.Parse(blocks.Current.GetAttribute("Unk1", "")));
+                        ms.WriteValueU32(uint.Parse(blocks.Current.GetAttribute("Unk2", "")));
+                        long blockPos = ms.Position;
+                        ms.WriteValueU32(0);
+                        ms.WriteValueU32(0);
+
+                        uint areaCount = 0;
+                        uint childsAllCount = 0;
+
+                        var areas = blocks.Current.Select("area");
+                        while (areas.MoveNext() == true)
+                        {
+                            string[] min = areas.Current.GetAttribute("BoxMin", "").Split(',');
+                            string[] max = areas.Current.GetAttribute("BoxMax", "").Split(',');
+                            float unk1 = float.Parse(areas.Current.GetAttribute("Unk1", ""), CultureInfo.InvariantCulture);
+
+                            ms.WriteValueF32(float.Parse(min[0], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(float.Parse(min[1], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(float.Parse(min[2], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(float.Parse(max[0], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(float.Parse(max[1], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(float.Parse(max[2], CultureInfo.InvariantCulture));
+                            ms.WriteValueF32(unk1);
+                            long areaPos = ms.Position;
+                            ms.WriteValueF32(0);
+
+                            uint childs = 0;
+
+                            var objects = areas.Current.Select("object");
+                            while (objects.MoveNext() == true)
+                            {
+                                string id = objects.Current.GetAttribute("ID", "");
+                                if (id != "")
+                                {
+                                    ms.WriteValueU64(ulong.Parse(id));
+                                }
+
+                                string[] pos = objects.Current.GetAttribute("Position", "").Split(',');
+                                string[] rot = objects.Current.GetAttribute("Rotation", "").Split(',');
+
+                                ms.WriteValueF32(float.Parse(pos[0], CultureInfo.InvariantCulture));
+                                ms.WriteValueF32(float.Parse(pos[1], CultureInfo.InvariantCulture));
+                                ms.WriteValueF32(float.Parse(pos[2], CultureInfo.InvariantCulture));
+                                ms.WriteValueF32(float.Parse(rot[0], CultureInfo.InvariantCulture));
+                                ms.WriteValueF32(float.Parse(rot[1], CultureInfo.InvariantCulture));
+                                ms.WriteValueF32(float.Parse(rot[2], CultureInfo.InvariantCulture));
+
+                                if (objects.Current.GetAttribute("UnknownPosition", "") != "")
+                                {
+                                    string[] unpos = objects.Current.GetAttribute("UnknownPosition", "").Split(',');
+                                    string[] unrot = objects.Current.GetAttribute("UnknownRotation", "").Split(',');
+
+                                    ms.WriteValueF32(float.Parse(unpos[0], CultureInfo.InvariantCulture));
+                                    ms.WriteValueF32(float.Parse(unpos[1], CultureInfo.InvariantCulture));
+                                    ms.WriteValueF32(float.Parse(unpos[2], CultureInfo.InvariantCulture));
+                                    ms.WriteValueF32(float.Parse(unrot[0], CultureInfo.InvariantCulture));
+                                    ms.WriteValueF32(float.Parse(unrot[1], CultureInfo.InvariantCulture));
+                                    ms.WriteValueF32(float.Parse(unrot[2], CultureInfo.InvariantCulture));
+                                }
+
+                                string Unk1 = objects.Current.GetAttribute("Unk1", "");
+                                if (Unk1 != "") ms.WriteValueU32(uint.Parse(Unk1));
+
+                                string Unk2 = objects.Current.GetAttribute("Unk2", "");
+                                if (Unk2 != "") ms.WriteValueU32(uint.Parse(Unk2));
+
+                                childs++;
+                                childsAllCount++;
+                            }
+
+                            long ap = ms.Position;
+                            ms.Seek(areaPos, SeekOrigin.Begin);
+                            ms.WriteValueU32(childs);
+                            ms.Seek(ap, SeekOrigin.Begin);
+
+                            areaCount++;
+                        }
+
+                        long cp = ms.Position;
+                        ms.Seek(blockPos, SeekOrigin.Begin);
+                        ms.WriteValueU32(areaCount);
+                        ms.WriteValueU32(childsAllCount);
+                        ms.Seek(cp, SeekOrigin.Begin);
+
+                        cnt++;
+                    }
+
+                    ms.Seek(0, SeekOrigin.Begin);
+                    ms.WriteValueU32(cnt);
+
+                    byte[] data = ms.ToArray();
+                    ms.Close();
+
+                    ms = new();
+                    ms.WriteValueS32(data.Length);
+                    ms.WriteBytes(data);
+                    ms.Close();
+
+                    data = ms.ToArray();
+
+                    //File.WriteAllBytes("a.bin", data);
+
+                    node.Fields.Add(fieldNameHash, data);
+                }
+
+                    if (t.Action == null || t.Action == "")
                 {
                     FieldType fieldType;
                     var fieldTypeName = fields.Current.GetAttribute("type", "");

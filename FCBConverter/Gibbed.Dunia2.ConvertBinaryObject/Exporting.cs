@@ -526,9 +526,6 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
 
                             if (t.Action == "CollectionZoneData")
                             {
-                                byte[] aa = File.ReadAllBytes("a.bin");
-                                uint aaa = CRC32.Hash(aa, 0, aa.Length);
-
                                 MemoryStream ms = new(kv.Value);
                                 int len = ms.ReadValueS32();
                                 byte[] bytes = ms.ReadBytes(len);
