@@ -1297,6 +1297,77 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
+            if (file.EndsWith(".hkx"))
+            {
+                FileStream hkxFile = File.OpenRead(file);
+                uint ver = hkxFile.ReadValueU32();
+                uint unk1 = hkxFile.ReadValueU32();
+                uint hkxSize = hkxFile.ReadValueU32();
+                uint fcbSize = hkxFile.ReadValueU32();
+                uint unk2 = hkxFile.ReadValueU32();
+                uint unk3 = hkxFile.ReadValueU32();
+                uint unk4 = hkxFile.ReadValueU32();
+                uint unk5 = hkxFile.ReadValueU32();
+                byte[] hkxPure = hkxFile.ReadBytes((int)hkxSize);
+                byte[] fcbData = hkxFile.ReadBytes((int)fcbSize);
+                hkxFile.Close();
+
+                string baseFileName = file.Replace(".hkx", "");
+
+                XElement root = new XElement("HKXHeader");
+                root.Add(new XElement("Version", ver.ToString()));
+                root.Add(new XElement("Unknown1", unk1.ToString()));
+                root.Add(new XElement("Unknown2", unk2.ToString()));
+                root.Add(new XElement("Unknown3", unk3.ToString()));
+                root.Add(new XElement("Unknown4", unk4.ToString()));
+                root.Add(new XElement("Unknown5", unk5.ToString()));
+
+                XDocument xDoc = new XDocument();
+                xDoc.Add(root);
+                xDoc.Save(baseFileName + ".hkx.converted.xml");
+
+                File.WriteAllBytes(baseFileName + ".pure.hkx", hkxPure);
+
+                File.WriteAllBytes(baseFileName + "tmp", fcbData);
+                ConvertFCB(baseFileName + "tmp", baseFileName + ".config.xml");
+                File.Delete(baseFileName + "tmp");
+
+                FIN();
+                return;
+            }
+
+            if (file.EndsWith(".hkx.converted.xml"))
+            {
+                string baseFileName = file.Replace(".hkx.converted.xml", "");
+
+                byte[] hkxPure = File.ReadAllBytes(baseFileName + ".pure.hkx");
+
+                ConvertXML(baseFileName + ".config.xml", baseFileName + "tmp");
+                byte[] fcbData = File.ReadAllBytes(baseFileName + "tmp");
+                File.Delete(baseFileName + "tmp");
+
+                XDocument xDoc = XDocument.Load(file);
+                XElement root = xDoc.Element("HKXHeader");
+
+                var output = File.Create(baseFileName + ".hkx");
+                output.WriteValueU32(uint.Parse(root.Element("Version").Value));
+                output.WriteValueU32(uint.Parse(root.Element("Unknown1").Value));
+                output.WriteValueU32((uint)hkxPure.Length);
+                output.WriteValueU32((uint)fcbData.Length);
+                output.WriteValueU32(uint.Parse(root.Element("Unknown2").Value));
+                output.WriteValueU32(uint.Parse(root.Element("Unknown3").Value));
+                output.WriteValueU32(uint.Parse(root.Element("Unknown4").Value));
+                output.WriteValueU32(uint.Parse(root.Element("Unknown5").Value));
+                output.WriteBytes(hkxPure);
+                output.WriteBytes(fcbData);
+                output.Close();
+
+                FIN();
+                return;
+            }
+
+            // ********************************************************************************************************************************************
+
             if (file.EndsWith(".markup.bin.converted.xml"))
             {
                 MarkupConvertXml(file);

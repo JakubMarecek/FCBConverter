@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"d:\\Desktop\\sel\\worldsector_21702.data.fcb.converted.xml\""
+      "commandLineArgs": "\"Z:\\home_cloud_private\\Nová složka\\sectorentity_s21540_default.1054240000.hkx\""
     }
   }
 }
