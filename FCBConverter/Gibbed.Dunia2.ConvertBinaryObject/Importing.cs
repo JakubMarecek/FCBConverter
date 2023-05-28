@@ -446,7 +446,7 @@ namespace Gibbed.Dunia2.ConvertBinaryObject
                     node.Fields.Add(fieldNameHash, data);
                 }
 
-                    if (t.Action == null || t.Action == "")
+                if (t.Action == null || t.Action == "")
                 {
                     FieldType fieldType;
                     var fieldTypeName = fields.Current.GetAttribute("type", "");

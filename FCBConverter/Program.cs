@@ -59,7 +59,7 @@ namespace FCBConverter
         public static string excludeFilesFromCompress = "";
         public static string excludeFilesFromPack = "";
 
-        public static string version = "20230212-2330";
+        public static string version = "20230528-1500";
 
         public static string matWarn = " - DO NOT DELETE THIS! DO NOT CHANGE LINE NUMBER!";
         public static string xmlheader = "Converted by FCBConverter v" + version + ", author ArmanIII.";
@@ -1349,7 +1349,7 @@ namespace FCBConverter
                 XDocument xDoc = XDocument.Load(file);
                 XElement root = xDoc.Element("HKXHeader");
 
-                var output = File.Create(baseFileName + ".hkx");
+                var output = File.Create(baseFileName + "_new.hkx");
                 output.WriteValueU32(uint.Parse(root.Element("Version").Value));
                 output.WriteValueU32(uint.Parse(root.Element("Unknown1").Value));
                 output.WriteValueU32((uint)hkxPure.Length);
@@ -1362,6 +1362,54 @@ namespace FCBConverter
                 output.WriteBytes(fcbData);
                 output.Close();
 
+                FIN();
+                return;
+            }
+
+            // ********************************************************************************************************************************************
+
+            if (file.EndsWith(".spx"))
+            {
+                byte[] bytes = File.ReadAllBytes(file);
+
+                int[] poses = Helpers.SearchBytesMultiple(bytes, new byte[] { 0x50, 0x48, 0x58 });
+
+                if (poses.Length > 1)
+                {
+                    throw new Exception("Multiple PHX not supported.");
+                }
+
+                FileStream spxFile = File.OpenRead(file);
+                byte[] fcbData = spxFile.ReadBytes(poses[0]);
+                byte[] phxData = spxFile.ReadBytes((int)(spxFile.Length - poses[0]));
+                spxFile.Close();
+
+                string baseFileName = file.Replace(".spx", "");
+
+                File.WriteAllBytes(baseFileName + ".phx", phxData);
+
+                File.WriteAllBytes(baseFileName + "tmp", fcbData);
+                ConvertFCB(baseFileName + "tmp", baseFileName + ".spx.converted.xml");
+                File.Delete(baseFileName + "tmp");
+
+                FIN();
+                return;
+            }
+
+            if (file.EndsWith(".spx.converted.xml"))
+            {
+                string baseFileName = file.Replace(".spx.converted.xml", "");
+
+                byte[] phxData = File.ReadAllBytes(baseFileName + ".phx");
+
+                ConvertXML(file, baseFileName + "tmp");
+                byte[] fcbData = File.ReadAllBytes(baseFileName + "tmp");
+                File.Delete(baseFileName + "tmp");
+
+                var output = File.Create(baseFileName + "_new.spx");
+                output.WriteBytes(fcbData);
+                output.WriteBytes(phxData);
+                output.Close();
                 FIN();
                 return;
             }
