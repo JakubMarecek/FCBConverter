@@ -2,7 +2,7 @@
   "profiles": {
     "FCBConverter": {
       "commandName": "Project",
-      "commandLineArgs": "d:\\Desktop\\h_activitystatus_fba6b660-3846-4d40-ab9f-04e73eb483fe.spx.converted.xml"
+      "commandLineArgs": "\"D:\\Desktop\\Metallica_512_mips.xbt.converted.xml\""
     }
   }
 }
