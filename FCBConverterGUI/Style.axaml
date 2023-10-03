@@ -1,0 +1,935 @@
+<Styles xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CustomControlsDV="clr-namespace:FCBConverterGUI.CustomControls"
+    xmlns:local="clr-namespace:FCBConverterGUI"
+    xmlns:sys="using:System"
+    x:CompileBindings="True">
+
+    <Styles.Resources>
+        <FontFamily x:Key="MainFont">avares://FCBConverterGUI/Assets/#Nunito</FontFamily>
+    </Styles.Resources>
+
+	<Style Selector="Label">
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+	</Style>
+
+	<Style Selector="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+	</Style>
+
+	<Style Selector="Label.Header">
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+		<Setter Property="VerticalAlignment" Value="Top"/>
+		<Setter Property="HorizontalAlignment" Value="Left"/>
+		<Setter Property="FontSize" Value="25"/>
+		<Setter Property="Margin" Value="10,5,0,0"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Foreground" Value="Orange"/>
+	</Style>
+
+	<Style Selector="Border.DialogRect">
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+		<Setter Property="VerticalAlignment" Value="Stretch"/>
+		<Setter Property="BorderBrush" Value="#F28C28"/>
+		<Setter Property="CornerRadius" Value="8"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="Background" Value="#181818"/>
+	</Style>
+
+	<Style Selector="TextBox">
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="CaretBrush">
+			<Setter.Value>
+				<SolidColorBrush Color="#F28C28" />
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Foreground">
+			<Setter.Value>
+				<SolidColorBrush Color="White" />
+			</Setter.Value>
+		</Setter>
+		<Setter Property="SelectionBrush">
+			<Setter.Value>
+				<SolidColorBrush Color="#9c5a1a" />
+			</Setter.Value>
+		</Setter>
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="AcceptsReturn" Value="True" />
+		<Setter Property="Cursor" Value="Ibeam"/>
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="TextBox">
+					<Grid>
+						<Border Name="outerRectangle" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="#F28C28" CornerRadius="5" BorderThickness="1" Background="#1b1b1b" />
+
+						<ScrollViewer Margin="5,5,5,5"
+									  Name="PART_ScrollViewer"
+									  AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+									  BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+									  HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+									  IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+									  VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+							<TextPresenter
+								Name="PART_TextPresenter"
+								CaretBrush="{TemplateBinding CaretBrush}"
+								CaretIndex="{TemplateBinding CaretIndex}"
+								LineHeight="{TemplateBinding LineHeight}"
+								LetterSpacing="{TemplateBinding LetterSpacing}"
+								PasswordChar="{TemplateBinding PasswordChar}"
+								RevealPassword="{TemplateBinding RevealPassword}"
+								SelectionBrush="{TemplateBinding SelectionBrush}"
+								SelectionEnd="{TemplateBinding SelectionEnd}"
+								SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+								SelectionStart="{TemplateBinding SelectionStart}"
+								Text="{TemplateBinding Text,Mode=TwoWay}"
+								TextAlignment="{TemplateBinding TextAlignment}"
+								TextWrapping="{TemplateBinding TextWrapping}" />
+						</ScrollViewer>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style Selector="^[IsReadOnly=true] Border#outerRectangle">
+			<Setter Property="Opacity" Value="0" />
+		</Style>
+	</Style>
+
+	<Style Selector="Button.CBtn">
+		<Setter Property="Margin" Value="0,0,0,10"/>
+		<Setter Property="HorizontalAlignment" Value="Center"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="Height" Value="38"/>
+		<Setter Property="Width" Value="200"/>
+		<Setter Property="Cursor" Value="Hand"/>
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Name="outerRectangle" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RadiusX="5" RadiusY="5" Fill="#1b1b1b">
+							<Rectangle.Transitions>
+								<Transitions>
+									<BrushTransition Property="Fill" Duration="0:0:0.1"/>
+								</Transitions>
+							</Rectangle.Transitions>
+						</Rectangle>
+						<Border BorderBrush="#F28C28" BorderThickness="1" CornerRadius="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+						<TextBlock Name="btntext" Text="{TemplateBinding Content}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16" Foreground="White" FontFamily="{StaticResource MainFont}">
+						</TextBlock>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style Selector="^:pointerover Rectangle#outerRectangle">
+			<Setter Property="Fill" Value="#333" />
+		</Style>
+		<Style Selector="^:pressed Rectangle#outerRectangle">
+			<Setter Property="Fill" Value="#F28C28" />
+		</Style>
+	</Style>
+
+	<Style Selector="Button.BoxBtn">
+		<Setter Property="Margin" Value="0,0,0,0"/>
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="Height" Value="20"/>
+		<Setter Property="Cursor" Value="Hand"/>
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Border BorderBrush="Black" BorderThickness="2" Background="LightGray" CornerRadius="5" />
+						<TextBlock Name="btntext" Text="{TemplateBinding Content}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" FontFamily="{StaticResource MainFont}">
+						</TextBlock>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditBtn">
+		<Setter Property="Margin" Value="0,0,0,0"/>
+		<Setter Property="HorizontalAlignment" Value="Right"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="Height" Value="18"/>
+		<Setter Property="Width" Value="18"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Content" Value="" />
+		<Setter Property="ToolTip.ShowDelay" Value="100" />
+		<Setter Property="ToolTip.Tip" Value="Edit" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"
+							Fill="Black">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditBtnWhite">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.SwapBtn">
+		<Setter Property="Margin" Value="0,0,20,0"/>
+		<Setter Property="IsVisible" Value="False" />
+		<Setter Property="ToolTip.Tip" Value="Change local / global type of the box" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z"
+							Fill="Black">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditExecArrayBtn">
+		<Setter Property="ToolTip.Tip" Value="Toggle array for the item" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M264.5 5.2c14.9-6.9 32.1-6.9 47 0l218.6 101c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 149.8C37.4 145.8 32 137.3 32 128s5.4-17.9 13.9-21.8L264.5 5.2zM476.9 209.6l53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 277.8C37.4 273.8 32 265.3 32 256s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0l152-70.2zm-152 198.2l152-70.2 53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 405.8C37.4 401.8 32 393.3 32 384s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditExecAddBtn">
+		<Setter Property="ToolTip.Tip" Value="Add item to the array" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditExecRemoveBtn">
+		<Setter Property="ToolTip.Tip" Value="Remove item from the array" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.EditExecGetDataBtn">
+		<Setter Property="ToolTip.Tip" Value="Get data from box" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M50.7 58.5L0 160H208V32H93.7C75.5 32 58.9 42.3 50.7 58.5zM240 160H448L397.3 58.5C389.1 42.3 372.5 32 354.3 32H240V160zm208 32H0V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.DelBtn">
+		<Setter Property="Margin" Value="0,0,20,0"/>
+		<Setter Property="ToolTip.Tip" Value="Delete" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
+							Fill="Black">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.DelBtnWhite">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.DuplBtnWhite">
+		<Setter Property="ToolTip.Tip" Value="Duplicate" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M0 448c0 35.3 28.7 64 64 64H288c35.3 0 64-28.7 64-64V384H224c-53 0-96-43-96-96V160H64c-35.3 0-64 28.7-64 64V448zm224-96H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H224c-35.3 0-64 28.7-64 64V288c0 35.3 28.7 64 64 64z"
+							Fill="White">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.CloseBtnWhite">
+		<Setter Property="HorizontalAlignment" Value="Right"/>
+		<Setter Property="ToolTip.Tip" Value="Close" />
+		<Setter Property="Height" Value="35"/>
+		<Setter Property="Width" Value="35"/>
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M312.1 375c9.369 9.369 9.369 24.57 0 33.94s-24.57 9.369-33.94 0L160 289.9l-119 119c-9.369 9.369-24.57 9.369-33.94 0s-9.369-24.57 0-33.94L126.1 256L7.027 136.1c-9.369-9.369-9.369-24.57 0-33.94s24.57-9.369 33.94 0L160 222.1l119-119c9.369-9.369 24.57-9.369 33.94 0s9.369 24.57 0 33.94L193.9 256L312.1 375z"
+							Fill="#ccc">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style Selector="^:pointerover /template/ Path">
+			<Setter Property="Fill" Value="#F28C28" />
+		</Style>
+		<Style Selector="^:pressed /template/ Path">
+			<Setter Property="Fill" Value="#F28C28" />
+		</Style>
+	</Style>
+
+	<Style Selector="Button.MaxBtnWhite">
+		<Setter Property="ToolTip.Tip" Value="Maximize / restore" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="15"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M64 464H288C296.8 464 304 456.8 304 448V384H352V448C352 483.3 323.3 512 288 512H64C28.65 512 0 483.3 0 448V224C0 188.7 28.65 160 64 160H128V208H64C55.16 208 48 215.2 48 224V448C48 456.8 55.16 464 64 464zM160 64C160 28.65 188.7 0 224 0H448C483.3 0 512 28.65 512 64V288C512 323.3 483.3 352 448 352H224C188.7 352 160 323.3 160 288V64zM224 304H448C456.8 304 464 296.8 464 288V64C464 55.16 456.8 48 448 48H224C215.2 48 208 55.16 208 64V288C208 296.8 215.2 304 224 304z"
+							Fill="#ccc">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.MinBtnWhite">
+		<Setter Property="ToolTip.Tip" Value="Minimize" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="15"
+							Height="12"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							VerticalAlignment="Bottom"
+							Data="M0 456C0 442.7 10.75 432 24 432H488C501.3 432 512 442.7 512 456C512 469.3 501.3 480 488 480H24C10.75 480 0 469.3 0 456z"
+							Fill="#ccc">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.SettBtnWhite">
+		<Setter Property="ToolTip.Tip" Value="Settings" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Rectangle Fill="#01000000" />
+						<Path
+							Width="17"
+							Height="17"
+							x:Name="CheckMark"
+							StrokeThickness="1"
+							Stretch="Uniform"
+							Data="M504.1 315.1c0-8.652-4.607-16.84-12.36-21.39l-32.91-18.97C459.5 269.1 459.8 262.5 459.8 256s-.3228-13.1-.9683-19.62l32.91-18.97c7.752-4.548 12.36-12.74 12.36-21.39c0-21.27-49.32-128.2-84.52-128.2c-4.244 0-8.51 1.094-12.37 3.357l-32.78 18.97c-10.71-7.742-22.07-14.32-34.07-19.74V32.49c0-11.23-7.484-21.04-18.33-23.88C300.5 2.871 278.3 0 256 0C233.8 0 211.5 2.871 189.9 8.613C179.1 11.45 171.6 21.26 171.6 32.49v37.94c-12 5.42-23.36 12-34.07 19.74l-32.78-18.97C100.9 68.94 96.63 67.85 92.38 67.85c-.0025 0 .0025 0 0 0c-32.46 0-84.52 101.7-84.52 128.2c0 8.652 4.607 16.84 12.36 21.39l32.91 18.97C52.49 242.9 52.17 249.5 52.17 256s.3228 13.1 .9683 19.62L20.23 294.6C12.47 299.1 7.867 307.3 7.867 315.1c0 21.27 49.32 128.2 84.52 128.2c4.244 0 8.51-1.094 12.37-3.357l32.78-18.97c10.71 7.742 22.07 14.32 34.07 19.74v37.94c0 11.23 7.484 21.04 18.33 23.88C211.5 509.1 233.7 512 255.1 512c22.25 0 44.47-2.871 66.08-8.613c10.84-2.84 18.33-12.65 18.33-23.88v-37.94c12-5.42 23.36-12 34.07-19.74l32.78 18.97c3.855 2.264 8.123 3.357 12.37 3.357C452.1 444.2 504.1 342.4 504.1 315.1zM415.2 389.1l-43.66-25.26c-42.06 30.39-32.33 24.73-79.17 45.89v50.24c-13.29 2.341-25.58 3.18-36.44 3.18c-15.42 0-27.95-1.693-36.36-3.176v-50.24c-46.95-21.21-37.18-15.54-79.17-45.89l-43.64 25.25c-15.74-18.69-28.07-40.05-36.41-63.11L103.1 301.7C101.4 276.1 100.1 266.1 100.1 256c0-10.02 1.268-20.08 3.81-45.76L60.37 185.2C68.69 162.1 81.05 140.7 96.77 122l43.66 25.26c42.06-30.39 32.33-24.73 79.17-45.89V51.18c13.29-2.341 25.58-3.18 36.44-3.18c15.42 0 27.95 1.693 36.36 3.176v50.24c46.95 21.21 37.18 15.54 79.17 45.89l43.64-25.25c15.74 18.69 28.07 40.05 36.4 63.11L408 210.3c2.538 25.64 3.81 35.64 3.81 45.68c0 10.02-1.268 20.08-3.81 45.76l43.58 25.12C443.3 349.9 430.9 371.3 415.2 389.1zM256 159.1c-52.88 0-96 43.13-96 96S203.1 351.1 256 351.1s96-43.13 96-96S308.9 159.1 256 159.1zM256 304C229.5 304 208 282.5 208 256S229.5 208 256 208s48 21.53 48 48S282.5 304 256 304z"
+							Fill="#ccc">
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="TextBlock.ParamsListText">
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="Foreground" Value="White" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+	</Style>
+
+
+	<Style Selector="Thumb">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Thumb}">
+					<Grid>
+						<Rectangle Fill="#F28C28" StrokeThickness="0"></Rectangle>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style Selector="RepeatButton">
+		<Setter Property="Focusable" Value="False" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="RepeatButton">
+					<Grid Background="#b2ad9f" Opacity="0.5">
+						<ContentPresenter />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style Selector="ScrollBar">
+		<Setter Property="MinWidth" Value="{DynamicResource ScrollBarSize}" />
+		<Setter Property="MinHeight" Value="{DynamicResource ScrollBarSize}" />
+
+		<Style Selector="^:vertical">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Grid x:Name="Root">
+						<Border x:Name="VerticalRoot">
+							<Grid RowDefinitions="0,*,0">
+								<Rectangle x:Name="TrackRect" Grid.RowSpan="3" />
+								<Track Grid.Row="1"
+									   Minimum="{TemplateBinding Minimum}"
+									   Maximum="{TemplateBinding Maximum}"
+									   Value="{TemplateBinding Value, Mode=TwoWay}"
+									   ViewportSize="{TemplateBinding ViewportSize}"
+									   Orientation="{TemplateBinding Orientation}"
+									   IsDirectionReversed="True">
+									<Track.DecreaseButton>
+										<RepeatButton Name="PART_PageUpButton" Width="3" />
+									</Track.DecreaseButton>
+									<Track.IncreaseButton>
+										<RepeatButton Name="PART_PageDownButton" Width="3" />
+									</Track.IncreaseButton>
+									<Thumb
+										   Width="8"
+										   MinHeight="20"
+										   RenderTransform="{DynamicResource VerticalSmallScrollThumbScaleTransform}"
+										   RenderTransformOrigin="100%,50%" />
+								</Track>
+							</Grid>
+						</Border>
+					</Grid>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+
+		<Style Selector="^:horizontal">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Grid x:Name="Root">
+						<Border x:Name="HorizontalRoot">
+							<Grid ColumnDefinitions="0,*,0">
+								<Rectangle x:Name="TrackRect" Grid.ColumnSpan="3" />
+								<Track Grid.Column="1"
+									   Minimum="{TemplateBinding Minimum}"
+									   Maximum="{TemplateBinding Maximum}"
+									   Value="{TemplateBinding Value, Mode=TwoWay}"
+									   ViewportSize="{TemplateBinding ViewportSize}"
+									   Orientation="{TemplateBinding Orientation}">
+									<Track.DecreaseButton>
+										<RepeatButton Name="PART_PageUpButton" Height="3" />
+									</Track.DecreaseButton>
+									<Track.IncreaseButton>
+										<RepeatButton Name="PART_PageDownButton" Height="3" />
+									</Track.IncreaseButton>
+									<Thumb
+										   Height="8"
+										   MinWidth="20"
+										   RenderTransform="{DynamicResource HorizontalSmallScrollThumbScaleTransform}"
+										   RenderTransformOrigin="50%,100%" />
+								</Track>
+							</Grid>
+						</Border>
+					</Grid>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+	</Style>
+	<Style Selector="ScrollViewer /template/ Panel">
+		<Setter Property="Opacity" Value="0" />
+	</Style>
+
+	<Style Selector="ToolTip">
+		<Setter Property="ShowDelay" Value="100" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="ToolTip">
+					<Border Name="Border" BorderThickness="1" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="#1b1b1b" CornerRadius="5">
+						<Border.BorderBrush>
+							<SolidColorBrush Color="#F28C28" />
+						</Border.BorderBrush>
+						<TextBlock Text="{TemplateBinding Content}" Margin="5,5,5,5" FontSize="16" Foreground="White" FontWeight="Normal" FontFamily="{StaticResource MainFont}" />
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="MenuFlyoutPresenter">
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="MenuFlyoutPresenter">
+					<Border Name="LayoutRoot" BorderThickness="1" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="#1b1b1b" CornerRadius="5">
+						<Border.BorderBrush>
+							<SolidColorBrush Color="#F28C28" />
+						</Border.BorderBrush>
+						<ItemsPresenter Name="PART_ItemsPresenter"
+										Margin="{TemplateBinding Padding}"
+										Grid.IsSharedSizeScope="True"
+										ItemsPanel="{TemplateBinding ItemsPanel}"
+										KeyboardNavigation.TabNavigation="Continue" />
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style Selector="MenuItem">
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Name="root"
+						Background="Transparent"
+						BorderBrush="Transparent"
+						BorderThickness="0"
+						CornerRadius="5">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="5" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto"
+											  SharedSizeGroup="MenuItemIGT" />
+							<ColumnDefinition Width="20" />
+						</Grid.ColumnDefinitions>
+						<ContentPresenter Name="icon"
+										  Width="16"
+										  Height="16"
+										  Margin="3"
+										  HorizontalAlignment="Center"
+										  VerticalAlignment="Center"
+										  Content="{TemplateBinding Icon}" />
+						<Path Name="check"
+							  Margin="3"
+							  VerticalAlignment="Center"
+							  Data="F1M10,1.2L4.7,9.1 4.5,9.1 0,5.2 1.3,3.5 4.3,6.1 8.3,0 10,1.2z"
+							  Fill="{TemplateBinding Foreground}"
+							  IsVisible="False" />
+						<ContentPresenter Name="PART_HeaderPresenter"
+										  Grid.Column="2"
+										  Margin="{TemplateBinding Padding}"
+										  VerticalAlignment="Center"
+										  Content="{TemplateBinding Header}"
+										  ContentTemplate="{TemplateBinding HeaderTemplate}">
+							<ContentPresenter.DataTemplates>
+								<DataTemplate DataType="sys:String">
+									<AccessText Text="{Binding}" Margin="5,5,5,5" FontSize="14" Foreground="White" FontFamily="{StaticResource MainFont}" />
+								</DataTemplate>
+							</ContentPresenter.DataTemplates>
+						</ContentPresenter>
+						<TextBlock x:Name="PART_InputGestureText"
+								   Grid.Column="3"
+								   VerticalAlignment="Center"
+								   Text="{TemplateBinding InputGesture,
+                                                  Converter={StaticResource KeyGestureConverter}}"
+									Margin="5,5,5,5" FontSize="14" Foreground="White" FontFamily="{StaticResource MainFont}"/>
+						<Path Name="rightArrow"
+							  Grid.Column="4"
+							  Margin="10,0,0,0"
+							  VerticalAlignment="Center"
+							  Data="M0,0L4,3.5 0,7z"
+							  Fill="{DynamicResource ThemeForegroundBrush}" />
+						<Popup Name="PART_Popup"
+							   IsLightDismissEnabled="False"
+							   IsOpen="{TemplateBinding IsSubMenuOpen,
+                                                Mode=TwoWay}"
+							   Placement="RightEdgeAlignedTop">
+							<Border Background="{DynamicResource ThemeBackgroundBrush}"
+									BorderBrush="{DynamicResource ThemeBorderMidBrush}"
+									BorderThickness="{TemplateBinding BorderThickness}">
+								<ScrollViewer Theme="{StaticResource SimpleMenuScrollViewer}">
+									<ItemsPresenter Name="PART_ItemsPresenter"
+													Margin="2"
+													Grid.IsSharedSizeScope="True"
+													ItemsPanel="{TemplateBinding ItemsPanel}" />
+								</ScrollViewer>
+							</Border>
+						</Popup>
+					</Grid>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+
+		<Style Selector="^:selected /template/ Border#root">
+			<Setter Property="Background" Value="#9c5a19" />
+			<Setter Property="BorderBrush" Value="#F28C28" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="CornerRadius" Value="5" />
+		</Style>
+
+		<Style Selector="^:disabled">
+			<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+		</Style>
+	</Style>
+
+	<Style Selector="CheckBox">
+		<Setter Property="Foreground" Value="White" />
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Grid ColumnDefinitions="Auto,*">
+					<Border Name="border" Width="30" Height="30" CornerRadius="0" BorderThickness="1" BorderBrush="#F28C28" Background="#1b1b1b">
+						<Border.Transitions>
+							<Transitions>
+								<BrushTransition Property="Background" Duration="0:0:0.1"/>
+							</Transitions>
+						</Border.Transitions>
+						<Panel>
+							<Path Name="checkMark"
+								  Width="15"
+								  Height="15"
+								  StrokeThickness="2"
+								  Stroke="#F28C28"
+								  Margin="1,0,0,0"
+								  Data="M 0 0 L 15 15 M 0 15 L 15 0" />
+						</Panel>
+					</Border>
+					<ContentPresenter Name="PART_ContentPresenter"
+									  Grid.Column="1"
+									  Margin="{TemplateBinding Padding}"
+									  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+									  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+									  Content="{TemplateBinding Content}"
+									  ContentTemplate="{TemplateBinding ContentTemplate}"
+									  IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}"
+									  RecognizesAccessKey="True"
+									  TextElement.Foreground="{TemplateBinding Foreground}" />
+				</Grid>
+			</ControlTemplate>
+		</Setter>
+		<Style Selector="^:pointerover /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#F28C28" />
+			<Setter Property="Background" Value="#333" />
+		</Style>
+		<Style Selector="^:pressed /template/ Border#border">
+			<Setter Property="Background" Value="#F28C28" />
+		</Style>
+		<Style Selector="^ /template/ Path#checkMark">
+			<Setter Property="IsVisible" Value="False" />
+		</Style>
+		<Style Selector="^:checked /template/ Path#checkMark">
+			<Setter Property="IsVisible" Value="True" />
+		</Style>
+		<Style Selector="^:disabled /template/ Border#border">
+			<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+		</Style>
+	</Style>
+
+	<Style Selector="ComboBox">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}" />
+		<Setter Property="BorderThickness" Value="{DynamicResource ThemeBorderThickness}" />
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Padding" Value="4" />
+		<Setter Property="MinWidth" Value="120"/>
+		<Setter Property="MinHeight" Value="20"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="FontFamily" Value="/FCBConverterGUI;component/OpenSans.ttfAssets/#Nunito" />
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="PlaceholderForeground" Value="{DynamicResource ThemeForegroundBrush}" />
+		<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Name="border"
+						Background="#1b1b1b"
+						BorderBrush="#F28C28"
+						BorderThickness="1"
+						CornerRadius="5">
+					<Grid ColumnDefinitions="*,Auto">
+						<TextBlock Name="PlaceholderTextBlock"
+								   Grid.Column="0"
+								   Margin="{TemplateBinding Padding}"
+								   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								   Foreground="{TemplateBinding PlaceholderForeground}"
+								   IsVisible="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}"
+								   Text="{TemplateBinding PlaceholderText}" />
+						<ContentControl Margin="{TemplateBinding Padding}"
+										HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+										VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+										Content="{TemplateBinding SelectionBoxItem}"
+										ContentTemplate="{TemplateBinding ItemTemplate}" />
+						<ToggleButton Name="toggle"
+									  Grid.Column="1"
+									  Background="Transparent"
+									  BorderThickness="0"
+									  ClickMode="Press"
+									  Focusable="False"
+									  IsChecked="{TemplateBinding IsDropDownOpen, Mode=TwoWay}">
+							<Path Width="10"
+								  Height="10"
+								  Margin="5,0,5,0"
+								  HorizontalAlignment="Center"
+								  VerticalAlignment="Center"
+								  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+								  Fill="White"
+								  Stretch="Uniform" />
+						</ToggleButton>
+						<Popup Name="PART_Popup"
+							   MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+							   MaxHeight="500"
+							   IsLightDismissEnabled="True"
+							   IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+							   PlacementTarget="{TemplateBinding}">
+							<Border Background="#1b1b1b"
+									Padding="0,5,0,5"
+									BorderThickness="1"
+                                    CornerRadius="5"
+                                    BorderBrush="#F28C28">
+								<ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+											  VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+									<ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+								</ScrollViewer>
+							</Border>
+						</Popup>
+					</Grid>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+		<Style Selector="^:pointerover /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#F28C28" />
+		</Style>
+		<Style Selector="^:disabled /template/ Border#border">
+			<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+		</Style>
+	</Style>
+
+	<Style Selector="ToggleButton">
+		<Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderLowBrush}" />
+		<Setter Property="BorderThickness" Value="{DynamicResource ThemeBorderThickness}" />
+		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+		<Setter Property="Padding" Value="4" />
+		<Setter Property="HorizontalContentAlignment" Value="Center" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Template">
+			<ControlTemplate>
+				<ContentPresenter Name="PART_ContentPresenter"
+								  Padding="{TemplateBinding Padding}"
+								  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+								  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+								  Background="{TemplateBinding Background}"
+								  BorderBrush="{TemplateBinding BorderBrush}"
+								  BorderThickness="{TemplateBinding BorderThickness}"
+								  Content="{TemplateBinding Content}"
+								  ContentTemplate="{TemplateBinding ContentTemplate}"
+								  CornerRadius="{TemplateBinding CornerRadius}"
+								  RecognizesAccessKey="True"
+								  TextElement.Foreground="{TemplateBinding Foreground}" />
+			</ControlTemplate>
+		</Setter>
+		<Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}" />
+		</Style>
+		<Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}" />
+		</Style>
+		<Style Selector="^:pressed  /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="^:disabled">
+			<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+		</Style>
+	</Style>
+
+	<Style Selector="ComboBoxItem">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="Padding" Value="2" />
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="HorizontalContentAlignment" Value="Left" />
+		<Setter Property="Foreground" Value="White" />
+		<Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="CornerRadius" Value="5"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Name="Border" Padding="2" CornerRadius="5">
+					<ContentPresenter Name="PART_ContentPresenter"
+									  Padding="{TemplateBinding Padding}"
+									  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+									  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+									  Background="{TemplateBinding Background}"
+									  BorderBrush="{TemplateBinding BorderBrush}"
+									  BorderThickness="{TemplateBinding BorderThickness}"
+									  Content="{TemplateBinding Content}"
+									  ContentTemplate="{TemplateBinding ContentTemplate}"
+									  CornerRadius="{TemplateBinding CornerRadius}" />
+				</Border>
+			</ControlTemplate>
+		</Setter>
+		<Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#9c5a19" />
+		</Style>
+		<Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#9c5a19" />
+		</Style>
+		<Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#9c5a19" />
+		</Style>
+		<Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#9c5a19" />
+		</Style>
+		<Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#9c5a19" />
+		</Style>
+	</Style>
+</Styles>

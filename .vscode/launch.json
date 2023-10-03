@@ -1,0 +1,74 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			// Use IntelliSense to find out which attributes exist for C# debugging
+			// Use hover for the description of the existing attributes
+			// For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+			"name": "FCBConv (Windows)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			// If you have changed target frameworks, make sure to update the program path.
+			"program": "${workspaceFolder}/bin_debug/FCBConverter.exe",
+			"args": [""],
+			"cwd": "${workspaceFolder}/FCBConverter",
+			// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			// Use IntelliSense to find out which attributes exist for C# debugging
+			// Use hover for the description of the existing attributes
+			// For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+			"name": "FCBConv (Linux)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "buildLinux",
+			// If you have changed target frameworks, make sure to update the program path.
+			"program": "${workspaceFolder}/bin_debug/FCBConverter",
+			"args": [""],
+			"cwd": "${workspaceFolder}/FCBConverter",
+			// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			// Use IntelliSense to find out which attributes exist for C# debugging
+			// Use hover for the description of the existing attributes
+			// For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+			"name": "FCBConv GUI (Windows)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "buildGUI",
+			// If you have changed target frameworks, make sure to update the program path.
+			"program": "${workspaceFolder}/bin_debug/FCBConverterGUI.exe",
+			"args": [""],
+			"cwd": "${workspaceFolder}/FCBConverterGUI",
+			// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			// Use IntelliSense to find out which attributes exist for C# debugging
+			// Use hover for the description of the existing attributes
+			// For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+			"name": "FCBConv GUI (Linux)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "buildGUILinux",
+			// If you have changed target frameworks, make sure to update the program path.
+			"program": "${workspaceFolder}/bin_debug/FCBConverterGUI",
+			"args": [""],
+			"cwd": "${workspaceFolder}/FCBConverterGUI",
+			// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": ".NET Core Attach",
+			"type": "coreclr",
+			"request": "attach"
+		}
+	]
+}

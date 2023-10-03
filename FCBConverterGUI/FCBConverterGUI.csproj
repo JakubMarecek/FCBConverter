@@ -2,62 +2,78 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-	  <ApplicationIcon>Dunia_Engine.ico</ApplicationIcon>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <Copyright>Copyright © ArmanIII 2021</Copyright>
+	  <ApplicationIcon>Assets/Dunia_Engine.ico</ApplicationIcon>
+    <TargetFramework>net7.0</TargetFramework>
+    <Copyright>Copyright © ArmanIII 2021-2023</Copyright>
     <Company>ArmanIII</Company>
     <Product>FCBConverterGUI</Product>
     <PackageId>FCBConverterGUI</PackageId>
     <Authors>ArmanIII</Authors>
     <Description>FCBConverterGUI</Description>
-    <Platforms>AnyCPU;x64;ARM32</Platforms>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin_debug\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin\</OutputPath>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
+	<PropertyGroup Condition="'$(Configuration)'=='DebugLinux'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin_debug\</OutputPath>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<DefineConstants>$(DefineConstants);LINUXBUILD;</DefineConstants>
+	</PropertyGroup>
 
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin\</OutputPath>
+		<SelfContained>true</SelfContained>
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<PublishAot>true</PublishAot>
 
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM32'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin\</OutputPath>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='ReleaseLinux'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin\</OutputPath>
+		<SelfContained>true</SelfContained>
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<PublishAot>true</PublishAot>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin\</OutputPath>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-	  <PublishSingleFile>true</PublishSingleFile>
-	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-	  <SelfContained>false</SelfContained>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin_debug\</OutputPath>
-  </PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM32'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin_debug\</OutputPath>
-  </PropertyGroup>
+		<DefineConstants>$(DefineConstants);LINUXBUILD;</DefineConstants>
+	</PropertyGroup>
+  
+	<ItemGroup>
+		<PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.4" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.4" />
+		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.4" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="11.0.4" />
+	</ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin_debug\</OutputPath>
-  </PropertyGroup>
-
+	<ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+	</ItemGroup>
 </Project>

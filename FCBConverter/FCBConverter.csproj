@@ -2,36 +2,70 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ApplicationIcon>Dunia_Engine.ico</ApplicationIcon>
-    <UseWPF>false</UseWPF>
-    <UseWindowsForms>false</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Copyright>Copyright © ArmanIII 2021</Copyright>
+    <Copyright>Copyright © ArmanIII 2021-2023</Copyright>
     <Company>ArmanIII</Company>
     <Product>FCBConverter</Product>
     <PackageId>FCBConverter</PackageId>
     <Authors>ArmanIII</Authors>
     <Description>FCBConverter</Description>
-    <Platforms>AnyCPU;x64;ARM32</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin_debug\</OutputPath>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin_debug\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\bin\</OutputPath>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-	  <PublishSingleFile>true</PublishSingleFile>
-	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-	  <SelfContained>false</SelfContained>
+	<PropertyGroup Condition="'$(Configuration)'=='DebugLinux'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin_debug\</OutputPath>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<DefineConstants>$(DefineConstants);LINUXBUILD;</DefineConstants>
+	</PropertyGroup>
 
-	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin\</OutputPath>
+		<SelfContained>true</SelfContained>
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<PublishAot>true</PublishAot>
+
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='ReleaseLinux'">
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>..\bin\</OutputPath>
+		<SelfContained>true</SelfContained>
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<PublishAot>true</PublishAot>
+
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+		<DefineConstants>$(DefineConstants);LINUXBUILD;</DefineConstants>
+	</PropertyGroup>
 
   <ItemGroup>
     <None Include="packed_codebooks_aoTuV_603.bin">

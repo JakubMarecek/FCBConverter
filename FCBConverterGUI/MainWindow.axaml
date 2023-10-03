@@ -1,0 +1,104 @@
+<Window x:Class="FCBConverterGUI.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:globalData="using:FCBConverterGUI"
+    xmlns:sys="using:System"
+    x:CompileBindings="True"
+    ExtendClientAreaToDecorationsHint="True"
+    ExtendClientAreaChromeHints="NoChrome"
+    ExtendClientAreaTitleBarHeightHint="-1"
+    xmlns:local="clr-namespace:FCBConverterGUI" mc:Ignorable="d" Title="appName" Height="500" Width="800" MinHeight="200" MinWidth="200" Loaded="Window_Loaded" KeyDown="W_KeyDown"
+		WindowStartupLocation="CenterScreen" Icon="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Closing="Window_Closing" Deactivated="MainWindow_Deactivated">
+
+	<Window.Styles>
+		<StyleInclude Source="avares://FCBConverterGUI/Style.axaml" />
+	</Window.Styles>
+
+	<Grid>
+		<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+		
+			<Grid Background="#01000000" Name="gridMainMenu" Margin="0,40,0,0" VerticalAlignment="Top">
+				<!-- <Image Source="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Margin="-450,-200,0,0" Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center" /> -->
+				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
+					<Label Content="FCBConverter GUI" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="45" FontWeight="Bold" Foreground="White" Margin="0,0,-30,-10" />
+					<Label Name="verT" Content="v1.00" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Foreground="Gray" Margin="0,0,0,-10" />
+				</StackPanel>
+				<Image Source="avares://FCBConverterGUI/Assets/BuiltWithAvalonia.png" Margin="0,0,0,-200" Height="70" VerticalAlignment="Center" HorizontalAlignment="Center" />
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+
+
+
+
+
+			<Grid Width="NaN" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Name="gridNoticeNote" Opacity="0" Margin="0,40,0,0">
+				<Grid Background="#77000000">
+					<Label Name="noticeNote" Content="a notice text" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White" />
+				</Grid>
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+			<Grid Background="#99000000" Name="gridLoading" IsVisible="false" Opacity="0" Cursor="Wait">
+				<Label Content="Loading..." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold" Foreground="White" />
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+			<Grid Background="#cc000000" Name="gridException" IsVisible="false" Opacity="0">
+				<Label Content="An exception occured" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Margin="50,50,0,0" FontWeight="Bold" Foreground="Red" />
+				<Label Content="Please report this to the author." VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="20" Margin="50,120,0,0" Foreground="White" />
+				<TextBlock Text="__err__" Name="excLabel" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="80,170,80,0" MaxWidth="{Binding Bounds.Width, ElementName=gridException}" TextWrapping="Wrap" Foreground="White" />
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+			<Grid Background="#99000000" Name="gridDialogInfo" IsVisible="false" Opacity="0">
+				<Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="500">
+					<Border Classes="DialogRect" />
+					<Label Content="Info" Name="dialogInfoName" Classes="Header" />
+					<TextBlock Text="Some description." Name="dialogInfoLabel" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="30,65,30,60" MaxWidth="{Binding Bounds.Width, ElementName=gridDialogInfo}" TextWrapping="Wrap" Foreground="White" />
+					<Button Classes="CBtn" Content="Close" Click="ButtonDialogInfoClose_Click" Margin="0,0,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+				</Grid>
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+			<Grid Background="#99000000" Name="gridDialogAsk" IsVisible="false" Opacity="0">
+				<Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="500">
+					<Border Classes="DialogRect" />
+					<Label Name="dialogAskName" Content="--name--" Classes="Header" />
+					<TextBlock Name="dialogAskDesc" Text="--desc--" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="30,65,80,80" MaxWidth="{Binding Bounds.Width, ElementName=gridDialogAsk}" TextWrapping="Wrap" Foreground="White" />
+					<Button Classes="CBtn" Content="Yes" Click="ButtonDialogAskClose_Click" Tag="1" Margin="0,0,120,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+					<Button Classes="CBtn" Content="No" Click="ButtonDialogAskClose_Click" Tag="0" Margin="0,0,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+				</Grid>
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+			</Grid>
+		</Grid>
+
+		<Grid Background="#cc000000" Height="40" HorizontalAlignment="Stretch" VerticalAlignment="Top" PointerPressed="MoveWnd">
+			<Label Content="Wnd title" Name="wndTitle" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="15" Foreground="#ccc" FontWeight="Bold" Margin="10,0,0,0" />
+			<Button Classes="EditBtn CloseBtnWhite MinBtnWhite" Click="ButtonChrome_Click" Tag="2" Margin="0,0,90,0" />
+			<Button Classes="EditBtn CloseBtnWhite MaxBtnWhite" Click="ButtonChrome_Click" Tag="1" Margin="0,0,50,0" />
+			<Button Classes="EditBtn CloseBtnWhite" Click="ButtonChrome_Click" Tag="0" Margin="0,0,10,0" />
+		</Grid>
+	</Grid>
+</Window>
