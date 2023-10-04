@@ -22,20 +22,49 @@
 			<Grid Background="#01000000" Name="gridMainMenu" Margin="0,40,0,0" VerticalAlignment="Top">
 				<!-- <Image Source="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Margin="-450,-200,0,0" Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center" /> -->
 				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
-					<Label Content="FCBConverter GUI" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="45" FontWeight="Bold" Foreground="White" Margin="0,0,-30,-10" />
-					<Label Name="verT" Content="v1.00" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Foreground="Gray" Margin="0,0,0,-10" />
+					<Label Content="FCBConverter" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="45" FontWeight="Bold" Foreground="White" Margin="0,0,-30,-10" />
+					<Label Name="verT" Content="v1.00" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" Foreground="Gray" Margin="0,0,0,-10" />
 				</StackPanel>
-				<Image Source="avares://FCBConverterGUI/Assets/BuiltWithAvalonia.png" Margin="0,0,0,-200" Height="70" VerticalAlignment="Center" HorizontalAlignment="Center" />
-				<Grid.Transitions>
-					<Transitions>
-						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
-					</Transitions>
-				</Grid.Transitions>
 			</Grid>
 
-
-
-
+			<globalData:AnimateTabControl Margin="10,150,10,10">
+				<globalData:AnimateTabControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<UniformGrid Rows="1" HorizontalAlignment="Center"/>
+					</ItemsPanelTemplate>
+				</globalData:AnimateTabControl.ItemsPanel>
+				<TabItem Header="Selected game">
+					<Grid>
+						<Label Content="Please specify a FC game, it's needed for converting some files:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
+						<Grid Margin="10,50,0,0" Name="selGameGrid">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"></ColumnDefinition>
+								<ColumnDefinition Width="*"></ColumnDefinition>
+							</Grid.ColumnDefinitions>
+							<CheckBox Tag="gameFC2" Margin="0,0,0,0" Content="Far Cry 2" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Tag="gameFC3" Margin="0,40,0,0" Content="Far Cry 3" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Tag="gameFC3BD" Margin="0,80,0,0" Content="Far Cry 3 Blood Dragon" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Tag="gameFC4" Margin="0,120,0,0" Content="Far Cry 4" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Grid.Column="1" Tag="gameFCP" Margin="0,0,0,0" Content="Far Cry Primal" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Grid.Column="1" Tag="gameFC5" Margin="0,40,0,0" Content="Far Cry 5" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Grid.Column="1" Tag="gameFCND" Margin="0,80,0,0" Content="Far Cry New Dawn" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+							<CheckBox Grid.Column="1" Tag="gameFC6" Margin="0,120,0,0" Content="Far Cry 6" VerticalAlignment="Top" HorizontalAlignment="Left" Click="GameSel_Click" />
+						</Grid>
+					</Grid>
+				</TabItem>
+				<TabItem Header="Convert file">
+					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+				</TabItem>
+				<TabItem Header="Unpack / pack game files">
+					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+				</TabItem>
+				<TabItem Header="Fix XBG for FP">
+					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+				</TabItem>
+				<TabItem Header="Convert UE to XBG">
+					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+				</TabItem>
+			</globalData:AnimateTabControl>
 
 			<Grid Width="NaN" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Name="gridNoticeNote" Opacity="0" Margin="0,40,0,0">
 				<Grid Background="#77000000">

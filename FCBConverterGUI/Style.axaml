@@ -932,4 +932,63 @@
 			<Setter Property="Background" Value="#9c5a19" />
 		</Style>
 	</Style>
+
+	<Style Selector="TabItem">
+		<Setter Property="Background" Value="#1b1b1b" />
+		<Setter Property="FontSize" Value="{DynamicResource FontSizeLarge}" />
+		<Setter Property="Foreground" Value="White" />
+		<Setter Property="HorizontalContentAlignment" Value="Left" />
+		<Setter Property="Padding" Value="8" />
+		<Setter Property="Margin" Value="2,0,2,0" />
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<ContentPresenter Name="PART_ContentPresenter"
+					Padding="{TemplateBinding Padding}"
+					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+					Background="{TemplateBinding Background}"
+					BorderBrush="#F28C28"
+					BorderThickness="1"
+					Content="{TemplateBinding Header}"
+					ContentTemplate="{TemplateBinding HeaderTemplate}"
+					CornerRadius="5" />
+			</ControlTemplate>
+		</Setter>
+		<Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+		</Style>
+		<Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#333" />
+		</Style>
+		<Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#F28C28" />
+		</Style>
+		<Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#F28C28" />
+		</Style>
+		<Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#F28C28" />
+		</Style>
+		<Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="#F28C28" />
+		</Style>
+		<Style Selector="^[TabStripPlacement=Right]">
+			<Setter Property="HorizontalContentAlignment" Value="Right" />
+		</Style>
+	</Style>
+	<Style Selector="TabControl:normal /template/ ContentPresenter">
+		<Style.Animations>
+			<Animation Duration="0:0:0.5" FillMode="Forward" Easing="CubicEaseOut">
+				<KeyFrame Cue="0%">
+					<Setter Property="TranslateTransform.X" Value="100" />
+					<Setter Property="Opacity" Value="0" />
+				</KeyFrame>
+				<KeyFrame Cue="100%">
+					<Setter Property="TranslateTransform.X" Value="0" />
+					<Setter Property="Opacity" Value="1" />
+				</KeyFrame>
+			</Animation>
+		</Style.Animations>
+	</Style>
 </Styles>

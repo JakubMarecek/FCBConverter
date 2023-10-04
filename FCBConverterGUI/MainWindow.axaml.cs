@@ -17,7 +17,7 @@ namespace FCBConverterGUI
     public partial class MainWindow : Window
 	{
 		const string appVer = "v0.01-DEV";
-		public const string appName = "FCBConverter GUI " + appVer;
+		public const string appName = "FCBConverter";
 
         public static Window MainWnd;
 
@@ -200,6 +200,29 @@ namespace FCBConverterGUI
                     WindowState = WindowState.Maximized;
                 else if (WindowState == WindowState.Maximized)
                     WindowState = WindowState.Normal;
+        }
+
+        GameType SelectedGame = GameType.Invalid;
+
+        private void GameSel_Click(object sender, RoutedEventArgs e)
+        {
+            string tag = (string)((CheckBox)sender).Tag;
+            if (tag == "gameFC2") SelectedGame = GameType.FarCry2;
+            if (tag == "gameFC3") SelectedGame = GameType.FarCry3;
+            if (tag == "gameFC3BD") SelectedGame = GameType.FarCry3BloodDragon;
+            if (tag == "gameFC4") SelectedGame = GameType.FarCry4;
+            if (tag == "gameFCP") SelectedGame = GameType.FarCryPrimal;
+            if (tag == "gameFC5") SelectedGame = GameType.FarCry5;
+            if (tag == "gameFCND") SelectedGame = GameType.FarCryNewDawn;
+            if (tag == "gameFC6") SelectedGame = GameType.FarCry6;
+        
+            foreach (var ch in selGameGrid.GetVisualDescendants().OfType<CheckBox>())
+            {
+                if ((CheckBox)sender != ch)
+                    ch.IsChecked = false;
+            }
+
+            ((CheckBox)sender).IsChecked = true;
         }
     }
 }
