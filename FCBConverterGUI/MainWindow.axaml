@@ -53,7 +53,13 @@
 					</Grid>
 				</TabItem>
 				<TabItem Header="Convert file">
-					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+					<Grid>
+						<Label Content="Select a file to convert:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
+						<TextBox Name="editDataName" Margin="10,40,10,0" VerticalAlignment="Top" />
+						<Button Classes="CBtn" Content="Open file..." Click="SelectFileConvert_Click" Margin="0,85,10,0" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+
+					</Grid>
 				</TabItem>
 				<TabItem Header="Unpack / pack game files">
 					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>

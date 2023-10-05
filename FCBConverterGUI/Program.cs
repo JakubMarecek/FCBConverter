@@ -18,7 +18,7 @@ namespace FCBConverterGUI
             }
             catch (Exception ex)
             {
-                File.WriteAllText("", ex.ToString());
+                File.WriteAllText(AppContext.BaseDirectory + Path.DirectorySeparatorChar + "Error.txt", ex.ToString());
             }
         }
 

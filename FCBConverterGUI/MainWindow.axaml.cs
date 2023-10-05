@@ -224,5 +224,50 @@ namespace FCBConverterGUI
 
             ((CheckBox)sender).IsChecked = true;
         }
+
+        readonly string[][] files = new string[][]
+        {
+            new string[] { "Far Cry Binary file", "*.fcb" },
+            new string[] { "Database file", "*.ndb" },
+            new string[] { "Dependency loader file", "*_depload.dat" },
+            new string[] { "Sound info file", "soundinfo.bin" },
+            new string[] { "Animation markup file", "*.markup.bin" },
+            new string[] { "Far Cry 5 / ND / 6 Strings file", "oasisstrings.oasis.bin" },
+            new string[] { "Far Cry 3 / 4 Strings file", "oasisstrings_compressed.bin" },
+            new string[] { "Lua file (adds LUAC header)", "*.lua" },
+            new string[] { "Material file", "*.material.bin" },
+            new string[] { "Texture file", "*.xbt" },
+            new string[] { "Terrain texture file", "*.xbts" },
+            new string[] { "Animation move file", "*.move.bin" },
+            new string[] { "Combined Move File", "CombinedMoveFile.bin" },
+            new string[] { "Sequence file", "*.cseq" },
+            new string[] { "Flash UI file", "*.feu" },
+            new string[] { "Bundle file", "*.bdl" },
+            new string[] { "Binary WolfSkin file", "*.bwsk" },
+            new string[] { "Wwise SoundBank file", "*.bnk" },
+            new string[] { "Wwise Encoded Media", "*.wem" },
+            new string[] { "File allocation table (DAT header file)", "*.fat" },
+            new string[] { "Converted files", "*.converted.xml" },
+        };
+
+        private void SelectFileConvert_Click(object sender, RoutedEventArgs e)
+        {
+            FilePickerOpenOptions opts = new();
+            opts.AllowMultiple = false;
+            opts.Title = "Select a file";
+            //opts.FileTypeFilter = new FilePickerFileType[] { new("Domino script") { Patterns = new[] { "*.lua" } } };
+
+            List<FilePickerFileType> filter = new();
+            foreach (var a in files)
+                filter.Add(new(a[0]) { Patterns = new[] { a[1] } });
+
+            opts.FileTypeFilter = filter.ToArray();
+
+            var d = StorageProvider.OpenFilePickerAsync(opts).Result;
+            if (d != null && d.Count > 0)
+            {
+                // d[0].Path.LocalPath
+            }
+        }
     }
 }

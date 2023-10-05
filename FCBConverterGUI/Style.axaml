@@ -55,8 +55,9 @@
 			</Setter.Value>
 		</Setter>
 		<Setter Property="VerticalContentAlignment" Value="Center" />
-		<Setter Property="AcceptsReturn" Value="True" />
+		<!-- <Setter Property="AcceptsReturn" Value="True" /> -->
 		<Setter Property="Cursor" Value="Ibeam"/>
+		<Setter Property="Height" Value="32"/>
 
 		<Setter Property="Template">
 			<Setter.Value>

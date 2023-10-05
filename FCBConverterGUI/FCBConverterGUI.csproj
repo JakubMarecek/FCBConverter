@@ -25,7 +25,7 @@
 		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<DefineConstants>$(DefineConstants);LINUXBUILD;</DefineConstants>
+		<DefineConstants>$(DefineConstants);LINUXBUILD;DEBUG;</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
