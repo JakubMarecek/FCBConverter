@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -202,6 +203,17 @@ namespace FCBConverterGUI
                     WindowState = WindowState.Normal;
         }
 
+        private int CallFCBConverter(string launchParams)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "FCBConverter";
+            process.StartInfo.Arguments = launchParams + " -keep";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+            process.Start();
+            process.WaitForExit();
+            return process.ExitCode;
+        }
+
         GameType SelectedGame = GameType.Invalid;
 
         private void GameSel_Click(object sender, RoutedEventArgs e)
@@ -250,7 +262,7 @@ namespace FCBConverterGUI
             new string[] { "Converted files", "*.converted.xml" },
         };
 
-        private void SelectFileConvert_Click(object sender, RoutedEventArgs e)
+        private async void SelectFileConvert_Click(object sender, RoutedEventArgs e)
         {
             FilePickerOpenOptions opts = new();
             opts.AllowMultiple = false;
@@ -259,15 +271,20 @@ namespace FCBConverterGUI
 
             List<FilePickerFileType> filter = new();
             foreach (var a in files)
-                filter.Add(new(a[0]) { Patterns = new[] { a[1] } });
+                filter.Add(new($"{a[0]} ({a[1]})") { Patterns = new[] { a[1] } });
 
             opts.FileTypeFilter = filter.ToArray();
 
-            var d = StorageProvider.OpenFilePickerAsync(opts).Result;
+            var d = await StorageProvider.OpenFilePickerAsync(opts);
             if (d != null && d.Count > 0)
             {
-                // d[0].Path.LocalPath
+                fileToConvert.Text = d[0].Path.LocalPath;
             }
+        }
+
+        private void ConvertFile_Click(object sender, RoutedEventArgs e)
+        {
+            CallFCBConverter(fileToConvert.Text);
         }
     }
 }

@@ -37,6 +37,8 @@ namespace FCBConverter
 {
     class Program
     {
+        public static char DS = Path.DirectorySeparatorChar;
+
         public static string m_Path = "";
 
         static readonly string listFiles = @"\FCBConverterFileNames.list";

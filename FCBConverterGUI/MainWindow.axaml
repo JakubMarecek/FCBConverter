@@ -55,10 +55,9 @@
 				<TabItem Header="Convert file">
 					<Grid>
 						<Label Content="Select a file to convert:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
-						<TextBox Name="editDataName" Margin="10,40,10,0" VerticalAlignment="Top" />
-						<Button Classes="CBtn" Content="Open file..." Click="SelectFileConvert_Click" Margin="0,85,10,0" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right" />
-
-
+						<TextBox Name="fileToConvert" Margin="10,40,70,0" VerticalAlignment="Top" />
+						<Button Classes="CBtn" Content="..." Click="SelectFileConvert_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						<Button Classes="CBtn" Content="Convert" Click="ConvertFile_Click" Margin="0,85,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
 					</Grid>
 				</TabItem>
 				<TabItem Header="Unpack / pack game files">

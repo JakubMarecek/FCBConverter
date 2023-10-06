@@ -953,7 +953,13 @@
 					BorderThickness="1"
 					Content="{TemplateBinding Header}"
 					ContentTemplate="{TemplateBinding HeaderTemplate}"
-					CornerRadius="5" />
+					CornerRadius="5">
+					<ContentPresenter.Transitions>
+						<Transitions>
+							<BrushTransition Property="Background" Duration="0:0:0.1"/>
+						</Transitions>
+					</ContentPresenter.Transitions>
+				</ContentPresenter>
 			</ControlTemplate>
 		</Setter>
 		<Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
