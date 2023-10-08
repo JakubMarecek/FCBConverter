@@ -286,5 +286,37 @@ namespace FCBConverterGUI
         {
             CallFCBConverter(fileToConvert.Text);
         }
+
+        private async void SelectFATUnpack_Click(object sender, RoutedEventArgs e)
+        {
+            FilePickerOpenOptions opts = new();
+            opts.AllowMultiple = false;
+            opts.Title = "Select a FAT file";
+            opts.FileTypeFilter = new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } };
+
+            var d = await StorageProvider.OpenFilePickerAsync(opts);
+            if (d != null && d.Count > 0)
+            {
+                unpackFATFile.Text = d[0].Path.LocalPath;
+            }
+        }
+
+        private async void SelectFATUnpackDest_Click(object sender, RoutedEventArgs e)
+        {
+            FolderPickerOpenOptions opts = new();
+            opts.AllowMultiple = false;
+            opts.Title = "Select output folder";
+
+            var d = await StorageProvider.OpenFolderPickerAsync(opts);
+
+            if (d != null && d.Count > 0)
+            {
+                unpackFATFileDest.Text = d[0].Path.LocalPath;
+            }
+        }
+
+        private void FATUnpack_Click(object sender, RoutedEventArgs e)
+        {
+        }
     }
 }

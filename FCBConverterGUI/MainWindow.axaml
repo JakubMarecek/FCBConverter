@@ -61,7 +61,15 @@
 					</Grid>
 				</TabItem>
 				<TabItem Header="Unpack / pack game files">
-					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+					<Grid>
+						<Label Content="Select a FAT file:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
+						<TextBox Name="unpackFATFile" Margin="10,40,70,0" VerticalAlignment="Top" />
+						<Button Classes="CBtn" Content="..." Click="SelectFATUnpack_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						<Label Content="Select a destination folder where the FAT will be unpacked:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,90,0,0" />
+						<TextBox Name="unpackFATFileDest" Margin="10,120,70,0" VerticalAlignment="Top" />
+						<Button Classes="CBtn" Content="..." Click="SelectFATUnpackDest_Click" Margin="0,120,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						<Button Classes="CBtn" Content="Unpack" Click="FATUnpack_Click" Margin="0,190,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+					</Grid>
 				</TabItem>
 				<TabItem Header="Fix XBG for FP">
 					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
