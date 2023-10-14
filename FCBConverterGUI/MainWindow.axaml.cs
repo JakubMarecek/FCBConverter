@@ -19,6 +19,7 @@ namespace FCBConverterGUI
 	{
 		const string appVer = "v0.01-DEV";
 		public const string appName = "FCBConverter";
+        private string baseDir;
 
         public static Window MainWnd;
 
@@ -30,6 +31,9 @@ namespace FCBConverterGUI
 			
 			wndTitle.Content = Title = appName;
             verT.Content = appVer;
+            
+            using var processModule = Process.GetCurrentProcess().MainModule;
+            baseDir = Path.GetDirectoryName(processModule?.FileName);
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -206,12 +210,23 @@ namespace FCBConverterGUI
         private int CallFCBConverter(string launchParams)
         {
             Process process = new Process();
-            process.StartInfo.FileName = "FCBConverter";
+            process.StartInfo.FileName = baseDir + "FCBConverter";
             process.StartInfo.Arguments = launchParams + " -keep";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
             process.Start();
             process.WaitForExit();
             return process.ExitCode;
+        }
+
+        private bool CheckSelectedGame()
+        {
+            if (SelectedGame == GameType.Invalid)
+            {
+                OpenInfoDialog("Game", "Game is not selected. Please select game on first tab.");
+                return false;
+            }
+
+            return true;
         }
 
         GameType SelectedGame = GameType.Invalid;
@@ -237,6 +252,58 @@ namespace FCBConverterGUI
             ((CheckBox)sender).IsChecked = true;
         }
 
+        private void ConvertFile_Click(object sender, RoutedEventArgs e)
+        {
+            CallFCBConverter(fileToConvert.Text);
+        }
+
+        private async Task<string> OpenFileDialog(string title, FilePickerFileType[] files)
+        {
+            FilePickerOpenOptions opts = new();
+            opts.AllowMultiple = false;
+            opts.Title = title;
+            opts.FileTypeFilter = files;
+
+            var d = await StorageProvider.OpenFilePickerAsync(opts);
+            if (d != null && d.Count > 0)
+            {
+                return d[0].Path.LocalPath;
+            }
+
+            return "";
+        }
+
+        private async Task<string> OpenFolderDialog(string title)
+        {
+            FolderPickerOpenOptions opts = new();
+            opts.AllowMultiple = false;
+            opts.Title = title;
+
+            var d = await StorageProvider.OpenFolderPickerAsync(opts);
+
+            if (d != null && d.Count > 0)
+            {
+                return d[0].Path.LocalPath;
+            }
+            
+            return "";
+        }
+
+        private async Task<string> SaveFileDialog(string title, FilePickerFileType[] files)
+        {
+            FilePickerSaveOptions opts = new();
+            opts.FileTypeChoices = files;
+            opts.Title = title;
+
+            var d = await StorageProvider.SaveFilePickerAsync(opts);
+			if (d != null)
+			{
+				return d.Path.LocalPath;
+            }
+            
+            return "";
+        }
+
         readonly string[][] files = new string[][]
         {
             new string[] { "Far Cry Binary file", "*.fcb" },
@@ -246,77 +313,118 @@ namespace FCBConverterGUI
             new string[] { "Animation markup file", "*.markup.bin" },
             new string[] { "Far Cry 5 / ND / 6 Strings file", "oasisstrings.oasis.bin" },
             new string[] { "Far Cry 3 / 4 Strings file", "oasisstrings_compressed.bin" },
-            new string[] { "Lua file (adds LUAC header)", "*.lua" },
+            new string[] { "Lua file (bytecode / Domino box to code)", "*.lua" },
+            new string[] { "Lua code to Domino box", "*.lua.converted.xml" },
+            new string[] { "Lua to bytecode", "*.decompiled.lua" },
             new string[] { "Material file", "*.material.bin" },
             new string[] { "Texture file", "*.xbt" },
             new string[] { "Terrain texture file", "*.xbts" },
+            new string[] { "DirectDraw Surface texture (to XBT)", "*.dds" },
             new string[] { "Animation move file", "*.move.bin" },
             new string[] { "Combined Move File", "CombinedMoveFile.bin" },
-            new string[] { "Sequence file", "*.cseq" },
-            new string[] { "Flash UI file", "*.feu" },
+            new string[] { "Compiled Sequence file", "*.cseq" },
+            new string[] { "Flash UI file (changes header to SWF)", "*.feu" },
+            new string[] { "Flash UI file (changes header to FEU)", "*.swf" },
             new string[] { "Bundle file", "*.bdl" },
             new string[] { "Binary WolfSkin file", "*.bwsk" },
             new string[] { "Wwise SoundBank file", "*.bnk" },
             new string[] { "Wwise Encoded Media", "*.wem" },
             new string[] { "File allocation table (DAT header file)", "*.fat" },
+            new string[] { "Havok physics file (extracts only FCB data)", "*.hkx" },
+            new string[] { "Phoenix UI file (extracts only FCB data)", "*.spx" },
+            new string[] { "Particle file", "*.part" },
+            new string[] { "Skeleton file", "*.skeleton" },
+            new string[] { "Animation track file", "*.animtrackcol" },
+            new string[] { "Binary file", "*.bin" },
+            new string[] { "GOSM file", "*.gosm.xml" },
+            new string[] { "Binary XML file", "*.rml" },
             new string[] { "Converted files", "*.converted.xml" },
         };
 
         private async void SelectFileConvert_Click(object sender, RoutedEventArgs e)
         {
-            FilePickerOpenOptions opts = new();
-            opts.AllowMultiple = false;
-            opts.Title = "Select a file";
-            //opts.FileTypeFilter = new FilePickerFileType[] { new("Domino script") { Patterns = new[] { "*.lua" } } };
-
             List<FilePickerFileType> filter = new();
             foreach (var a in files)
                 filter.Add(new($"{a[0]} ({a[1]})") { Patterns = new[] { a[1] } });
 
-            opts.FileTypeFilter = filter.ToArray();
-
-            var d = await StorageProvider.OpenFilePickerAsync(opts);
-            if (d != null && d.Count > 0)
-            {
-                fileToConvert.Text = d[0].Path.LocalPath;
-            }
-        }
-
-        private void ConvertFile_Click(object sender, RoutedEventArgs e)
-        {
-            CallFCBConverter(fileToConvert.Text);
+            fileToConvert.Text = await OpenFileDialog("Select a file", filter.ToArray());
         }
 
         private async void SelectFATUnpack_Click(object sender, RoutedEventArgs e)
         {
-            FilePickerOpenOptions opts = new();
-            opts.AllowMultiple = false;
-            opts.Title = "Select a FAT file";
-            opts.FileTypeFilter = new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } };
-
-            var d = await StorageProvider.OpenFilePickerAsync(opts);
-            if (d != null && d.Count > 0)
-            {
-                unpackFATFile.Text = d[0].Path.LocalPath;
-            }
+            unpackFATFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
         }
 
         private async void SelectFATUnpackDest_Click(object sender, RoutedEventArgs e)
         {
-            FolderPickerOpenOptions opts = new();
-            opts.AllowMultiple = false;
-            opts.Title = "Select output folder";
-
-            var d = await StorageProvider.OpenFolderPickerAsync(opts);
-
-            if (d != null && d.Count > 0)
-            {
-                unpackFATFileDest.Text = d[0].Path.LocalPath;
-            }
+            unpackFATFileDest.Text = await OpenFolderDialog("Select output folder");
         }
 
         private void FATUnpack_Click(object sender, RoutedEventArgs e)
         {
+            CallFCBConverter($"-source=\"{unpackFATFile.Text}\" -out=\"{unpackFATFileDest.Text}\"");
+        }
+
+        private async void SelectFATPackDest_Click(object sender, RoutedEventArgs e)
+        {
+			packFATFileDest.Text = await SaveFileDialog("Save a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
+        }
+
+        private async void SelectFATPackSource_Click(object sender, RoutedEventArgs e)
+        {
+            packFATFileSource.Text = await OpenFolderDialog("Select source folder");
+        }
+
+        private void FATPack_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CheckSelectedGame())
+                return;
+
+            string fatVer;
+            if (SelectedGame == GameType.FarCry2) fatVer = "-v5";
+            else if (SelectedGame == GameType.FarCry6) fatVer = "-v11";
+            else if (SelectedGame == GameType.FarCry5 || SelectedGame == GameType.FarCryNewDawn) fatVer = "";
+            else fatVer = "-v9";
+
+            string compress = "-disablecompress";
+            if (enableCompression.IsChecked == true) compress = "-enablecompress";
+
+            string excludeCompress = "-excludeFilesFromCompress=" + extFilesCompress.Text;
+
+            CallFCBConverter($"-source=\"{packFATFileSource.Text}\" -fat=\"{packFATFileDest.Text}\" {fatVer} {compress} {excludeCompress}");
+        }
+        
+        private async void SelectSingleUnpack_Click(object sender, RoutedEventArgs e)
+        {
+            unpackSingleFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
+        }
+        
+        private async void SelectSingleUnpackDest_Click(object sender, RoutedEventArgs e)
+        {
+            unpackSingleFileDest.Text = await OpenFolderDialog("Select output folder");
+        }
+        
+        private void SingleUnpack_Click(object sender, RoutedEventArgs e)
+        {
+            CallFCBConverter($"-source=\"{unpackFATFile.Text}\" -out=\"{unpackFATFileDest.Text}\" -single=\"{unpackSingleFileName.Text}\"");
+        }
+
+        private async void SelectFolderConvert_Click(object sender, RoutedEventArgs e)
+        {
+            folderToConvert.Text = await OpenFolderDialog("Select source folder");
+        }
+        
+        private async void ConvertFolder_Click(object sender, RoutedEventArgs e)
+        {
+            string subFld = "";
+            if (allowSubfolders.IsChecked == true) subFld = "-subfolders";
+
+            CallFCBConverter($"-source=\"{folderToConvert.Text}\" -filter=\"{folderFilter.Text}\" {subFld}");
+        }
+        
+        private async void SelectFPXbgFile_Click(object sender, RoutedEventArgs e)
+        {
+            fpXbgFile.Text = await OpenFileDialog("Select XBG file for fix", new FilePickerFileType[] { new("XBG file") { Patterns = new[] { "*.xbg" } } });
         }
     }
 }

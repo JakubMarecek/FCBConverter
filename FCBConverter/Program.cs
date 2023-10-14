@@ -921,14 +921,14 @@ namespace FCBConverter
 
             // ********************************************************************************************************************************************
 
-            if (file.EndsWith(".terrainnode.bdl"))
+            if (file.EndsWith(".bdl"))
             {
                 TerrainNodeBdl(file);
                 FIN();
                 return;
             }
 
-            if (file.EndsWith(".terrainnode.bdl.converted.xml"))
+            if (file.EndsWith(".bdl.converted.xml"))
             {
                 TerrainNodeXml(file);
                 FIN();

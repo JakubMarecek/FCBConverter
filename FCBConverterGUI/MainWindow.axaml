@@ -19,7 +19,7 @@
 	<Grid>
 		<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 		
-			<Grid Background="#01000000" Name="gridMainMenu" Margin="0,40,0,0" VerticalAlignment="Top">
+			<Grid Background="#282828" Name="gridMainMenu" Margin="0,40,0,0" VerticalAlignment="Top">
 				<!-- <Image Source="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Margin="-450,-200,0,0" Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center" /> -->
 				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
 					<Label Content="FCBConverter" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="45" FontWeight="Bold" Foreground="White" Margin="0,0,-30,-10" />
@@ -35,7 +35,7 @@
 				</globalData:AnimateTabControl.ItemsPanel>
 				<TabItem Header="Selected game">
 					<Grid>
-						<Label Content="Please specify a FC game, it's needed for converting some files:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
+						<Label Content="Please specify a FC game, it's needed for converting some files:" Classes="Lab" Margin="10,10,0,0" />
 						<Grid Margin="10,50,0,0" Name="selGameGrid">
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="*"></ColumnDefinition>
@@ -52,27 +52,103 @@
 						</Grid>
 					</Grid>
 				</TabItem>
-				<TabItem Header="Convert file">
-					<Grid>
-						<Label Content="Select a file to convert:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
-						<TextBox Name="fileToConvert" Margin="10,40,70,0" VerticalAlignment="Top" />
-						<Button Classes="CBtn" Content="..." Click="SelectFileConvert_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
-						<Button Classes="CBtn" Content="Convert" Click="ConvertFile_Click" Margin="0,85,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
-					</Grid>
+				<TabItem Header="Convert files">
+					<ScrollViewer>
+						<StackPanel Orientation="Vertical">
+							<Grid Classes="GroupBoxC">
+								<Rectangle Classes="GroupBox" />
+								<Label Content="Convert single file" Classes="GroupBoxName" />
+
+								<Label Content="Select a file to convert:" Classes="Lab" Margin="15,10,0,0" />
+								<TextBox Name="fileToConvert" Margin="15,40,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFileConvert_Click" Margin="0,40,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Button Classes="CBtn" Content="Convert" Click="ConvertFile_Click" Margin="0,85,15,15" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							</Grid>
+							<Grid Classes="GroupBoxC">
+								<Rectangle Classes="GroupBox" />
+								<Label Content="Batch converting" Classes="GroupBoxName" />
+
+								<Label Content="Select a folder with files to convert:" Classes="Lab" Margin="15,10,0,0" />
+								<TextBox Name="folderToConvert" Margin="15,40,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFolderConvert_Click" Margin="0,40,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Label Content="Set filter for selecting files - *.fcb for example convert all FCB files" Classes="Lab" Margin="15,90,0,0" />
+								<TextBox Name="folderFilter" Margin="15,120,80,0" VerticalAlignment="Top" />
+								<CheckBox Name="allowSubfolders" Margin="15,180,0,0" Content="Allow processing also subfolders" VerticalAlignment="Top" HorizontalAlignment="Left" />
+								<Button Classes="CBtn" Content="Convert" Click="ConvertFolder_Click" Margin="0,220,15,15" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							</Grid>
+						</StackPanel>
+					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Unpack / pack game files">
-					<Grid>
-						<Label Content="Select a FAT file:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,10,0,0" />
-						<TextBox Name="unpackFATFile" Margin="10,40,70,0" VerticalAlignment="Top" />
-						<Button Classes="CBtn" Content="..." Click="SelectFATUnpack_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
-						<Label Content="Select a destination folder where the FAT will be unpacked:" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="10,90,0,0" />
-						<TextBox Name="unpackFATFileDest" Margin="10,120,70,0" VerticalAlignment="Top" />
-						<Button Classes="CBtn" Content="..." Click="SelectFATUnpackDest_Click" Margin="0,120,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
-						<Button Classes="CBtn" Content="Unpack" Click="FATUnpack_Click" Margin="0,190,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
-					</Grid>
+					<ScrollViewer>
+						<StackPanel Orientation="Vertical">
+							<Grid Classes="GroupBoxC">
+								<Rectangle Classes="GroupBox" />
+								<Label Content="Unpacking single file from DAT" Classes="GroupBoxName" />
+
+								<Label Content="Select a FAT file:" Classes="Lab" Margin="15,10,0,0" />
+								<TextBox Name="unpackSingleFile" Margin="15,40,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectSingleUnpack_Click" Margin="0,40,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Label Content="Select a destination folder where the FAT will be unpacked:" Classes="Lab" Margin="15,90,0,0" />
+								<TextBox Name="unpackSingleFileDest" Margin="15,120,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectSingleUnpackDest_Click" Margin="0,120,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Label Content="Set the full filename of desired file inside of a DAT file:" Classes="Lab" Margin="15,170,0,0" />
+								<TextBox Name="unpackSingleFileName" Margin="15,200,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="Unpack" Click="SingleUnpack_Click" Margin="0,270,15,15" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							</Grid>
+							<Grid Classes="GroupBoxC">
+								<Rectangle Classes="GroupBox" />
+								<Label Content="Unpacking whole DAT file" Classes="GroupBoxName" />
+
+								<Label Content="Select a FAT file:" Classes="Lab" Margin="15,10,0,0" />
+								<TextBox Name="unpackFATFile" Margin="15,40,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFATUnpack_Click" Margin="0,40,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Label Content="Select a destination folder where the FAT will be unpacked:" Classes="Lab" Margin="15,90,0,0" />
+								<TextBox Name="unpackFATFileDest" Margin="15,120,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFATUnpackDest_Click" Margin="0,120,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Button Classes="CBtn" Content="Unpack" Click="FATUnpack_Click" Margin="0,190,15,15" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							</Grid>
+							<Grid Classes="GroupBoxC">
+								<Rectangle Classes="GroupBox" />
+								<Label Content="Packing a folder into DAT file" Classes="GroupBoxName" />
+
+								<Label Content="Select a source folder:" Classes="Lab" Margin="15,10,0,0" />
+								<TextBox Name="packFATFileSource" Margin="15,40,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFATPackSource_Click" Margin="0,40,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								<Label Content="Select a destination file:" Classes="Lab" Margin="15,90,0,0" />
+								<TextBox Name="packFATFileDest" Margin="15,120,80,0" VerticalAlignment="Top" />
+								<Button Classes="CBtn" Content="..." Click="SelectFATPackDest_Click" Margin="0,120,15,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								
+								<CheckBox Name="enableCompression" Margin="15,180,0,0" Content="Enable compression of DAT" VerticalAlignment="Top" HorizontalAlignment="Left" />
+								<Label Content="Exclude files from compress:" Classes="Lab" Margin="15,215,0,0" />
+								<TextBox Name="extFilesCompress" Margin="15,245,15,0" VerticalAlignment="Top" />
+								
+								<Button Classes="CBtn" Content="Pack" Click="FATPack_Click" Margin="0,300,15,15" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							</Grid>
+						</StackPanel>
+					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Fix XBG for FP">
-					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+					<ScrollViewer>
+						<Grid>
+							<Label Content="Select XBG file for fix:" Classes="Lab" Margin="10,10,0,0" />
+							<TextBox Name="fpXbgFile" Margin="10,40,75,0" VerticalAlignment="Top" />
+							<Button Classes="CBtn" Content="..." Click="SelectFPXbgFile_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						
+							<Grid Margin="10,90,10,0" ColumnDefinitions="*,*">
+								<Grid ColumnDefinitions="*,110" Margin="0,0,10,0">
+									<Label Content="Select skeleton ID to write edits:" Classes="Lab" />
+									<NumericUpDown Grid.Column="1" Name="fpSkelSel" Value="0" Minimum="0" Maximum="20" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" />
+								</Grid>
+								<Grid ColumnDefinitions="*,110" Margin="10,0,0,0" Grid.Column="1">
+									<Label Content="Select material ID to write edits:" Classes="Lab" />
+									<NumericUpDown Grid.Column="1" Name="fpMatSel" Value="0" Minimum="0" Maximum="20" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" />
+								</Grid>
+							</Grid>
+
+
+						</Grid>
+					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Convert UE to XBG">
 					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -111,7 +187,7 @@
 				<Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="500">
 					<Border Classes="DialogRect" />
 					<Label Content="Info" Name="dialogInfoName" Classes="Header" />
-					<TextBlock Text="Some description." Name="dialogInfoLabel" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="30,65,30,60" MaxWidth="{Binding Bounds.Width, ElementName=gridDialogInfo}" TextWrapping="Wrap" Foreground="White" />
+					<TextBlock Text="Some description." Name="dialogInfoLabel" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Margin="30,55,30,60" MaxWidth="{Binding Bounds.Width, ElementName=gridDialogInfo}" TextWrapping="Wrap" Foreground="White" />
 					<Button Classes="CBtn" Content="Close" Click="ButtonDialogInfoClose_Click" Margin="0,0,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
 				</Grid>
 				<Grid.Transitions>
