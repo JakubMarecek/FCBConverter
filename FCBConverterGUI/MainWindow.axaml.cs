@@ -34,11 +34,31 @@ namespace FCBConverterGUI
             
             using var processModule = Process.GetCurrentProcess().MainModule;
             baseDir = Path.GetDirectoryName(processModule?.FileName);
+
+            ueDesc.Text = 
+                "The UAsset file should have also UExp file and TXT file with names of materials, for example:" + Environment.NewLine +
+                "handw_avatar_mygloves_aver_mf.txt" + Environment.NewLine +
+                "handw_avatar_mygloves_aver_mf.uasset" + Environment.NewLine +
+                "handw_avatar_mygloves_aver_mf.uexp" + Environment.NewLine + Environment.NewLine +
+                "The TXT must contains material name, each material on new line, so for example:" + Environment.NewLine +
+                "graymond-M-20180904151809" + Environment.NewLine + Environment.NewLine +
+                "The reference XBG is required for some binary data for new XBG file." + Environment.NewLine +
+                "The type of XBG must be same, so for example hand cloth must have same reference hand cloth XBG.";
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
             DiscordOwnRPC.Connect();
+
+            List<HiddenMeshListEntry> a = new();
+            for (int i = 0; i < 100; i++)
+                a.Add(new() { Name = "aa " + i.ToString(), Enabled = false });
+            hiddenMeshList.ItemsSource = a;
+
+            List<HiddenFacesListEntry> b = new();
+            for (int i = 0; i < 100; i++)
+                b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = "100", CountOfFaces = "1000" });
+            hiddenFacesList.ItemsSource = b;
 		}
 
         private void Window_Closing(object sender, WindowClosingEventArgs e)
@@ -229,7 +249,7 @@ namespace FCBConverterGUI
             return true;
         }
 
-        GameType SelectedGame = GameType.Invalid;
+        private GameType SelectedGame = GameType.Invalid;
 
         private void GameSel_Click(object sender, RoutedEventArgs e)
         {
@@ -352,7 +372,7 @@ namespace FCBConverterGUI
 
         private async void SelectFATUnpack_Click(object sender, RoutedEventArgs e)
         {
-            unpackFATFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
+            unpackFATFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file (*.fat)") { Patterns = new[] { "*.fat" } } });
         }
 
         private async void SelectFATUnpackDest_Click(object sender, RoutedEventArgs e)
@@ -367,7 +387,7 @@ namespace FCBConverterGUI
 
         private async void SelectFATPackDest_Click(object sender, RoutedEventArgs e)
         {
-			packFATFileDest.Text = await SaveFileDialog("Save a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
+			packFATFileDest.Text = await SaveFileDialog("Save a FAT file", new FilePickerFileType[] { new("FAT file (*.fat)") { Patterns = new[] { "*.fat" } } });
         }
 
         private async void SelectFATPackSource_Click(object sender, RoutedEventArgs e)
@@ -396,7 +416,7 @@ namespace FCBConverterGUI
         
         private async void SelectSingleUnpack_Click(object sender, RoutedEventArgs e)
         {
-            unpackSingleFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file") { Patterns = new[] { "*.fat" } } });
+            unpackSingleFile.Text = await OpenFileDialog("Select a FAT file", new FilePickerFileType[] { new("FAT file (*.fat)") { Patterns = new[] { "*.fat" } } });
         }
         
         private async void SelectSingleUnpackDest_Click(object sender, RoutedEventArgs e)
@@ -424,7 +444,66 @@ namespace FCBConverterGUI
         
         private async void SelectFPXbgFile_Click(object sender, RoutedEventArgs e)
         {
-            fpXbgFile.Text = await OpenFileDialog("Select XBG file for fix", new FilePickerFileType[] { new("XBG file") { Patterns = new[] { "*.xbg" } } });
+            fpXbgFile.Text = await OpenFileDialog("Select XBG file for fix", new FilePickerFileType[] { new("XBG file (*.xbg)") { Patterns = new[] { "*.xbg" } } });
+        }
+        
+        private void hiddenMeshList_MouseDoubleClick(object sender, PointerPressedEventArgs e)
+        {
+            var props = e.GetCurrentPoint(hiddenMeshList).Properties;
+
+            if (e.ClickCount == 2 && props.IsLeftButtonPressed)
+            {
+                if (hiddenMeshList.SelectedIndex != -1)
+                {
+                }
+            }
+        }
+        
+        private void hiddenFacesList_MouseDoubleClick(object sender, PointerPressedEventArgs e)
+        {
+            var props = e.GetCurrentPoint(hiddenFacesList).Properties;
+
+            if (e.ClickCount == 2 && props.IsLeftButtonPressed)
+            {
+                if (hiddenFacesList.SelectedIndex != -1)
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+        private async void SelectUEFile_Click(object sender, RoutedEventArgs e)
+        {
+            ueFile.Text = await OpenFileDialog("Select UAsset file", new FilePickerFileType[] { new("UAsset file (*.uasset)") { Patterns = new[] { "*.uasset" } } });
+        }
+
+        private async void SelectUERefFile_Click(object sender, RoutedEventArgs e)
+        {
+            ueRefFile.Text = await OpenFileDialog("Select reference XBG file", new FilePickerFileType[] { new("XBG file (*.xbg)") { Patterns = new[] { "*.xbg" } } });
+        }
+
+        private string selectedUEModelType = "0";
+
+        private void UEModelTypeSel_Click(object sender, RoutedEventArgs e)
+        {
+            selectedUEModelType = (string)((CheckBox)sender).Tag;
+        
+            foreach (var ch in selUEModelTypeGrid.GetVisualDescendants().OfType<CheckBox>())
+            {
+                if ((CheckBox)sender != ch)
+                    ch.IsChecked = false;
+            }
+
+            ((CheckBox)sender).IsChecked = true;
+        }
+
+        private void UEConvert_Click(object sender, RoutedEventArgs e)
+        {
+            CallFCBConverter($"-UE2XBG={selectedUEModelType} -ue=\"{ueFile.Text}\" -xbg=\"{ueRefFile.Text}\"");
         }
     }
 }

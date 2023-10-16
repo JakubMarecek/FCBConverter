@@ -13,6 +13,7 @@
 		WindowStartupLocation="CenterScreen" Icon="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Closing="Window_Closing" Deactivated="MainWindow_Deactivated">
 
 	<Window.Styles>
+		<StyleInclude Source="avares://FCBConverterGUI/StyleBase.axaml" />
 		<StyleInclude Source="avares://FCBConverterGUI/Style.axaml" />
 	</Window.Styles>
 
@@ -146,12 +147,112 @@
 								</Grid>
 							</Grid>
 
+							<Grid Margin="10,140,10,0" ColumnDefinitions="*,*">
+								<Grid Margin="0,0,10,0">
+									<Label Content="Hidden mesh parts while XBG is used" Classes="Lab" />
 
+									<ListBox Name="hiddenMeshList" Margin="0,30,0,0">
+										<ListBox.Template>
+											<ControlTemplate>
+												<ScrollViewer HorizontalScrollBarVisibility="Visible">
+													<DockPanel LastChildFill="True">
+														<Grid DockPanel.Dock="Top">
+															<Grid.ColumnDefinitions>
+																<ColumnDefinition Width="*"></ColumnDefinition>
+															</Grid.ColumnDefinitions>
+															<Label Grid.Column="0" Classes="ListHeader"></Label>
+														</Grid>
+														<ItemsPresenter></ItemsPresenter>
+													</DockPanel>
+												</ScrollViewer>
+											</ControlTemplate>
+										</ListBox.Template>
+										<ListBox.ItemTemplate>
+											<DataTemplate x:DataType="{x:Type globalData:HiddenMeshListEntry}">
+												<Grid Background="#01000000" Margin="0,2" PointerPressed="hiddenMeshList_MouseDoubleClick">
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="*"></ColumnDefinition>
+													</Grid.ColumnDefinitions>
+													<CheckBox Grid.Column="0" Margin="0,0,0,0" IsChecked="{Binding Enabled}" Content="{Binding Name}" />
+												</Grid>
+											</DataTemplate>
+										</ListBox.ItemTemplate>
+									</ListBox>
+								</Grid>
+								<Grid Margin="10,0,0,0" Grid.Column="1">
+									<Label Content="Hidden faces / polygons while FP view (values are multiplied by 3)" Classes="Lab" />
+								
+									<ListBox Name="hiddenFacesList" Margin="0,30,0,0">
+										<ListBox.Template>
+											<ControlTemplate>
+												<ScrollViewer HorizontalScrollBarVisibility="Visible">
+													<DockPanel LastChildFill="True">
+														<Grid DockPanel.Dock="Top">
+															<Grid.ColumnDefinitions>
+																<ColumnDefinition Width="*"></ColumnDefinition>
+																<ColumnDefinition Width="*"></ColumnDefinition>
+																<ColumnDefinition Width="*"></ColumnDefinition>
+															</Grid.ColumnDefinitions>
+															<Label Grid.Column="0" Classes="ListHeader">Mesh name</Label>
+															<Label Grid.Column="1" Classes="ListHeader">Face start index</Label>
+															<Label Grid.Column="2" Classes="ListHeader">Count of faces</Label>
+														</Grid>
+														<ItemsPresenter></ItemsPresenter>
+													</DockPanel>
+												</ScrollViewer>
+											</ControlTemplate>
+										</ListBox.Template>
+										<ListBox.ItemTemplate>
+											<DataTemplate x:DataType="{x:Type globalData:HiddenFacesListEntry}">
+												<Grid Background="#01000000" Margin="0,2" PointerPressed="hiddenFacesList_MouseDoubleClick">
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="*"></ColumnDefinition>
+														<ColumnDefinition Width="*"></ColumnDefinition>
+														<ColumnDefinition Width="*"></ColumnDefinition>
+													</Grid.ColumnDefinitions>
+													<TextBlock Grid.Column="0" Margin="0,0,0,0" Classes="ListTB" Text="{Binding Name}" />
+													<TextBlock Grid.Column="1" Margin="0,0,0,0" Classes="ListTB" Text="{Binding FaceStartIndex}" />
+													<TextBlock Grid.Column="2" Margin="0,0,0,0" Classes="ListTB" Text="{Binding CountOfFaces}" />
+												</Grid>
+											</DataTemplate>
+										</ListBox.ItemTemplate>
+									</ListBox>
+								</Grid>
+							</Grid>
 						</Grid>
 					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Convert UE to XBG">
-					<TextBlock Text="I am in the circle page !" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+					<ScrollViewer>
+						<Grid>
+							<Label Content="Select UAsset file" Classes="Lab" Margin="10,10,0,0" />
+							<TextBox Name="ueFile" Margin="10,40,75,0" VerticalAlignment="Top" />
+							<Button Classes="CBtn" Content="..." Click="SelectUEFile_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						
+							<Label Content="Select reference XBG file" Classes="Lab" Margin="10,90,0,0" />
+							<TextBox Name="ueRefFile" Margin="10,120,75,0" VerticalAlignment="Top" />
+							<Button Classes="CBtn" Content="..." Click="SelectUERefFile_Click" Margin="0,120,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
+						
+							<Grid Margin="10,180,10,0" ColumnDefinitions="*,*">
+								<TextBlock Name="ueDesc" Classes="Lab" TextWrapping="Wrap" />
+								<Grid Grid.Column="1">
+									<Grid Classes="GroupBoxC">
+										<Rectangle Classes="GroupBox" />
+										<Label Content="Type of model" Classes="GroupBoxName" />
+
+										<Grid Margin="15,15,0,15" Name="selUEModelTypeGrid">
+											<CheckBox Tag="0" Margin="0,0,0,0" IsChecked="True" Content="Hair" VerticalAlignment="Top" HorizontalAlignment="Left" Click="UEModelTypeSel_Click" />
+											<CheckBox Tag="1" Margin="0,40,0,0" Content="Cloth - top, bottom, hand, feet" VerticalAlignment="Top" HorizontalAlignment="Left" Click="UEModelTypeSel_Click" />
+											<CheckBox Tag="2" Margin="0,80,0,0" Content="Weapons" VerticalAlignment="Top" HorizontalAlignment="Left" Click="UEModelTypeSel_Click" />
+											<CheckBox Tag="3" Margin="0,120,0,0" Content="Vehicles" VerticalAlignment="Top" HorizontalAlignment="Left" Click="UEModelTypeSel_Click" />
+										</Grid>
+									</Grid>
+
+									<Button Classes="CBtn" Content="Convert" Click="UEConvert_Click" Margin="0,230,5,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+								</Grid>
+							</Grid>
+						</Grid>
+					</ScrollViewer>
 				</TabItem>
 			</globalData:AnimateTabControl>
 
