@@ -56,7 +56,7 @@ namespace FCBConverterGUI
             hiddenMeshList.ItemsSource = a;
 
             List<HiddenFacesListEntry> b = new();
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 5; i++)
                 b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = "100", CountOfFaces = "1000" });
             hiddenFacesList.ItemsSource = b;
 		}
@@ -169,24 +169,6 @@ namespace FCBConverterGUI
         private void ButtonDialogInfoClose_Click(object sender, RoutedEventArgs e)
         {
             Animation(false, gridDialogInfo);
-        }
-
-		private void ShowNotice(string text)
-		{
-            noticeNote.Content = text;
-
-            gridNoticeNote.Opacity = 1;
-
-            Timer aTimer = new Timer(5000);
-            aTimer.Enabled = true;
-            aTimer.Elapsed += (object source, ElapsedEventArgs e) =>
-            {
-                aTimer.Stop();
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    gridNoticeNote.Opacity = 0;
-                });
-            };
         }
 
         private void ButtonChrome_Click(object sender, RoutedEventArgs e)
@@ -467,8 +449,63 @@ namespace FCBConverterGUI
             {
                 if (hiddenFacesList.SelectedIndex != -1)
                 {
+                    addHFMeshPart.ItemsSource = GetMeshParts();
+                    addHFMeshPart.SelectedIndex = 0;
+                    addHFFaceStartIndex.Value = 0;
+                    addHFFaceCount.Value = 0;
+                    Animation(true, gridDialogAddFace);
                 }
             }
+        }
+        
+        private async void ButtonAddFaceAdd_Click(object sender, RoutedEventArgs e)
+        {
+            Animation(false, gridDialogAddFace);
+        }
+
+        private List<HiddenFacesListEntry> GetMeshParts()
+        {
+            if (SelectedGame == GameType.FarCry5)
+                return MeshParts.meshPartsFC5;
+
+            else if (SelectedGame == GameType.FarCryNewDawn)
+                return MeshParts.meshPartsNewDawn;
+
+            else if (SelectedGame == GameType.FarCry6)
+                return MeshParts.meshPartsFC6;
+
+            else
+            {
+            }
+
+            return null;
+        }
+
+        private async void FPFacesAdd_Click(object sender, RoutedEventArgs e)
+        {
+            addHFMeshPart.ItemsSource = GetMeshParts();
+            addHFMeshPart.SelectedIndex = 0;
+            Animation(true, gridDialogAddFace);
+        }
+        
+        private async void FPFacesCalc_Click(object sender, RoutedEventArgs e)
+        {
+        }
+        
+        private async void FPFacesRemove_Click(object sender, RoutedEventArgs e)
+        {
+        }
+        
+        private async void ButtonXBGInfoClose_Click(object sender, RoutedEventArgs e)
+        {
+        }
+        
+        private async void FPConvert_Click(object sender, RoutedEventArgs e)
+        {
+        }
+        
+        private async void FPXbgInfo_Click(object sender, RoutedEventArgs e)
+        {
         }
 
 

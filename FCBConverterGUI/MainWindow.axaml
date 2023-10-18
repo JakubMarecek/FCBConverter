@@ -136,7 +136,10 @@
 							<TextBox Name="fpXbgFile" Margin="10,40,75,0" VerticalAlignment="Top" />
 							<Button Classes="CBtn" Content="..." Click="SelectFPXbgFile_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
 						
-							<Grid Margin="10,90,10,0" ColumnDefinitions="*,*">
+							<Button Classes="CBtn" Content="Convert" Click="FPConvert_Click" Margin="0,90,15,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							<Button Classes="CBtn" Content="Show XBG info" Click="FPXbgInfo_Click" Margin="0,90,230,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+							<Grid Margin="10,140,10,0" ColumnDefinitions="*,*">
 								<Grid ColumnDefinitions="*,110" Margin="0,0,10,0">
 									<Label Content="Select skeleton ID to write edits:" Classes="Lab" />
 									<NumericUpDown Grid.Column="1" Name="fpSkelSel" Value="0" Minimum="0" Maximum="20" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" />
@@ -147,11 +150,11 @@
 								</Grid>
 							</Grid>
 
-							<Grid Margin="10,140,10,0" ColumnDefinitions="*,*">
-								<Grid Margin="0,0,10,0">
+							<Grid Margin="10,180,10,0" ColumnDefinitions="*,*">
+								<StackPanel Orientation="Vertical" Margin="0,0,10,20">
 									<Label Content="Hidden mesh parts while XBG is used" Classes="Lab" />
 
-									<ListBox Name="hiddenMeshList" Margin="0,30,0,0">
+									<ListBox Name="hiddenMeshList">
 										<ListBox.Template>
 											<ControlTemplate>
 												<ScrollViewer HorizontalScrollBarVisibility="Visible">
@@ -178,11 +181,11 @@
 											</DataTemplate>
 										</ListBox.ItemTemplate>
 									</ListBox>
-								</Grid>
-								<Grid Margin="10,0,0,0" Grid.Column="1">
+								</StackPanel>
+								<StackPanel Orientation="Vertical" Margin="10,0,0,20" Grid.Column="1">
 									<Label Content="Hidden faces / polygons while FP view (values are multiplied by 3)" Classes="Lab" />
 								
-									<ListBox Name="hiddenFacesList" Margin="0,30,0,0">
+									<ListBox Name="hiddenFacesList">
 										<ListBox.Template>
 											<ControlTemplate>
 												<ScrollViewer HorizontalScrollBarVisibility="Visible">
@@ -217,7 +220,13 @@
 											</DataTemplate>
 										</ListBox.ItemTemplate>
 									</ListBox>
-								</Grid>
+
+									<Grid Margin="0,0,0,0">
+										<Button Classes="CBtn" Content="Add" Click="FPFacesAdd_Click" Width="100" HorizontalAlignment="Left" />
+										<Button Classes="CBtn" Content="Auto calc" Click="FPFacesCalc_Click" Width="100" HorizontalAlignment="Center" />
+										<Button Classes="CBtn" Content="Remove" Click="FPFacesRemove_Click" Width="100" HorizontalAlignment="Right" />
+									</Grid>
+								</StackPanel>
 							</Grid>
 						</Grid>
 					</ScrollViewer>
@@ -236,7 +245,7 @@
 							<Grid Margin="10,180,10,0" ColumnDefinitions="*,*">
 								<TextBlock Name="ueDesc" Classes="Lab" TextWrapping="Wrap" />
 								<Grid Grid.Column="1">
-									<Grid Classes="GroupBoxC">
+									<Grid Classes="GroupBoxC" Margin="5,10,5,0">
 										<Rectangle Classes="GroupBox" />
 										<Label Content="Type of model" Classes="GroupBoxName" />
 
@@ -256,9 +265,34 @@
 				</TabItem>
 			</globalData:AnimateTabControl>
 
-			<Grid Width="NaN" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Name="gridNoticeNote" Opacity="0" Margin="0,40,0,0">
-				<Grid Background="#77000000">
-					<Label Name="noticeNote" Content="a notice text" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White" />
+			<Grid Background="#99000000" Name="gridDialogAddFace" IsVisible="false" Opacity="0">
+				<Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="500">
+					<Border Classes="DialogRect" />
+					<Label Content="Add hidden face" Classes="Header" />
+
+					<Label Content="Select a mesh part" Margin="15,50,0,0" Classes="Lab" />
+					<ComboBox Name="addHFMeshPart" Width="250" Margin="200,50,15,0" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30">
+						<ComboBox.ItemsPanel>
+							<ItemsPanelTemplate>
+								<StackPanel/>
+							</ItemsPanelTemplate>
+						</ComboBox.ItemsPanel>
+						<ComboBox.ItemTemplate>
+							<DataTemplate x:DataType="{x:Type globalData:HiddenFacesListEntry}">
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Text="{Binding Name}" />
+								</StackPanel>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+
+					<Label Content="Face start index&#x0d;&#x0a;(begin face number)" Margin="15,100,0,0" Classes="Lab" />
+					<NumericUpDown Name="addHFFaceStartIndex" Margin="200,100,15,0" Value="0" Minimum="0" Maximum="9999999" Increment="1" FormatString="0" Width="150" HorizontalAlignment="Right" />
+
+					<Label Content="Faces count&#x0d;&#x0a;(count of faces which will be removed)" Margin="15,150,0,0" Classes="Lab" />
+					<NumericUpDown Name="addHFFaceCount" Margin="200,150,15,0" Value="0" Minimum="0" Maximum="9999999" Increment="1" FormatString="0" Width="150" HorizontalAlignment="Right" />
+
+					<Button Classes="CBtn" Content="Add" Click="ButtonAddFaceAdd_Click" Margin="0,200,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
 				</Grid>
 				<Grid.Transitions>
 					<Transitions>
@@ -266,14 +300,23 @@
 					</Transitions>
 				</Grid.Transitions>
 			</Grid>
-			<Grid Background="#99000000" Name="gridLoading" IsVisible="false" Opacity="0" Cursor="Wait">
-				<Label Content="Loading..." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold" Foreground="White" />
+
+			<Grid Background="#99000000" Name="gridDialogXBGInfo" IsVisible="false" Opacity="0">
+				<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="50,50,50,50">
+					<Border Classes="DialogRect" />
+					<Label Content="XBG Info" Classes="Header" />
+
+					<TextBox Name="xbgInfoTB" Margin="15,50,15,70" IsReadOnly="True" />
+
+					<Button Classes="CBtn" Content="Close" Click="ButtonXBGInfoClose_Click" Margin="0,0,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+				</Grid>
 				<Grid.Transitions>
 					<Transitions>
 						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
 					</Transitions>
 				</Grid.Transitions>
 			</Grid>
+
 			<Grid Background="#cc000000" Name="gridException" IsVisible="false" Opacity="0">
 				<Label Content="An exception occured" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Margin="50,50,0,0" FontWeight="Bold" Foreground="Red" />
 				<Label Content="Please report this to the author." VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="20" Margin="50,120,0,0" Foreground="White" />
