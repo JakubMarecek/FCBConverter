@@ -13,7 +13,7 @@
 		WindowStartupLocation="CenterScreen" Icon="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Closing="Window_Closing" Deactivated="MainWindow_Deactivated">
 
 	<Window.Styles>
-		<StyleInclude Source="avares://FCBConverterGUI/StyleBase.axaml" />
+		<StyleInclude Source="avares://UILibrary/StyleBase.axaml" />
 		<StyleInclude Source="avares://FCBConverterGUI/Style.axaml" />
 	</Window.Styles>
 

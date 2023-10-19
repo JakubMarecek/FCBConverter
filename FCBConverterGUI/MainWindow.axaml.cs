@@ -57,7 +57,7 @@ namespace FCBConverterGUI
 
             List<HiddenFacesListEntry> b = new();
             for (int i = 0; i < 5; i++)
-                b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = "100", CountOfFaces = "1000" });
+                b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = 100, CountOfFaces = 1000 });
             hiddenFacesList.ItemsSource = b;
 		}
 
