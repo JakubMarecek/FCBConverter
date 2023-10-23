@@ -67,10 +67,10 @@
 	</PropertyGroup>
   
 	<ItemGroup>
-		<PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.4" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.0.4" />
-		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.4" />
-		<PackageReference Include="Avalonia.Diagnostics" Version="11.0.4" />
+		<PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="11.0.5" />
 		<ProjectReference Include="..\..\UILibrary\UILibrary.csproj" />
 	</ItemGroup>
 

@@ -292,7 +292,8 @@
 					<Label Content="Faces count&#x0d;&#x0a;(count of faces which will be removed)" Margin="15,150,0,0" Classes="Lab" />
 					<NumericUpDown Name="addHFFaceCount" Margin="200,150,15,0" Value="0" Minimum="0" Maximum="9999999" Increment="1" FormatString="0" Width="150" HorizontalAlignment="Right" />
 
-					<Button Classes="CBtn" Content="Add" Click="ButtonAddFaceAdd_Click" Margin="0,200,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+					<Button Classes="CBtn" Content="Add" Click="ButtonAddFaceAdd_Click" Margin="0,200,120,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+					<Button Classes="CBtn" Content="Cancel" Click="ButtonAddFaceCancel_Click" Margin="0,200,10,10" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
 				</Grid>
 				<Grid.Transitions>
 					<Transitions>

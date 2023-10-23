@@ -449,16 +449,24 @@ namespace FCBConverterGUI
             {
                 if (hiddenFacesList.SelectedIndex != -1)
                 {
+                    var selFL = (HiddenFacesListEntry)hiddenFacesList.SelectedItem;
+
                     addHFMeshPart.ItemsSource = GetMeshParts();
-                    addHFMeshPart.SelectedIndex = 0;
-                    addHFFaceStartIndex.Value = 0;
-                    addHFFaceCount.Value = 0;
+                    addHFMeshPart.SelectedIndex = GetMeshParts().FindIndex(a => a.ID == selFL.ID);
+                    addHFFaceStartIndex.Value = selFL.FaceStartIndex;
+                    addHFFaceCount.Value = selFL.CountOfFaces;
+
                     Animation(true, gridDialogAddFace);
                 }
             }
         }
         
         private async void ButtonAddFaceAdd_Click(object sender, RoutedEventArgs e)
+        {
+            Animation(false, gridDialogAddFace);
+        }
+        
+        private async void ButtonAddFaceCancel_Click(object sender, RoutedEventArgs e)
         {
             Animation(false, gridDialogAddFace);
         }
