@@ -456,13 +456,31 @@ namespace FCBConverterGUI
                     addHFFaceStartIndex.Value = selFL.FaceStartIndex;
                     addHFFaceCount.Value = selFL.CountOfFaces;
 
+                    hiddenFacesAddEdit = true;
+                    addHFAddBtn.Content = "Edit";
+
                     Animation(true, gridDialogAddFace);
                 }
             }
         }
         
+        bool hiddenFacesAddEdit = false;
+
         private async void ButtonAddFaceAdd_Click(object sender, RoutedEventArgs e)
         {
+            var entry = (HiddenFacesListEntry)addHFMeshPart.SelectedItem;
+            entry.CountOfFaces = (int)addHFFaceCount.Value;
+            entry.FaceStartIndex = (int)addHFFaceStartIndex.Value;
+            
+            var a = hiddenFacesList.ItemsSource.OfType<HiddenFacesListEntry>().ToList();
+
+            if (hiddenFacesAddEdit)
+                a[hiddenFacesList.SelectedIndex] = entry;
+            else
+                a.Add(entry);
+
+            hiddenFacesList.ItemsSource = a;
+
             Animation(false, gridDialogAddFace);
         }
         
@@ -491,8 +509,13 @@ namespace FCBConverterGUI
 
         private async void FPFacesAdd_Click(object sender, RoutedEventArgs e)
         {
+            hiddenFacesAddEdit = false;
+            addHFAddBtn.Content = "Add";
+
             addHFMeshPart.ItemsSource = GetMeshParts();
             addHFMeshPart.SelectedIndex = 0;
+            addHFFaceStartIndex.Value = 0;
+            addHFFaceCount.Value = 0;
             Animation(true, gridDialogAddFace);
         }
         
