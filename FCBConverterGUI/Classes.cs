@@ -2,6 +2,8 @@ namespace FCBConverterGUI
 {
 	public class HiddenMeshListEntry
 	{
+		public string ID { set; get; }
+
 		public string Name { set; get; }
 
 		public bool? Enabled { set; get; }

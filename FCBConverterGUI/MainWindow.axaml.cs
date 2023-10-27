@@ -50,7 +50,7 @@ namespace FCBConverterGUI
 		{
             DiscordOwnRPC.Connect();
 
-            List<HiddenMeshListEntry> a = new();
+            /*List<HiddenMeshListEntry> a = new();
             for (int i = 0; i < 100; i++)
                 a.Add(new() { Name = "aa " + i.ToString(), Enabled = false });
             hiddenMeshList.ItemsSource = a;
@@ -58,7 +58,7 @@ namespace FCBConverterGUI
             List<HiddenFacesListEntry> b = new();
             for (int i = 0; i < 5; i++)
                 b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = 100, CountOfFaces = 1000 });
-            hiddenFacesList.ItemsSource = b;
+            hiddenFacesList.ItemsSource = b;*/
 		}
 
         private void Window_Closing(object sender, WindowClosingEventArgs e)
@@ -252,6 +252,8 @@ namespace FCBConverterGUI
             }
 
             ((CheckBox)sender).IsChecked = true;
+
+            LoadMeshParts();
         }
 
         private void ConvertFile_Click(object sender, RoutedEventArgs e)
@@ -424,6 +426,17 @@ namespace FCBConverterGUI
             CallFCBConverter($"-source=\"{folderToConvert.Text}\" -filter=\"{folderFilter.Text}\" {subFld}");
         }
         
+
+
+
+
+
+
+
+
+
+
+
         private async void SelectFPXbgFile_Click(object sender, RoutedEventArgs e)
         {
             fpXbgFile.Text = await OpenFileDialog("Select XBG file for fix", new FilePickerFileType[] { new("XBG file (*.xbg)") { Patterns = new[] { "*.xbg" } } });
@@ -525,10 +538,14 @@ namespace FCBConverterGUI
         
         private async void FPFacesRemove_Click(object sender, RoutedEventArgs e)
         {
+            var a = hiddenFacesList.ItemsSource.OfType<HiddenFacesListEntry>().ToList();
+            a.RemoveAt(hiddenFacesList.SelectedIndex);
+            hiddenFacesList.ItemsSource = a;
         }
         
         private async void ButtonXBGInfoClose_Click(object sender, RoutedEventArgs e)
         {
+            Animation(false, gridDialogXBGInfo);
         }
         
         private async void FPConvert_Click(object sender, RoutedEventArgs e)
@@ -537,6 +554,26 @@ namespace FCBConverterGUI
         
         private async void FPXbgInfo_Click(object sender, RoutedEventArgs e)
         {
+
+
+            Animation(true, gridDialogXBGInfo);
+        }
+
+        private void LoadMeshParts()
+        {
+            hiddenMeshList.ItemsSource = null;
+
+            var items = GetMeshParts();
+
+            if (items != null)
+            {
+                List<HiddenMeshListEntry> a = new();
+
+                foreach (var i in items)
+                    a.Add(new() { ID = i.ID, Name = i.Name, Enabled = false });
+
+                hiddenMeshList.ItemsSource = a;
+            }
         }
 
 
