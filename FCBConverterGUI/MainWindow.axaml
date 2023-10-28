@@ -133,11 +133,11 @@
 					<ScrollViewer>
 						<Grid>
 							<Label Content="Select XBG file for fix:" Classes="Lab" Margin="10,10,0,0" />
-							<TextBox Name="fpXbgFile" Margin="10,40,75,0" VerticalAlignment="Top" />
+							<TextBox Name="fpXbgFile" Margin="10,40,75,0" VerticalAlignment="Top" TextChanged="fpXbgFile_TextChanged" />
 							<Button Classes="CBtn" Content="..." Click="SelectFPXbgFile_Click" Margin="0,40,10,0" Width="50" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right" />
 						
-							<Button Classes="CBtn" Content="Convert" Click="FPConvert_Click" Margin="0,90,15,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
-							<Button Classes="CBtn" Content="Show XBG info" Click="FPXbgInfo_Click" Margin="0,90,230,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							<Button Name="fpConvert" IsEnabled="False" Classes="CBtn" Content="Convert" Click="FPConvert_Click" Margin="0,90,15,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+							<Button Name="fpXBGInfo" IsEnabled="False" Classes="CBtn" Content="Show XBG info" Click="FPXbgInfo_Click" Margin="0,90,230,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
 
 							<Grid Margin="10,140,10,0" ColumnDefinitions="*,*">
 								<Grid ColumnDefinitions="*,110" Margin="0,0,10,0">
@@ -223,7 +223,7 @@
 
 									<Grid Margin="0,0,0,0">
 										<Button Classes="CBtn" Content="Add" Click="FPFacesAdd_Click" Width="100" HorizontalAlignment="Left" />
-										<Button Classes="CBtn" Content="Auto calc" Click="FPFacesCalc_Click" Width="100" HorizontalAlignment="Center" />
+										<Button Name="fpAutoCalc" IsEnabled="False" Classes="CBtn" Content="Auto calc" Click="FPFacesCalc_Click" Width="100" HorizontalAlignment="Center" />
 										<Button Classes="CBtn" Content="Remove" Click="FPFacesRemove_Click" Width="100" HorizontalAlignment="Right" />
 									</Grid>
 								</StackPanel>

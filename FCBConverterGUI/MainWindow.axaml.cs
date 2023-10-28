@@ -59,6 +59,9 @@ namespace FCBConverterGUI
             for (int i = 0; i < 5; i++)
                 b.Add(new() { Name = "aa " + i.ToString(), FaceStartIndex = 100, CountOfFaces = 1000 });
             hiddenFacesList.ItemsSource = b;*/
+
+            hiddenFacesList.ItemsSource = new List<HiddenFacesListEntry>();
+            hiddenMeshList.ItemsSource = new List<HiddenMeshListEntry>();
 		}
 
         private void Window_Closing(object sender, WindowClosingEventArgs e)
@@ -575,6 +578,257 @@ namespace FCBConverterGUI
                 hiddenMeshList.ItemsSource = a;
             }
         }
+
+        int sourceXbgSkel = 0;
+        Dictionary<int, int> sourceXbgSkelMats;
+        Dictionary<int, Dictionary<int, int>> sourceXbgSkelVerts;
+        Dictionary<int, Dictionary<int, int>> sourceXbgSkelFaces;
+        Dictionary<int, Dictionary<int, Dictionary<int, HideFacesStruct>>> sourceXbgSkelHideFacesFP;
+        string[] sourceXbgMatNames;
+        string[] sourceXbgMatPaths;
+        int hideFacesSelSkel = 0;
+        int hideFacesSelMat = 0;
+
+        struct HideFacesStruct
+        {
+            public ulong id;
+            public ushort start;
+            public ushort count;
+        }
+
+        private void LoadDataFromXBG(string file)
+        {
+            fpConvert.IsEnabled = false;
+            fpXBGInfo.IsEnabled = false;
+            fpAutoCalc.IsEnabled = false;
+
+            if (!File.Exists(file))
+                return;
+
+            try
+            {
+                var meshList = hiddenMeshList.ItemsSource.OfType<HiddenMeshListEntry>().ToList();
+                foreach (var b in meshList)
+                    b.Enabled = false;
+                hiddenMeshList.ItemsSource = meshList;
+
+                Process process = new Process();
+                process.StartInfo.FileName = "FCBConverter.exe";
+                process.StartInfo.Arguments = "-xbgData -xbg=\"" + file + "\"";
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.Start();
+
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    string line = process.StandardOutput.ReadLine();
+
+                    if (line != null && line.StartsWith("data"))
+                    {
+                        string data = line.Replace("data", "");
+
+                        string[] dataParse = data.Split('|');
+                        foreach (string dP in dataParse)
+                        {
+                            string[] vals = dP.Split(';');
+                            string[] valsData = vals[1].Split(',');
+
+                            if (vals[0] == "MESHPARTHIDE")
+                            {
+                                foreach (string valsV in valsData)
+                                {
+                                    if (valsV != "" && valsV != "0")
+                                    {
+                                        var mp = GetMeshParts();
+                                        var s = meshList.Where(a => a.ID == valsV)?.SingleOrDefault();
+                                        if (s != null)
+                                            s.Enabled = true;
+                                    }
+                                }
+                            }
+
+                            /*if (vals[0] == "FACEHIDEFP")
+                            {
+                                foreach (string valsV in valsData)
+                                {
+                                    if (valsV != "" && valsV != "0")
+                                    {
+                                        string[] partsV = valsV.Split('*');
+
+                                        ListViewItem listViewItem = new ListViewItem();
+                                        listViewItem.Text = GetMeshParts()[partsV[0]];
+                                        listViewItem.SubItems.Add(partsV[1]);
+                                        listViewItem.SubItems.Add(partsV[2]);
+                                        listView1.Items.Add(listViewItem);
+                                    }
+                                }
+                            }*/
+
+                            if (vals[0] == "SKELFACES")
+                            {
+                                sourceXbgSkelFaces = new();
+
+                                for (int i = 0; i < valsData.Length; i++)
+                                {
+                                    string[] matChilds = valsData[i].Split('+');
+                                    Dictionary<int, int> matsArr = new();
+
+                                    for (int j = 0; j < matChilds.Length; j++)
+                                    {
+                                        matsArr.Add(j, int.Parse(matChilds[j]));
+                                    }
+
+                                    sourceXbgSkelFaces.Add(i, matsArr);
+                                }
+                            }
+
+                            if (vals[0] == "SKELVERTS")
+                            {
+                                sourceXbgSkelVerts = new();
+
+                                for (int i = 0; i < valsData.Length; i++)
+                                {
+                                    string[] matChilds = valsData[i].Split('+');
+                                    Dictionary<int, int> matsArr = new();
+
+                                    for (int j = 0; j < matChilds.Length; j++)
+                                    {
+                                        matsArr.Add(j, int.Parse(matChilds[j]));
+                                    }
+
+                                    sourceXbgSkelVerts.Add(i, matsArr);
+                                }
+                            }
+
+                            if (vals[0] == "SKELMATS")
+                            {
+                                sourceXbgSkelMats = new();
+
+                                for (int i = 0; i < valsData.Length; i++)
+                                {
+                                    sourceXbgSkelMats.Add(i, int.Parse(valsData[i]));
+                                }
+                            }
+
+                            if (vals[0] == "SKELHIDEFACESFP")
+                            {
+                                sourceXbgSkelHideFacesFP = new();
+
+                                for (int i = 0; i < valsData.Length; i++)
+                                {
+                                    string[] matChilds = valsData[i].Split('+');
+                                    Dictionary<int, Dictionary<int, HideFacesStruct>> matsArr = new();
+
+                                    for (int j = 0; j < matChilds.Length; j++)
+                                    {
+                                        Dictionary<int, HideFacesStruct> hfSA = new();
+
+                                        if (matChilds[j] != "" && matChilds[j] != "0")
+                                        {
+                                            string[] matParts = matChilds[j].Split('-');
+
+                                            for (int k = 0; k < matParts.Length; k++)
+                                            {
+                                                string[] partData = matParts[k].Split('*');
+
+                                                hfSA.Add(k, new()
+                                                {
+                                                    id = ulong.Parse(partData[0]),
+                                                    start = ushort.Parse(partData[1]),
+                                                    count = ushort.Parse(partData[2])
+                                                });
+                                            }
+                                        }
+
+                                        matsArr.Add(j, hfSA);
+                                    }
+
+                                    sourceXbgSkelHideFacesFP.Add(i, matsArr);
+                                }
+                            }
+
+                            if (vals[0] == "SKEL")
+                            {
+                                sourceXbgSkel = int.Parse(vals[1]);
+                            }
+
+                            if (vals[0] == "MATS")
+                            {
+                                List<string> matNames = new List<string>();
+                                List<string> matPaths = new List<string>();
+                                foreach (string valsV in valsData)
+                                {
+                                    string[] partsV = valsV.Split('*');
+                                    matNames.Add(partsV[0]);
+                                    matPaths.Add(partsV[1]);
+                                }
+                                sourceXbgMatNames = matNames.ToArray();
+                                sourceXbgMatPaths = matPaths.ToArray();
+                            }
+                        }
+                    }
+                }
+
+                process.WaitForExit();
+
+                fpConvert.IsEnabled = true;
+                fpXBGInfo.IsEnabled = true;
+                fpAutoCalc.IsEnabled = true;
+
+                fpSkelSel.Value = 0;
+                fpSkelSel.Maximum = sourceXbgSkel - 1;
+                fpMatSel.Value = 0;
+                fpMatSel.Maximum = sourceXbgSkelMats[(int)fpSkelSel.Value] - 1;
+
+                hideFacesSelSkel = 0;
+                hideFacesSelMat = 0;
+
+                NumericsChangeSetData(0, 0);
+            }
+            catch (Exception)
+            {
+                OpenInfoDialog("Fix XBG for FP", "Error occured during opening XBG. Did you select right game?");
+            }
+        }
+
+        private void NumericsChangeSetData(int skel, int material)
+        {
+            Dictionary<int, HideFacesStruct> hideFacesStructs = sourceXbgSkelHideFacesFP[skel][material];
+
+            List<HiddenFacesListEntry> l = new();
+
+            foreach (HideFacesStruct hideFacesStruct in hideFacesStructs.Values)
+            {
+                var mp = GetMeshParts();
+                var nl = new HiddenFacesListEntry();
+                nl.Name = mp.Where(a => a.ID == hideFacesStruct.id.ToString())?.SingleOrDefault()?.Name ?? "---";
+                nl.CountOfFaces = hideFacesStruct.count;
+                nl.FaceStartIndex = hideFacesStruct.start;
+                l.Add(nl);
+            }
+
+            hiddenFacesList.ItemsSource = l;
+
+            hideFacesSelSkel = skel;
+            hideFacesSelMat = material;
+        }
+
+        private void fpXbgFile_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            LoadDataFromXBG(fpXbgFile.Text);
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
