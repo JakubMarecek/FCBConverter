@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -44,6 +46,29 @@ namespace FCBConverterGUI
                 "graymond-M-20180904151809" + Environment.NewLine + Environment.NewLine +
                 "The reference XBG is required for some binary data for new XBG file." + Environment.NewLine +
                 "The type of XBG must be same, so for example hand cloth must have same reference hand cloth XBG.";
+
+            wlDesc.Text = 
+                "This app is a GUI version for command line app FCBConverter and makes it esaily usable by even less skilled modders." + Environment.NewLine +
+                "This app is divided into several tabs, categorized by specific usage of FCBConv." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Selected game" + Environment.NewLine +
+                "Here you can specify what game you will modify. It's required because some converting processes are specific for each FC game." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Convert files" + Environment.NewLine +
+                "Here you can convert single file. You can also use batch converting in case of many files." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Unpack / pack game files" + Environment.NewLine +
+                "In this tab you can unpack and pack game main files. All FC games use same format DAT/FAT but each FC game uses a bit changed version of DAT/FAT." + Environment.NewLine +
+                "You can even specify a single file name which you want to unpack from a DAT/FAT." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Fix XBG for FP" + Environment.NewLine +
+                "Here you can fix FP issues with clothing. Clothing which is primary for NPCs are missing parts which are required for player's usage, so without them you can experience doubled legs or hands." + Environment.NewLine +
+                "You can even define which part of body mesh will be hidden if a cloth will be equipped." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "Convert UE to XBG" + Environment.NewLine +
+                "Converting backed Unreal Engine Asset to XBG. This process is currently only know way how to get new models into the FC game." + Environment.NewLine +
+                "" + Environment.NewLine +
+                "";
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -110,6 +135,37 @@ namespace FCBConverterGUI
 			}*/
 		}
 
+        private void TextBlock_MouseLeftButtonDown(object sender, PointerReleasedEventArgs e)
+        {
+            string url = "https://downloads.fcmodding.com/others/fcbconverter/";
+
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
 		private void Animation(bool fadeInOut, Grid grid)
 		{
             foreach (var ch in grid.GetVisualDescendants().OfType<Button>())
@@ -142,10 +198,15 @@ namespace FCBConverterGUI
             }
         }
 
-        private void OpenAskDialog(string name, string val)
+        Action askDialogAccept;
+        Action askDialogCancel;
+
+        private void OpenAskDialog(string name, string val, Action accept, Action cancel)
         {
             dialogAskName.Content = name;
             dialogAskDesc.Text = val;
+            askDialogAccept = accept;
+            askDialogCancel = cancel;
             Animation(true, gridDialogAsk);
         }
 
@@ -154,10 +215,10 @@ namespace FCBConverterGUI
             string tag = (string)((Button)sender).Tag;
 
             if (tag == "0")
-			{}
+                askDialogCancel();
 
             if (tag == "1")
-			{}
+                askDialogAccept();
 
             Animation(false, gridDialogAsk);
         }
@@ -447,14 +508,14 @@ namespace FCBConverterGUI
         
         private void hiddenMeshList_MouseDoubleClick(object sender, PointerPressedEventArgs e)
         {
-            var props = e.GetCurrentPoint(hiddenMeshList).Properties;
+            /*var props = e.GetCurrentPoint(hiddenMeshList).Properties;
 
             if (e.ClickCount == 2 && props.IsLeftButtonPressed)
             {
                 if (hiddenMeshList.SelectedIndex != -1)
                 {
                 }
-            }
+            }*/
         }
         
         private void hiddenFacesList_MouseDoubleClick(object sender, PointerPressedEventArgs e)
@@ -537,6 +598,22 @@ namespace FCBConverterGUI
         
         private async void FPFacesCalc_Click(object sender, RoutedEventArgs e)
         {
+            OpenAskDialog("Fix XBG for FP", "Autocalculate will add all faces from selected material and submesh. This is used for clothes of type feet, bottom and handwear. Top parts can produce bugs like missing body when you look down.",
+                () => {
+                    var meshList = hiddenFacesList.ItemsSource.OfType<HiddenFacesListEntry>().ToList();
+
+                    int clc = (int)Math.Floor((double)sourceXbgSkelFaces[(int)fpSkelSel.Value][(int)fpMatSel.Value] / meshList.Count);
+
+                    for (int i = 0; i < meshList.Count; i++)
+                    {
+                        meshList[i].FaceStartIndex = (clc * i * 3);
+                        meshList[i].CountOfFaces = (clc * 3);
+                    }
+
+                    hiddenFacesList.ItemsSource = meshList;
+                },
+                () => {}
+            );
         }
         
         private async void FPFacesRemove_Click(object sender, RoutedEventArgs e)
@@ -553,11 +630,73 @@ namespace FCBConverterGUI
         
         private async void FPConvert_Click(object sender, RoutedEventArgs e)
         {
+            if (!File.Exists(fpXbgFile.Text))
+                return;
+
+            string outParamVal = "";
+
+            outParamVal += "SKELHIDEFACESFP;";
+            for (int i = 0; i < sourceXbgSkelHideFacesFP.Count; i++)
+            {
+                outParamVal += (i > 0 ? "," : "");
+                for (int j = 0; j < sourceXbgSkelHideFacesFP[i].Count; j++)
+                {
+                    outParamVal += (j > 0 ? "+" : "");
+                    for (int k = 0; k < sourceXbgSkelHideFacesFP[i][j].Count; k++)
+                    {
+                        var hideFace = sourceXbgSkelHideFacesFP[i][j][k];
+                        outParamVal += (k > 0 ? "-" : "") + hideFace.ID + "*" + hideFace.FaceStartIndex + "*" + hideFace.CountOfFaces;
+                    }
+                }
+            }
+
+            outParamVal += "|MESHPARTHIDE;";
+            var meshList = hiddenMeshList.ItemsSource.OfType<HiddenMeshListEntry>().ToList();
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                if (meshList[i].Enabled == true)
+                {
+                    outParamVal += (i > 0 ? "," : "") + meshList[i].ID;
+                }
+            }
+
+            CallFCBConverter("-xbgFP -xbg=\"" + fpXbgFile.Text + "\" -data=\"" + outParamVal + "\"");
+
+            OpenInfoDialog("Fix XBG for FP", "XBG successfully edited.");
         }
         
         private async void FPXbgInfo_Click(object sender, RoutedEventArgs e)
         {
+            string info = "";
 
+            info += "Source XBG contains" + Environment.NewLine + Environment.NewLine;
+            info += "Materials:" + Environment.NewLine;
+
+            for (int i = 0; i < sourceXbgMatNames.Length; i++)
+            {
+                info += "  Material ID " + i.ToString() + Environment.NewLine;
+                info += "    -Name: " + sourceXbgMatNames[i] + Environment.NewLine;
+                info += "    -Path: " + sourceXbgMatPaths[i] + Environment.NewLine;
+            }
+
+            info += Environment.NewLine;
+
+            info += "Number of skeleton IDs: " + sourceXbgSkel + Environment.NewLine + Environment.NewLine;
+
+            info += "Count of materials in each skeleton ID:" + Environment.NewLine;
+
+            for (int i = 0; i < sourceXbgSkel; i++)
+            {
+                info += "  -Skeleton " + i.ToString() + " contains " + sourceXbgSkelMats[i] + " materials" + Environment.NewLine;
+                for (int j = 0; j < sourceXbgSkelMats[i]; j++)
+                {
+                    int faces = sourceXbgSkelFaces[i][j];
+                    int verts = sourceXbgSkelVerts[i][j];
+                    info += "    -material ID " + j.ToString() + " contains " + faces + " (" + (faces * 3) + ")" + " faces, " + verts + " verts" + Environment.NewLine;
+                }
+            }
+
+            xbgInfoTB.Text = info;
 
             Animation(true, gridDialogXBGInfo);
         }
@@ -583,18 +722,11 @@ namespace FCBConverterGUI
         Dictionary<int, int> sourceXbgSkelMats;
         Dictionary<int, Dictionary<int, int>> sourceXbgSkelVerts;
         Dictionary<int, Dictionary<int, int>> sourceXbgSkelFaces;
-        Dictionary<int, Dictionary<int, Dictionary<int, HideFacesStruct>>> sourceXbgSkelHideFacesFP;
+        Dictionary<int, Dictionary<int, List<HiddenFacesListEntry>>> sourceXbgSkelHideFacesFP;
         string[] sourceXbgMatNames;
         string[] sourceXbgMatPaths;
         int hideFacesSelSkel = 0;
         int hideFacesSelMat = 0;
-
-        struct HideFacesStruct
-        {
-            public ulong id;
-            public ushort start;
-            public ushort count;
-        }
 
         private void LoadDataFromXBG(string file)
         {
@@ -602,16 +734,23 @@ namespace FCBConverterGUI
             fpXBGInfo.IsEnabled = false;
             fpAutoCalc.IsEnabled = false;
 
+            var meshList = hiddenMeshList.ItemsSource.OfType<HiddenMeshListEntry>().ToList();
+            foreach (var b in meshList)
+                b.Enabled = false;
+            hiddenMeshList.ItemsSource = meshList;
+
+            hiddenFacesList.ItemsSource = new List<HiddenFacesListEntry>();
+            
+            fpSkelSel.Value = 0;
+            fpSkelSel.Maximum = 0;
+            fpMatSel.Value = 0;
+            fpMatSel.Maximum = 0;
+
             if (!File.Exists(file))
                 return;
 
             try
             {
-                var meshList = hiddenMeshList.ItemsSource.OfType<HiddenMeshListEntry>().ToList();
-                foreach (var b in meshList)
-                    b.Enabled = false;
-                hiddenMeshList.ItemsSource = meshList;
-
                 Process process = new Process();
                 process.StartInfo.FileName = "FCBConverter.exe";
                 process.StartInfo.Arguments = "-xbgData -xbg=\"" + file + "\"";
@@ -718,11 +857,11 @@ namespace FCBConverterGUI
                                 for (int i = 0; i < valsData.Length; i++)
                                 {
                                     string[] matChilds = valsData[i].Split('+');
-                                    Dictionary<int, Dictionary<int, HideFacesStruct>> matsArr = new();
+                                    Dictionary<int, List<HiddenFacesListEntry>> matsArr = new();
 
                                     for (int j = 0; j < matChilds.Length; j++)
                                     {
-                                        Dictionary<int, HideFacesStruct> hfSA = new();
+                                        List<HiddenFacesListEntry> hfSA = new();
 
                                         if (matChilds[j] != "" && matChilds[j] != "0")
                                         {
@@ -732,11 +871,12 @@ namespace FCBConverterGUI
                                             {
                                                 string[] partData = matParts[k].Split('*');
 
-                                                hfSA.Add(k, new()
+                                                hfSA.Add(new()
                                                 {
-                                                    id = ulong.Parse(partData[0]),
-                                                    start = ushort.Parse(partData[1]),
-                                                    count = ushort.Parse(partData[2])
+                                                    ID = partData[0],
+                                                    Name = GetMeshParts().Single(a => a.ID == partData[0]).Name,
+                                                    FaceStartIndex = ushort.Parse(partData[1]),
+                                                    CountOfFaces = ushort.Parse(partData[2])
                                                 });
                                             }
                                         }
@@ -792,23 +932,18 @@ namespace FCBConverterGUI
             }
         }
 
-        private void NumericsChangeSetData(int skel, int material)
+        private void NumericsChangeSetData(int skel, int material, int skelBef = -1, int matBef = -1)
         {
-            Dictionary<int, HideFacesStruct> hideFacesStructs = sourceXbgSkelHideFacesFP[skel][material];
-
-            List<HiddenFacesListEntry> l = new();
-
-            foreach (HideFacesStruct hideFacesStruct in hideFacesStructs.Values)
+            if (skelBef != -1)
             {
-                var mp = GetMeshParts();
-                var nl = new HiddenFacesListEntry();
-                nl.Name = mp.Where(a => a.ID == hideFacesStruct.id.ToString())?.SingleOrDefault()?.Name ?? "---";
-                nl.CountOfFaces = hideFacesStruct.count;
-                nl.FaceStartIndex = hideFacesStruct.start;
-                l.Add(nl);
+                sourceXbgSkelHideFacesFP[skelBef][material] = hiddenFacesList.ItemsSource.OfType<HiddenFacesListEntry>().ToList();
+            }
+            else if (matBef != -1)
+            {
+                sourceXbgSkelHideFacesFP[skel][matBef] = hiddenFacesList.ItemsSource.OfType<HiddenFacesListEntry>().ToList();
             }
 
-            hiddenFacesList.ItemsSource = l;
+            hiddenFacesList.ItemsSource = sourceXbgSkelHideFacesFP[skel][material];
 
             hideFacesSelSkel = skel;
             hideFacesSelMat = material;
@@ -819,6 +954,18 @@ namespace FCBConverterGUI
             LoadDataFromXBG(fpXbgFile.Text);
         }
 
+        private void FPSkelSel_ValueChanged(object sender, NumericUpDownValueChangedEventArgs e)
+        {
+            NumericsChangeSetData((int)fpSkelSel.Value, 0, (int)e.OldValue);
+
+            fpMatSel.Value = 0;
+            fpMatSel.Maximum = sourceXbgSkelMats[(int)fpSkelSel.Value] - 1;
+        }
+
+        private void FPMatSel_ValueChanged(object sender, NumericUpDownValueChangedEventArgs e)
+        {
+            NumericsChangeSetData((int)fpSkelSel.Value, (int)fpMatSel.Value, -1, (int)e.OldValue);
+        }
 
 
 

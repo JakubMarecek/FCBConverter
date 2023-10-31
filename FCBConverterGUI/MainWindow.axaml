@@ -9,7 +9,7 @@
     ExtendClientAreaToDecorationsHint="True"
     ExtendClientAreaChromeHints="NoChrome"
     ExtendClientAreaTitleBarHeightHint="-1"
-    xmlns:local="clr-namespace:FCBConverterGUI" mc:Ignorable="d" Title="appName" Height="500" Width="800" MinHeight="200" MinWidth="200" Loaded="Window_Loaded" KeyDown="W_KeyDown"
+    xmlns:local="clr-namespace:FCBConverterGUI" mc:Ignorable="d" Title="appName" Height="500" Width="800" MinHeight="500" MinWidth="800" Loaded="Window_Loaded" KeyDown="W_KeyDown"
 		WindowStartupLocation="CenterScreen" Icon="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Closing="Window_Closing" Deactivated="MainWindow_Deactivated">
 
 	<Window.Styles>
@@ -34,6 +34,15 @@
 						<UniformGrid Rows="1" HorizontalAlignment="Center"/>
 					</ItemsPanelTemplate>
 				</globalData:AnimateTabControl.ItemsPanel>
+				<TabItem Header="Welcome">
+					<ScrollViewer>
+						<StackPanel Orientation="Vertical">
+							<Label Content="Welcome to FCBConverter" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Bold" />
+							<TextBlock Text="This tab covers only small description of GUI tabs, for full FCBConv docs look to its website: https://downloads.fcmodding.com/others/fcbconverter/" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="12" TextWrapping="Wrap" PointerReleased="TextBlock_MouseLeftButtonDown" />
+							<TextBlock Name="wlDesc" Margin="10,40,0,0" Classes="Lab" TextWrapping="Wrap" />
+						</StackPanel>
+					</ScrollViewer>
+				</TabItem>
 				<TabItem Header="Selected game">
 					<Grid>
 						<Label Content="Please specify a FC game, it's needed for converting some files:" Classes="Lab" Margin="10,10,0,0" />
@@ -142,11 +151,11 @@
 							<Grid Margin="10,140,10,0" ColumnDefinitions="*,*">
 								<Grid ColumnDefinitions="*,110" Margin="0,0,10,0">
 									<Label Content="Select skeleton ID to write edits:" Classes="Lab" />
-									<NumericUpDown Grid.Column="1" Name="fpSkelSel" Value="0" Minimum="0" Maximum="20" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" />
+									<NumericUpDown Grid.Column="1" Name="fpSkelSel" Value="0" Minimum="0" Maximum="0" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" ValueChanged="FPSkelSel_ValueChanged" />
 								</Grid>
 								<Grid ColumnDefinitions="*,110" Margin="10,0,0,0" Grid.Column="1">
 									<Label Content="Select material ID to write edits:" Classes="Lab" />
-									<NumericUpDown Grid.Column="1" Name="fpMatSel" Value="0" Minimum="0" Maximum="20" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" />
+									<NumericUpDown Grid.Column="1" Name="fpMatSel" Value="0" Minimum="0" Maximum="0" Increment="1" FormatString="0" Width="100" HorizontalAlignment="Right" ValueChanged="FPMatSel_ValueChanged" />
 								</Grid>
 							</Grid>
 

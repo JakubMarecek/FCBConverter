@@ -948,7 +948,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + (file.EndsWith(".ndb") || file.EndsWith(".cseq") ? ".rml" : "") + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + Path.GetFileName(file) + (file.EndsWith(".ndb") || file.EndsWith(".cseq") ? ".rml" : "") + ".converted.xml";
 
                 var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
                 using (var input = File.OpenRead(file))
@@ -984,7 +984,7 @@ namespace FCBConverter
                 {
                     workingOriginalFile = file.EndsWith(".ndb.rml.converted.xml") || file.EndsWith(".cseq.rml.converted.xml") ? file.Replace(".rml.converted.xml", "") : file.Replace(".converted.xml", "");
                     string extension = Path.GetExtension(workingOriginalFile);
-                    workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
+                    workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + DS + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
                 }
 
                 var rez = new Gibbed.Dunia2.FileFormats.XmlResourceFile();
@@ -1238,7 +1238,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + Path.GetFileName(file) + ".converted.xml";
 
                 OasisNew.OasisDeserialize(file, workingOriginalFile);
 
@@ -1255,7 +1255,7 @@ namespace FCBConverter
                 else
                 {
                     workingOriginalFile = file.Replace(".oasis.bin.converted.xml", "");
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new.oasis.bin";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new.oasis.bin";
                 }
 
                 OasisNew.OasisSerialize(file, workingOriginalFile);
@@ -1271,7 +1271,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + Path.GetFileName(file) + ".converted.xml";
 
                 OasisNew.OasisDeserialize(file, workingOriginalFile);
 
@@ -1288,7 +1288,7 @@ namespace FCBConverter
                 else
                 {
                     workingOriginalFile = file.Replace(".bin.converted.xml", "");
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\new_" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".bin";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + "new_" + Path.GetFileNameWithoutExtension(workingOriginalFile) + ".bin";
                 }
 
                 OasisNew.OasisSerialize(file, workingOriginalFile);
@@ -1537,7 +1537,7 @@ namespace FCBConverter
                     {
                         workingOriginalFile = file.Replace(".lzo.converted.xml", "");
                         string extension = Path.GetExtension(workingOriginalFile);
-                        workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
+                        workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + DS + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
                     }
 
                     var bof = new Gibbed.Dunia2.FileFormats.BinaryObjectFile();
@@ -1585,7 +1585,7 @@ namespace FCBConverter
                     {
                         workingOriginalFile = file.Replace(".converted.xml", "");
                         string extension = Path.GetExtension(workingOriginalFile);
-                        workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + "\\" + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
+                        workingOriginalFile = Path.GetDirectoryName(workingOriginalFile) + DS + Path.GetFileNameWithoutExtension(workingOriginalFile) + "_new" + extension;
                     }
 
                     if (isCompressEnabled && new FileInfo(file).Length > 20000000)
@@ -1604,7 +1604,7 @@ namespace FCBConverter
                 if (outputFile != "")
                     workingOriginalFile = outputFile;
                 else
-                    workingOriginalFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileName(file) + ".converted.xml";
+                    workingOriginalFile = Path.GetDirectoryName(file) + DS + Path.GetFileName(file) + ".converted.xml";
 
                 tmpformat = File.OpenRead(file);
                 uint nbCF = tmpformat.ReadValueU32();
@@ -2490,7 +2490,7 @@ namespace FCBConverter
                 ulong probablyFileNameHash = MarkupReader.ReadUInt64();
                 byte[] fcbData = MarkupReader.ReadBytes((int)fcbByteLength);
 
-                string tmp = onlyDir + "\\" + probablyFileNameHash.ToString();
+                string tmp = onlyDir + DS + probablyFileNameHash.ToString();
                 File.WriteAllBytes(tmp, fcbData);
                 ConvertFCB(tmp, tmp + "c");
                 XmlDocument doc = new XmlDocument();
@@ -2591,7 +2591,7 @@ namespace FCBConverter
 
                 byte[] fcbBytes = MabStream.ReadBytes(fcbLen);
 
-                string tmp = onlyDir + "\\" + hash.ToString();
+                string tmp = onlyDir + DS + hash.ToString();
                 File.WriteAllBytes(tmp, fcbBytes);
                 ConvertFCB(tmp, tmp + "c");
                 XDocument doc = XDocument.Load(tmp + "c");
@@ -2722,7 +2722,7 @@ namespace FCBConverter
 
             byte[] fcbData = MoveReader.ReadBytes(100000000);
 
-            string tmp = onlyDir + "\\tmp";
+            string tmp = onlyDir + DS + "tmp";
             File.WriteAllBytes(tmp, fcbData);
             ConvertFCB(tmp, tmp + "c");
             XmlDocument doc = new XmlDocument();
@@ -2757,7 +2757,7 @@ namespace FCBConverter
             output.WriteValueU16(ushort.Parse(root.Attribute("Unknown").Value));
 
 
-            string tmp = onlyDir + "\\tmp";
+            string tmp = onlyDir + DS + "tmp";
             XElement fcb = root.Element("object");
             fcb.Save(tmp);
 
@@ -2814,7 +2814,7 @@ namespace FCBConverter
 
             //****
 
-            string tmp = onlyDir + "\\tmp";
+            string tmp = onlyDir + DS + "tmp";
             File.WriteAllBytes(tmp, fcbData);
             ConvertFCB(tmp, tmp + "c");
 
@@ -2905,7 +2905,7 @@ namespace FCBConverter
 
             byte[] perMoveResourceInfosByte = perMoveResourceInfos.SelectMany(byteArr => byteArr).ToArray();
 
-            string tmp = onlyDir + "\\tmp";
+            string tmp = onlyDir + DS + "tmp";
             var fcb = nav.SelectSingleNode("CombinedMoveFile/FCBData/object");
             XmlWriter writer = XmlWriter.Create(tmp);
             fcb.WriteSubtree(writer);
@@ -3008,8 +3008,8 @@ namespace FCBConverter
                 string folderName = Directory.GetParent(path).Name;
                 string fileName = Path.GetFileName(path);
 
-                Directory.CreateDirectory(workingDir + "\\" + folderName);
-                File.WriteAllBytes(workingDir + "\\" + folderName + "\\" + fileName, data);
+                Directory.CreateDirectory(workingDir + DS + folderName);
+                File.WriteAllBytes(workingDir + DS + folderName + DS + fileName, data);
 
                 writer.WriteEndElement();
             }
@@ -3092,7 +3092,7 @@ namespace FCBConverter
                 string folderName = Directory.GetParent(path).Name;
                 string fileName = Path.GetFileName(path);
 
-                byte[] fileBytes = File.ReadAllBytes(workingDir + "\\" + folderName + "\\" + fileName);
+                byte[] fileBytes = File.ReadAllBytes(workingDir + DS + folderName + DS + fileName);
 
                 ulong pathHash = Gibbed.Dunia2.FileFormats.CRC64.Hash(path);
                 uint pathLen = (uint)pathNull.Length;
@@ -3437,7 +3437,7 @@ namespace FCBConverter
 
         static void PackBigFile(string sourceDir, string outputFile, int dwVersion = 10)
         {
-            if (sourceDir.EndsWith("\\"))
+            if (sourceDir.EndsWith(DS))
             {
                 Console.WriteLine("Bad source dir name!");
                 Environment.Exit(0);
@@ -3483,7 +3483,7 @@ namespace FCBConverter
             {
                 cnt++;
 
-                string fatFileName = file.Replace(sourceDir + "\\", "");
+                string fatFileName = file.Replace(sourceDir + DS, "");
                 string extension = Path.GetExtension(fatFileName);
 
                 if (excludeFilesFromPack != "" && excludeFilesFromPack.Contains(extension)) continue;
@@ -3813,7 +3813,7 @@ namespace FCBConverter
         {
             HashSet<uint> gameProjIDs = new();
 
-            string[] soundsIDs = File.ReadAllLines(m_Path + "\\SoundDataIDs.bin");
+            string[] soundsIDs = File.ReadAllLines(m_Path + DS + "SoundDataIDs.bin");
 
             foreach (var id in soundsIDs)
                 gameProjIDs.Add(uint.Parse(id));
@@ -3891,8 +3891,8 @@ namespace FCBConverter
 
                         byte[] wem = BNKStream.ReadBytes((int)wemLengths[i]);
                         string wemFN = fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".wem";
-                        string wemFileName = onlyDir + "\\" + wemFN;
-                        string wavFileName = onlyDir + "\\" + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".ogg";
+                        string wemFileName = onlyDir + DS + wemFN;
+                        string wavFileName = onlyDir + DS + fileName + "_" + i.ToString() + "_" + wemIDs[i] + ".ogg";
 
                         File.WriteAllBytes(wemFileName, wem);
 
@@ -4489,7 +4489,7 @@ namespace FCBConverter
                     foreach (XElement WEMFile in WEMFiles)
                     {
                         string fileName = WEMFile.Attribute("FileName").Value;
-                        byte[] wemFile = File.ReadAllBytes(onlyDir + "\\" + fileName);
+                        byte[] wemFile = File.ReadAllBytes(onlyDir + DS + fileName);
                         uint offset = (uint)BNKStream.Position - startPos;
 
                         uint wemID = uint.Parse(WEMFile.Attribute("ID").Value);
@@ -4903,14 +4903,14 @@ namespace FCBConverter
                 //wemFile.GenerateOGG(output, m_Path + "\\packed_codebooks_aoTuV_603.bin", false, false);
 
                 Process process1 = new();
-                process1.StartInfo.FileName = m_Path + "\\ww2ogg.exe";
-                process1.StartInfo.Arguments = "\"" + file + "\" --pcb \"" + m_Path + "\\packed_codebooks_aoTuV_603.bin\"  -o \"" + output + "\"";
+                process1.StartInfo.FileName = m_Path + DS + "ww2ogg.exe";
+                process1.StartInfo.Arguments = "\"" + file + "\" --pcb \"" + m_Path + DS + "packed_codebooks_aoTuV_603.bin\"  -o \"" + output + "\"";
                 process1.StartInfo.UseShellExecute = false;
                 process1.Start();
                 process1.WaitForExit();
 
                 Process process = new();
-                process.StartInfo.FileName = m_Path + "\\revorb.exe";
+                process.StartInfo.FileName = m_Path + DS + "revorb.exe";
                 process.StartInfo.Arguments = "\"" + output + "\"";
                 process.StartInfo.UseShellExecute = false;
                 process.Start();
@@ -4943,9 +4943,9 @@ namespace FCBConverter
                 {
                     string[] lineSplit = lines[i].Split('=');
 
-                    string ff = onlyDir + "\\" + lineSplit[0];
+                    string ff = onlyDir + DS + lineSplit[0];
 
-                    string newFileName = onlyDir + "\\" + lineSplit[1];
+                    string newFileName = onlyDir + DS + lineSplit[1];
 
                     File.Copy(ff, newFileName, true);
                     bytes = File.ReadAllBytes(newFileName);
@@ -5177,7 +5177,7 @@ namespace FCBConverter
                 return;
             }
 
-            string newF = Path.GetDirectoryName(editXbg) + "\\" + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
+            string newF = Path.GetDirectoryName(editXbg) + DS + Path.GetFileNameWithoutExtension(editXbg) + "_new.xbg";
             File.Copy(editXbg, newF, true);
 
             FileStream XBGEditStream = new(newF, FileMode.Open, FileAccess.ReadWrite);
@@ -5584,7 +5584,7 @@ namespace FCBConverter
                 return;
             }
 
-            string workDir = Path.GetDirectoryName(uePath) + "\\";
+            string workDir = Path.GetDirectoryName(uePath) + DS;
 
             string uexp = workDir + Path.GetFileNameWithoutExtension(uePath) + ".uexp";
             if (!File.Exists(uexp))
@@ -5610,7 +5610,7 @@ namespace FCBConverter
             string mipsResStr = null;
             string mipsHDResStr = null;
             string mipsPathStr = null;
-            string xmlTemplate = m_Path + "\\XBTTemplate.xml";
+            string xmlTemplate = m_Path + DS + "XBTTemplate.xml";
             bool hasXML = false;
 
             string baseFileNameXML = file.Replace(".png", ".xml");
@@ -5692,7 +5692,7 @@ namespace FCBConverter
 
             if (mipsPathStr == null && !hasXML)
             {
-                Console.WriteLine("Write path to folder where will be textures placed (it means path inside DAT FAT, ending with \\, for example ):");
+                Console.WriteLine("Write path to folder where will be textures placed (it means path inside DAT FAT, ending with " + DS + ", for example ):");
                 mipsPathStr = Console.ReadLine();
                 Console.WriteLine("");
             }
@@ -5746,10 +5746,10 @@ namespace FCBConverter
             string baseFileName = Path.GetFileNameWithoutExtension(file);
             string parentDir = Directory.GetParent(file).FullName;
 
-            string newPNGBase = parentDir + "\\" + baseFileName + ".png";
-            string newPNGMips = parentDir + "\\" + baseFileName + "_mips.png";
-            string newPNGBaseHD = parentDir + "\\" + baseFileName + "_hd.png";
-            string newPNGMipsHD = parentDir + "\\" + baseFileName + "_hd_mips.png";
+            string newPNGBase = parentDir + DS + baseFileName + ".png";
+            string newPNGMips = parentDir + DS + baseFileName + "_mips.png";
+            string newPNGBaseHD = parentDir + DS + baseFileName + "_hd.png";
+            string newPNGMipsHD = parentDir + DS + baseFileName + "_hd_mips.png";
 
             ProcessStartInfo info;
             Process proc;
@@ -5758,7 +5758,7 @@ namespace FCBConverter
             {
                 File.Copy(file, newPNGMips, true);
 
-                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBase}\" -y");
+                info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBase}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
@@ -5766,7 +5766,7 @@ namespace FCBConverter
 
                 if (mipsHDCount > 0)
                 {
-                    info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 -w {resMipsSplit[0]} -h {resMipsSplit[1]} -if FANT_DITHER \"{newPNGMips}\" -y");
+                    info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 -w {resMipsSplit[0]} -h {resMipsSplit[1]} -if FANT_DITHER \"{newPNGMips}\" -y");
                     info.WorkingDirectory = parentDir;
                     info.UseShellExecute = false;
                     proc = Process.Start(info);
@@ -5774,7 +5774,7 @@ namespace FCBConverter
                 }
                 else
                 {
-                    info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 \"{newPNGMips}\" -y");
+                    info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m {mipsCount} -dx10 -f DXT1 \"{newPNGMips}\" -y");
                     info.WorkingDirectory = parentDir;
                     info.UseShellExecute = false;
                     proc = Process.Start(info);
@@ -5785,7 +5785,7 @@ namespace FCBConverter
             }
             else
             {
-                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 \"{newPNGBase}\" -y");
+                info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m 0 -dx10 -f DXT1 \"{newPNGBase}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
@@ -5797,13 +5797,13 @@ namespace FCBConverter
                 File.Copy(file, newPNGBaseHD, true);
                 File.Copy(file, newPNGMipsHD, true);
 
-                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBaseHD}\" -y");
+                info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m 0 -dx10 -f DXT1 -w {resBaseSplit[0]} -h {resBaseSplit[1]} -if FANT_DITHER \"{newPNGBaseHD}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
                 proc.WaitForExit();
 
-                info = new ProcessStartInfo(m_Path + "\\texconv.exe", $"-m {mipsHDCount} -dx10 -f DXT1 \"{newPNGMipsHD}\" -y");
+                info = new ProcessStartInfo(m_Path + DS + "texconv.exe", $"-m {mipsHDCount} -dx10 -f DXT1 \"{newPNGMipsHD}\" -y");
                 info.WorkingDirectory = parentDir;
                 info.UseShellExecute = false;
                 proc = Process.Start(info);
