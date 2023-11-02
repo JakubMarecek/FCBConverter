@@ -41,15 +41,15 @@ namespace FCBConverter
 
         public static string m_Path = "";
 
-        static readonly string listFiles = @"\FCBConverterFileNames.list";
-        static readonly string listFiles_5 = @"\FCBConverterFileNames_5.list";
+        static readonly string listFiles = DS + @"FCBConverterFileNames.list";
+        static readonly string listFiles_5 = DS + @"FCBConverterFileNames_5.list";
         public static Dictionary<ulong, string> listFilesDict = new Dictionary<ulong, string>();
 
-        static readonly string listStrings = @"\FCBConverterStrings.list";
+        static readonly string listStrings = DS + @"FCBConverterStrings.list";
         public static Dictionary<uint, string> listStringsDict = new Dictionary<uint, string>();
 
-        static readonly string settingsFile = @"\FCBConverterSettings.xml";
-        static readonly string defsFile = @"\FCBConverterDefinitions.xml";
+        static readonly string settingsFile = DS + @"FCBConverterSettings.xml";
+        static readonly string defsFile = DS + @"FCBConverterDefinitions.xml";
 
         static DefinitionsLoader definitionLoader;
 

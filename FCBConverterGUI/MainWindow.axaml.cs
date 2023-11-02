@@ -752,7 +752,7 @@ namespace FCBConverterGUI
             try
             {
                 Process process = new Process();
-                process.StartInfo.FileName = "FCBConverter.exe";
+                process.StartInfo.FileName = "FCBConverter";
                 process.StartInfo.Arguments = "-xbgData -xbg=\"" + file + "\"";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 process.StartInfo.UseShellExecute = false;

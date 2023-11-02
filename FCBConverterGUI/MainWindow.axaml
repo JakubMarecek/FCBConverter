@@ -9,7 +9,7 @@
     ExtendClientAreaToDecorationsHint="True"
     ExtendClientAreaChromeHints="NoChrome"
     ExtendClientAreaTitleBarHeightHint="-1"
-    xmlns:local="clr-namespace:FCBConverterGUI" mc:Ignorable="d" Title="appName" Height="500" Width="800" MinHeight="500" MinWidth="800" Loaded="Window_Loaded" KeyDown="W_KeyDown"
+    xmlns:local="clr-namespace:FCBConverterGUI" mc:Ignorable="d" Title="appName" Height="700" Width="1000" MinHeight="500" MinWidth="800" Loaded="Window_Loaded" KeyDown="W_KeyDown"
 		WindowStartupLocation="CenterScreen" Icon="avares://FCBConverterGUI/Assets/Dunia_Engine.ico" Closing="Window_Closing" Deactivated="MainWindow_Deactivated">
 
 	<Window.Styles>
@@ -38,7 +38,7 @@
 					<ScrollViewer>
 						<StackPanel Orientation="Vertical">
 							<Label Content="Welcome to FCBConverter" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Bold" />
-							<TextBlock Text="This tab covers only small description of GUI tabs, for full FCBConv docs look to its website: https://downloads.fcmodding.com/others/fcbconverter/" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="12" TextWrapping="Wrap" PointerReleased="TextBlock_MouseLeftButtonDown" />
+							<TextBlock Text="This tab covers only small description of GUI tabs, for full FCBConv docs look to its website: https://downloads.fcmodding.com/others/fcbconverter/" Margin="10,10,0,0" VerticalAlignment="Top" Cursor="Hand" FontSize="12" TextWrapping="Wrap" PointerReleased="TextBlock_MouseLeftButtonDown" />
 							<TextBlock Name="wlDesc" Margin="10,40,0,0" Classes="Lab" TextWrapping="Wrap" />
 						</StackPanel>
 					</ScrollViewer>
@@ -269,6 +269,15 @@
 									<Button Classes="CBtn" Content="Convert" Click="UEConvert_Click" Margin="0,230,5,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
 								</Grid>
 							</Grid>
+						</Grid>
+					</ScrollViewer>
+				</TabItem>
+				<TabItem Header="Textures">
+					<ScrollViewer>
+						<Grid>
+							<Label Content="Currently available for FC5, FCND and FC6." Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Bold" />
+							<Label Content="Convert PNG to XBT, it will automatically create mipmap and _mips texture." Classes="Lab" Margin="10,50,0,0" />
+						
 						</Grid>
 					</ScrollViewer>
 				</TabItem>
