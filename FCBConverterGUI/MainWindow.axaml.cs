@@ -35,7 +35,7 @@ namespace FCBConverterGUI
             verT.Content = appVer;
             
             using var processModule = Process.GetCurrentProcess().MainModule;
-            baseDir = Path.GetDirectoryName(processModule?.FileName);
+            baseDir = Path.GetDirectoryName(processModule?.FileName) + Path.DirectorySeparatorChar;
 
             ueDesc.Text = 
                 "The UAsset file should have also UExp file and TXT file with names of materials, for example:" + Environment.NewLine +
@@ -273,15 +273,27 @@ namespace FCBConverterGUI
                     WindowState = WindowState.Normal;
         }
 
-        private int CallFCBConverter(string launchParams)
+        private void CallFCBConverter(string launchParams)
         {
+            Animation(true, gridDialogLoading);
+
             Process process = new Process();
             process.StartInfo.FileName = baseDir + "FCBConverter";
             process.StartInfo.Arguments = launchParams + " -keep";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+            process.StartInfo.WorkingDirectory = baseDir;
+            process.EnableRaisingEvents = true;
+            process.Exited += new EventHandler(CallFCBConverter_Exited);
             process.Start();
-            process.WaitForExit();
-            return process.ExitCode;
+            //process.WaitForExit();
+            //return process.ExitCode;
+        }
+        private void CallFCBConverter_Exited(object sender, EventArgs e)
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Animation(false, gridDialogLoading);
+            });
         }
 
         private bool CheckSelectedGame()
@@ -749,12 +761,15 @@ namespace FCBConverterGUI
             if (!File.Exists(file))
                 return;
 
+            Animation(true, gridDialogLoading);
+
             try
             {
                 Process process = new Process();
-                process.StartInfo.FileName = "FCBConverter";
+                process.StartInfo.FileName = baseDir + "FCBConverter";
                 process.StartInfo.Arguments = "-xbgData -xbg=\"" + file + "\"";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.WorkingDirectory = baseDir;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
@@ -925,6 +940,8 @@ namespace FCBConverterGUI
                 hideFacesSelMat = 0;
 
                 NumericsChangeSetData(0, 0);
+
+                Animation(false, gridDialogLoading);
             }
             catch (Exception)
             {

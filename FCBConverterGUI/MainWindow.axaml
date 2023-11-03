@@ -373,6 +373,39 @@
 					</Transitions>
 				</Grid.Transitions>
 			</Grid>
+			<Grid Background="#99000000" Name="gridDialogLoading" IsVisible="false" Opacity="0">
+				<Grid Margin="0,100,0,0" Height="30" Width="30" RenderTransformOrigin="0%,0%" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<Path Stroke="#F28C28" StrokeThickness="8">
+						<Path.Data>
+							<PathGeometry>
+								<PathFigure StartPoint="30,0" IsClosed="False">
+									<ArcSegment RotationAngle="0" SweepDirection="Clockwise" Size="30,30" Point="-30,0" IsLargeArc="False">
+									</ArcSegment>
+								</PathFigure>
+							</PathGeometry>
+						</Path.Data>
+					</Path>
+				</Grid>
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+					</Transitions>
+				</Grid.Transitions>
+				<Grid.Styles>
+					<Style Selector="Grid#gridDialogLoading[IsVisible=True] Grid">
+						<Style.Animations>
+							<Animation Duration="0:0:1" IterationCount="INFINITE">
+								<KeyFrame Cue="0%">
+									<Setter Property="RotateTransform.Angle" Value="0"/>
+								</KeyFrame>
+								<KeyFrame Cue="100%">
+									<Setter Property="RotateTransform.Angle" Value="360"/>
+								</KeyFrame>
+							</Animation>
+						</Style.Animations>
+					</Style>
+				</Grid.Styles>
+			</Grid>
 		</Grid>
 
 		<Grid Background="#cc000000" Height="40" HorizontalAlignment="Stretch" VerticalAlignment="Top" PointerPressed="MoveWnd">
